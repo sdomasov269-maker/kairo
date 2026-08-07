@@ -1,0 +1,8 @@
+{
+  "key": "aniparsec",
+  "name": "AniParsec",
+  "baseUrl": "https://aniparsec.com",
+  "defaultStatus": "UNSUPPORTED",
+  "declaredPaths": [],
+  "notes": ["Unsupported until an authorized integration method is documented."]
+}

@@ -1,0 +1,310 @@
+import type {
+  Anime,
+  Collection,
+  Episode,
+  WatchingProgress,
+} from "@/types/media";
+
+const demo = (anime: Anime): Anime => ({ ...anime, isDemo: true });
+
+export const featured: Anime = demo({
+  id: "eclipse-protocol",
+  slug: "eclipse-protocol",
+  title: "Eclipse Protocol",
+  titleRu: "Протокол «Затмение»",
+  titleRomaji: "Eclipse Protocol",
+  tagline: "When the sun went silent, memory became a weapon.",
+  description:
+    "Курьер Рэй Курода пересекает затопленный мегаполис Нара-9, неся последнюю человеческую память о дневном свете — и тайну, способную снова запустить небо.",
+  synopsis:
+    "Courier Rei Kuroda crosses the drowned megacity of Nara-9 carrying the last human memory of daylight — and a secret powerful enough to restart the sky.",
+  year: 2026,
+  genres: ["Sci-Fi", "Mystery", "Drama"],
+  rating: 91,
+  episodes: 12,
+  duration: 24,
+  format: "TV",
+  status: "RELEASING",
+  studios: ["Kairo Pictures"],
+  country: "JP",
+  source: "ORIGINAL",
+  art: "eclipse",
+});
+
+const fictional: Anime[] = [
+  demo({
+    id: "neon-ronin",
+    slug: "neon-ronin",
+    title: "Neon Ronin",
+    titleRu: "Неоновый ронин",
+    tagline: "No master. No past.",
+    description:
+      "Самурай без прошлого просыпается под городом, который никогда не спит.",
+    synopsis: "A swordsman wakes beneath a city that never sleeps.",
+    year: 2025,
+    genres: ["Action", "Sci-Fi"],
+    rating: 88,
+    episodes: 10,
+    status: "FINISHED",
+    art: "neon",
+  }),
+  demo({
+    id: "ashen-crown",
+    slug: "ashen-crown",
+    title: "Ashen Crown",
+    titleRu: "Пепельная корона",
+    tagline: "The throne remembers.",
+    description:
+      "Изгнанный наследник возвращается в королевство из вулканического стекла.",
+    synopsis: "An exiled heir returns to a kingdom built on volcanic glass.",
+    year: 2026,
+    genres: ["Fantasy", "Drama"],
+    rating: 87,
+    episodes: 8,
+    status: "RELEASING",
+    art: "ashen",
+  }),
+  demo({
+    id: "zero-meridian",
+    slug: "zero-meridian",
+    title: "Zero Meridian",
+    titleRu: "Нулевой меридиан",
+    tagline: "Beyond every known map.",
+    description:
+      "Четыре навигатора следуют за сигналом из-за пределов пространства-времени.",
+    synopsis: "Four navigators pursue a signal from outside spacetime.",
+    year: 2025,
+    genres: ["Adventure", "Sci-Fi"],
+    rating: 85,
+    episodes: 16,
+    status: "FINISHED",
+    art: "zero",
+  }),
+  demo({
+    id: "silent-orbit",
+    slug: "silent-orbit",
+    title: "Silent Orbit",
+    titleRu: "Тихая орбита",
+    tagline: "In silence, we return.",
+    description: "Заброшенная лунная станция передаёт свою последнюю песню.",
+    synopsis: "A deserted lunar station transmits one final song.",
+    year: 2024,
+    genres: ["Mystery", "Drama"],
+    rating: 89,
+    episodes: 12,
+    status: "FINISHED",
+    art: "orbit",
+  }),
+  demo({
+    id: "crimson-memory",
+    slug: "crimson-memory",
+    title: "Crimson Memory",
+    titleRu: "Багровая память",
+    tagline: "Some memories bleed.",
+    description: "Художница узнаёт, что каждый её портрет меняет прошлое.",
+    synopsis: "A painter discovers that every portrait changes the past.",
+    year: 2026,
+    genres: ["Thriller", "Supernatural"],
+    rating: 90,
+    episodes: 6,
+    status: "RELEASING",
+    art: "crimson",
+  }),
+];
+
+export const realAnimeCatalog: Anime[] = [
+  {
+    id: "attack-on-titan",
+    slug: "attack-on-titan",
+    anilistId: 16498,
+    title: "Attack on Titan",
+    titleRu: "Атака титанов",
+    tagline: "",
+    description:
+      "Человечество прячется за стенами от гигантских титанов, пока одна атака не меняет всё.",
+    synopsis: "",
+    genres: [],
+    status: "",
+    art: "ashen",
+  },
+  {
+    id: "fullmetal-alchemist-brotherhood",
+    slug: "fullmetal-alchemist-brotherhood",
+    anilistId: 5114,
+    title: "Fullmetal Alchemist: Brotherhood",
+    titleRu: "Стальной алхимик: Братство",
+    tagline: "",
+    description:
+      "Два брата-алхимика ищут философский камень, чтобы вернуть утраченное.",
+    synopsis: "",
+    genres: [],
+    status: "",
+    art: "crimson",
+  },
+  {
+    id: "frieren-beyond-journeys-end",
+    slug: "frieren-beyond-journeys-end",
+    anilistId: 154587,
+    title: "Frieren: Beyond Journey’s End",
+    titleRu: "Провожающая в последний путь Фрирен",
+    tagline: "",
+    description:
+      "После победы над Королём демонов эльфийка Фрирен учится понимать быстротечную человеческую жизнь.",
+    synopsis: "",
+    genres: ["Adventure", "Drama", "Fantasy"],
+    year: 2023,
+    season: "FALL",
+    format: "TV",
+    status: "FINISHED",
+    episodes: 28,
+    duration: 24,
+    art: "orbit",
+  },
+  {
+    id: "spy-x-family",
+    slug: "spy-x-family",
+    anilistId: 140960,
+    title: "SPY×FAMILY",
+    titleRu: "Семья шпиона",
+    tagline: "",
+    description:
+      "Шпион, наёмная убийца и телепат создают идеальную ненастоящую семью.",
+    synopsis: "",
+    genres: [],
+    status: "",
+    art: "neon",
+  },
+  {
+    id: "cowboy-bebop",
+    slug: "cowboy-bebop",
+    anilistId: 1,
+    title: "Cowboy Bebop",
+    titleRu: "Ковбой Бибоп",
+    tagline: "",
+    description:
+      "Команда охотников за головами путешествует по Солнечной системе в поисках работы и прошлого.",
+    synopsis: "",
+    genres: [],
+    status: "",
+    art: "zero",
+  },
+  {
+    id: "death-note",
+    slug: "death-note",
+    anilistId: 1535,
+    title: "Death Note",
+    titleRu: "Тетрадь смерти",
+    tagline: "",
+    description:
+      "Гениальный школьник получает тетрадь, способную убить любого человека.",
+    synopsis: "",
+    genres: [],
+    status: "",
+    art: "eclipse",
+  },
+];
+
+export const localAnimeCatalog: Anime[] = [
+  featured,
+  ...realAnimeCatalog,
+  ...fictional,
+];
+export const catalogAniListIds = realAnimeCatalog.flatMap((anime) =>
+  anime.anilistId ? [anime.anilistId] : [],
+);
+export const getLocalAnimeBySlug = (slug: string) =>
+  localAnimeCatalog.find((anime) => anime.slug === slug);
+
+export const watching: WatchingProgress[] = [
+  {
+    id: "w1",
+    title: "Тихая орбита",
+    episode: 7,
+    progress: 68,
+    remaining: "8 мин",
+    art: "orbit",
+  },
+  {
+    id: "w2",
+    title: "Неоновый ронин",
+    episode: 3,
+    progress: 42,
+    remaining: "14 мин",
+    art: "neon",
+  },
+  {
+    id: "w3",
+    title: "Пепельная корона",
+    episode: 5,
+    progress: 81,
+    remaining: "5 мин",
+    art: "ashen",
+  },
+];
+
+export const episodes: Episode[] = [
+  {
+    id: "ep1",
+    animeTitle: "Протокол «Затмение»",
+    episode: 9,
+    title: "Синий час",
+    released: "Сегодня · 20:00",
+    duration: "24 мин",
+    audio: { id: "a1", language: "RU", studio: "Lumen Voice" },
+    art: "eclipse",
+  },
+  {
+    id: "ep2",
+    animeTitle: "Багровая память",
+    episode: 6,
+    title: "Портрет без лица",
+    released: "Сегодня · 18:30",
+    duration: "23 мин",
+    audio: { id: "a2", language: "RU", studio: "Northline" },
+    art: "crimson",
+  },
+  {
+    id: "ep3",
+    animeTitle: "Нулевой меридиан",
+    episode: 16,
+    title: "Дальний берег",
+    released: "Вчера",
+    duration: "26 мин",
+    audio: { id: "a3", language: "JP", studio: "Original" },
+    art: "zero",
+  },
+  {
+    id: "ep4",
+    animeTitle: "Пепельная корона",
+    episode: 8,
+    title: "Дворец пепла",
+    released: "2 дня назад",
+    duration: "24 мин",
+    audio: { id: "a4", language: "RU", studio: "Aster Dub" },
+    art: "ashen",
+  },
+];
+
+export const collections: Collection[] = [
+  {
+    id: "c1",
+    title: "Для вечернего просмотра",
+    eyebrow: "Медленные истории",
+    description: "Камерные миры, мягкий свет и время, чтобы выдохнуть.",
+    art: "evening",
+  },
+  {
+    id: "c2",
+    title: "На одном дыхании",
+    eyebrow: "Невозможно остановиться",
+    description: "Напряжённые истории, которые ведут только вперёд.",
+    art: "binge",
+  },
+  {
+    id: "c3",
+    title: "Сильная визуальная режиссура",
+    eyebrow: "Кадр за кадром",
+    description: "Смелая композиция и незабываемый визуальный язык.",
+    art: "vision",
+  },
+];

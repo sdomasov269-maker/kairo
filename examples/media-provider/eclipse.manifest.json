@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "provider": { "key": "kairo-demo-manifest", "name": "Kairo Demo Manifest" },
+  "authorization": { "documentedApi": false, "officialEmbed": false, "licensedDirectMedia": false, "feed": false, "partnerAccess": false, "writtenPermission": true },
+  "anime": [{
+    "providerAnimeId": "eclipse-protocol",
+    "title": "Eclipse Protocol",
+    "anilistId": 999999001,
+    "format": "TV",
+    "episodeCount": 3,
+    "episodes": [
+      { "providerEpisodeId": "eclipse-s1e1", "seasonNumber": 1, "episodeNumber": 1, "title": "Episode 1", "titleRu": "Серия 1", "isPublished": true, "audioVariants": [{ "id": "ja", "language": "ja", "label": "Original" }], "playback": { "kind": "DIRECT", "referenceId": "demo-dash-1", "protocol": "DASH", "url": "https://storage.googleapis.com/shaka-demo-assets/bbb-dark-truths/dash.mpd" } },
+      { "providerEpisodeId": "eclipse-s1e2", "seasonNumber": 1, "episodeNumber": 2, "title": "Episode 2", "titleRu": "Серия 2", "isPublished": true, "playback": { "kind": "DIRECT", "referenceId": "demo-mp4-2", "protocol": "MP4", "url": "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" } },
+      { "providerEpisodeId": "eclipse-s1e3", "seasonNumber": 1, "episodeNumber": 3, "title": "Episode 3", "titleRu": "Серия 3", "isPublished": true }
+    ]
+  }]
+}

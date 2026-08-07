@@ -1,0 +1,21 @@
+.emptyHero {
+  width: min(
+    calc(100% - (2 * var(--home-page-gutter, var(--page-gutter)))),
+    var(--home-page-max, var(--content-max-width))
+  );
+  min-height: clamp(17.5rem, 55svh, 30rem);
+  margin-inline: auto;
+  background: transparent;
+}
+
+@media (min-width: 768px) {
+  .emptyHero {
+    min-height: clamp(28.75rem, 62svh, 42.5rem);
+  }
+}
+
+@media (min-width: 1200px) {
+  .emptyHero {
+    min-height: clamp(32.5rem, 67svh, 48.75rem);
+  }
+}

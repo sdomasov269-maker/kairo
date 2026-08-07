@@ -1,0 +1,170 @@
+[
+  {
+    "id": 5255,
+    "type": {
+      "value": "TV",
+      "description": "ТВ"
+    },
+    "year": 2017,
+    "name": {
+      "main": "Чёрный Клевер",
+      "english": "Black Clover",
+      "alternative": "Черный клевер"
+    },
+    "alias": "black-clover",
+    "season": {
+      "value": "autumn",
+      "description": "Осень"
+    },
+    "poster": {
+      "src": "/storage/releases/posters/5255/GvODKpdZrvle3YufKASBhlJ0HmasR2o7.jpg",
+      "preview": "/storage/releases/posters/5255/GvODKpdZrvle3YufKASBhlJ0HmasR2o7.jpg",
+      "thumbnail": "/storage/releases/posters/5255/df4fD1pVs9z2ikG1wRLZqAw83KFxoLkb.jpg",
+      "optimized": {
+        "src": "/storage/releases/posters/5255/8uLSlG62NcQIpYF32mvJ4nPJgqiSrrHX.webp",
+        "preview": "/storage/releases/posters/5255/8uLSlG62NcQIpYF32mvJ4nPJgqiSrrHX.webp",
+        "thumbnail": "/storage/releases/posters/5255/8WNQnEtCJbEZWwN8H7lYq5GcCvlp5owC.webp"
+      }
+    },
+    "fresh_at": "2021-03-31T08:02:30+00:00",
+    "created_at": "2021-03-31T08:02:30+00:00",
+    "updated_at": "2024-08-02T19:51:59+00:00",
+    "is_ongoing": false,
+    "age_rating": {
+      "value": "R16_PLUS",
+      "label": "16+",
+      "is_adult": false,
+      "description": "Для людей, достигших возраста шестнадцати лет (16+)"
+    },
+    "publish_day": {
+      "value": 3,
+      "description": "Среда"
+    },
+    "description": "В мире, где всё решает магия, однажды у порога церкви находят двух брошенных детей, Асту и Юно. И если Юно оказался одарён исключительной магическо...",
+    "notification": null,
+    "episodes_total": 170,
+    "external_player": "[REDACTED]",
+    "is_in_production": false,
+    "is_blocked_by_geo": false,
+    "is_blocked_by_copyrights": false,
+    "added_in_users_favorites": 46142,
+    "average_duration_of_episode": 25,
+    "added_in_planned_collection": 708,
+    "added_in_watched_collection": 3023,
+    "added_in_watching_collection": 1042,
+    "added_in_postponed_collection": 166,
+    "added_in_abandoned_collection": 157
+  },
+  {
+    "id": 5152,
+    "type": {
+      "value": null,
+      "description": null
+    },
+    "year": 2016,
+    "name": {
+      "main": "Чёрный Клевер (Спэшл)",
+      "english": "Black Clover Special",
+      "alternative": "Черный клевер спешл"
+    },
+    "alias": "black-clover-special",
+    "season": {
+      "value": "autumn",
+      "description": "Осень"
+    },
+    "poster": {
+      "src": "/storage/releases/posters/5152/p041cYpWwxDgMnH2d4mUD1GbRN9d1fhn.jpg",
+      "preview": "/storage/releases/posters/5152/p041cYpWwxDgMnH2d4mUD1GbRN9d1fhn.jpg",
+      "thumbnail": "/storage/releases/posters/5152/ckc7s6NiOHOgQ8HZGnGZZ4u6tAeT4WQC.jpg",
+      "optimized": {
+        "src": "/storage/releases/posters/5152/TxWoxcsWl6ezrASNlRbPyePNtRulAMuJ.webp",
+        "preview": "/storage/releases/posters/5152/TxWoxcsWl6ezrASNlRbPyePNtRulAMuJ.webp",
+        "thumbnail": "/storage/releases/posters/5152/bSGmBzVGfuMHkJsVJEdg5DGNesggftt3.webp"
+      }
+    },
+    "fresh_at": "2018-04-18T21:46:43+00:00",
+    "created_at": "2018-04-18T21:46:43+00:00",
+    "updated_at": "2024-08-02T19:51:54+00:00",
+    "is_ongoing": false,
+    "age_rating": {
+      "value": "R16_PLUS",
+      "label": "16+",
+      "is_adult": false,
+      "description": "Для людей, достигших возраста шестнадцати лет (16+)"
+    },
+    "publish_day": {
+      "value": 1,
+      "description": "Понедельник"
+    },
+    "description": "В мире, где всё решает магия, однажды у порога церкви находят двух брошенных детей, Асту и Юно. И если Юно оказался одарён исключительной магическо...",
+    "notification": null,
+    "episodes_total": null,
+    "external_player": "[REDACTED]",
+    "is_in_production": false,
+    "is_blocked_by_geo": false,
+    "is_blocked_by_copyrights": false,
+    "added_in_users_favorites": 1393,
+    "average_duration_of_episode": 27,
+    "added_in_planned_collection": 27,
+    "added_in_watched_collection": 189,
+    "added_in_watching_collection": 9,
+    "added_in_postponed_collection": 2,
+    "added_in_abandoned_collection": 3
+  },
+  {
+    "id": 9518,
+    "type": {
+      "value": "MOVIE",
+      "description": "Фильм"
+    },
+    "year": 2023,
+    "name": {
+      "main": "Чёрный клевер: Меч короля магов",
+      "english": "Black Clover: Mahou Mikado no Ken",
+      "alternative": null
+    },
+    "alias": "black-clover-mahou-mikado-no-ken",
+    "season": {
+      "value": "summer",
+      "description": "Лето"
+    },
+    "poster": {
+      "src": "/storage/releases/posters/9518/C92oWh58wvMeP5fZQ1avra8iHm59cpK8.jpg",
+      "preview": "/storage/releases/posters/9518/C92oWh58wvMeP5fZQ1avra8iHm59cpK8.jpg",
+      "thumbnail": "/storage/releases/posters/9518/8lfHviiPDKoUN54b7B58fIlBrRwJeROq.jpg",
+      "optimized": {
+        "src": "/storage/releases/posters/9518/2KDIqsdCHKkqluHcPGMZLU7LwrGoxznb.webp",
+        "preview": "/storage/releases/posters/9518/2KDIqsdCHKkqluHcPGMZLU7LwrGoxznb.webp",
+        "thumbnail": "/storage/releases/posters/9518/1oFN0pyXlhyONmikpSk2BA7l2RorKF5C.webp"
+      }
+    },
+    "fresh_at": "2023-06-24T18:34:39+00:00",
+    "created_at": "2023-06-24T17:16:38+00:00",
+    "updated_at": "2024-08-02T19:57:26+00:00",
+    "is_ongoing": false,
+    "age_rating": {
+      "value": "R16_PLUS",
+      "label": "16+",
+      "is_adult": false,
+      "description": "Для людей, достигших возраста шестнадцати лет (16+)"
+    },
+    "publish_day": {
+      "value": 6,
+      "description": "Суббота"
+    },
+    "description": "На фестивале магических битв «Триумф», который проходит в славном Королевстве Клевера раз в десять лет, Аста намерен показать себя и вновь сразитьс...",
+    "notification": null,
+    "episodes_total": 1,
+    "external_player": null,
+    "is_in_production": false,
+    "is_blocked_by_geo": false,
+    "is_blocked_by_copyrights": false,
+    "added_in_users_favorites": 4753,
+    "average_duration_of_episode": 113,
+    "added_in_planned_collection": 251,
+    "added_in_watched_collection": 1266,
+    "added_in_watching_collection": 53,
+    "added_in_postponed_collection": 20,
+    "added_in_abandoned_collection": 20
+  }
+]

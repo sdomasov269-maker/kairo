@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-08-03T00:00:00.000Z",
+  "policy": "Only first-party pages are evidence. Absence means no official public documentation was found, not proof that a private API does not exist.",
+  "records": [
+    {"providers":["youtube"],"type":"OFFICIAL_API_AND_EMBED_DOCS","url":"https://developers.google.com/youtube/v3","finding":"Data API is documented; it exposes videos/playlists, not an anime catalog."},
+    {"providers":["youtube"],"type":"OFFICIAL_EMBED_DOCS","url":"https://developers.google.com/youtube/iframe_api_reference","finding":"Official iframe player is available subject to API policies."},
+    {"providers":["vimeo"],"type":"OFFICIAL_DEVELOPER_DOCS","url":"https://developer.vimeo.com/","finding":"API and Player SDK apply to Vimeo/customer video, not a normalized anime catalog."},
+    {"providers":["cloudflare-stream"],"type":"OFFICIAL_API_DOCS","url":"https://developers.cloudflare.com/stream/","finding":"API/player host assets controlled by the customer."},
+    {"providers":["cloudflare-stream"],"type":"OFFICIAL_WEBHOOK_DOCS","url":"https://developers.cloudflare.com/stream/manage-video-library/using-webhooks/","finding":"Webhooks report processing state for customer assets."},
+    {"providers":["mux"],"type":"OFFICIAL_API_DOCS","url":"https://www.mux.com/docs/core/mux-fundamentals","finding":"Published API and webhook specifications; customer assets only."},
+    {"providers":["bunny-stream"],"type":"OFFICIAL_API_DOCS","url":"https://docs.bunny.net/api-reference/stream","finding":"AccessKey API, embed and webhooks for customer libraries."},
+    {"providers":["brightcove"],"type":"OFFICIAL_API_DOCS","url":"https://apis.support.brightcove.com/playback/getting-started/overview-playback-api.html","finding":"Playback API searches a customer's Video Cloud library and requires account policy credentials."},
+    {"providers":["dailymotion"],"type":"OFFICIAL_EMBED_DOCS","url":"https://developers.dailymotion.com/docs/player-embed-script-web","finding":"Official player embed and API are documented; no anime-specific catalog."},
+    {"providers":["rutube"],"type":"OFFICIAL_EMBED_DOCS","url":"https://rutube.ru/info/embed/","finding":"Public/embeddable videos can use the official iframe and postMessage controls."},
+    {"providers":["vk-video"],"type":"OFFICIAL_API_DOCS","url":"https://dev.vk.com/ru/method/video","finding":"VK documents generic video methods, not an anime catalog contract."},
+    {"providers":["tubi"],"type":"OFFICIAL_PARTNER_PAGE","url":"https://www.tubipartners.com/","finding":"Content partnership route exists; no public catalog/playback API is documented there."},
+    {"providers":["crunchyroll"],"type":"OFFICIAL_SUPPORT","url":"https://help.crunchyroll.com/hc/en-us/requests/new","finding":"Official contact route; no public developer integration documentation found."},
+    {"providers":["moonanime"],"type":"VERIFIER_RESULT","url":"https://api.moonanime.art/docs","finding":"Existing read-only verifier found no public OpenAPI/Swagger documentation; status NO_PUBLIC_DOCUMENTATION."}
+  ],
+  "safetyCounters": {"imports":0,"playbackRequests":0,"mediaUrlsCollected":0,"databaseWrites":0,"credentialsUsed":0}
+}

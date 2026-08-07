@@ -1,0 +1,451 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  MODERATOR
+  ADMIN
+}
+
+enum AnimeListStatus {
+  PLANNED
+  WATCHING
+  COMPLETED
+  PAUSED
+  DROPPED
+}
+
+enum AnimeTitleLocale {
+  RU
+  UK
+}
+
+enum AnimeTitleSource {
+  SHIKIMORI
+  WIKIDATA
+  WIKIPEDIA
+  IMPORTED
+  AI
+  MANUAL
+}
+
+enum AnimeTitleLookupStatus {
+  FOUND
+  NOT_FOUND
+  AMBIGUOUS
+  NOT_ELIGIBLE
+  RATE_LIMITED
+  TIMEOUT
+  NETWORK_ERROR
+  SERVER_ERROR
+  CLIENT_ERROR
+  TEMPORARY_ERROR
+}
+
+enum AnimeVideoProtocol {
+  DASH
+  HLS
+  MP4
+}
+
+enum AnimeVideoQuality {
+  AUTO
+  P360
+  P480
+  P720
+  P1080
+  P1440
+  P2160
+}
+
+enum AnimeMediaProviderStatus {
+  ACTIVE
+  DEGRADED
+  DISABLED
+  UNSUPPORTED
+}
+
+model User {
+  id            String               @id @default(cuid())
+  email         String               @unique
+  emailVerified DateTime?
+  passwordHash  String?
+  displayName   String
+  image         String?
+  role          Role                 @default(USER)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  lastLoginAt   DateTime?
+  accounts      Account[]
+  sessions      Session[]
+  progress      WatchProgress[]
+  animeList     AnimeListEntry[]
+  preferences   UserPreferences?
+  resetTokens   PasswordResetToken[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model WatchProgress {
+  id            String   @id @default(cuid())
+  userId        String
+  animeKey      String
+  seasonNumber  Int
+  episodeNumber Int
+  currentTime   Float
+  duration      Float
+  percent       Float
+  completed     Boolean  @default(false)
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, animeKey, seasonNumber, episodeNumber])
+  @@index([userId, updatedAt])
+  @@index([userId, animeKey])
+}
+
+model AnimeListEntry {
+  id        String          @id @default(cuid())
+  userId    String
+  animeKey  String
+  status    AnimeListStatus
+  addedAt   DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, animeKey])
+  @@index([userId, status])
+  @@index([userId, updatedAt])
+}
+
+model UserPreferences {
+  userId                   String   @id
+  locale                   String   @default("ru")
+  autoplayNext             Boolean  @default(false)
+  playbackRate             Float    @default(1)
+  subtitleLanguage         String?
+  subtitlesEnabled         Boolean  @default(false)
+  subtitleSize             String   @default("medium")
+  subtitleBackground       String   @default("shadow")
+  preferredAudioLanguage   String?
+  preferredQualityMode     String   @default("auto")
+  reducedEffectsPreference String   @default("balanced")
+  updatedAt                DateTime @updatedAt
+  user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Anime {
+  id                 String   @id @default(cuid())
+  slug               String   @unique
+  anilistId          Int      @unique
+  malId              Int?     @unique
+  titleEnglish       String?
+  titleRomaji        String?
+  titleNative        String?
+  titleRussian       String?
+  titleUkrainian     String?
+  descriptionEnglish String?  @db.Text
+  descriptionRussian String?  @db.Text
+  descriptionUkrainian String? @db.Text
+  synonyms           String[] @default([])
+  synonymsRussian    String[] @default([])
+  synonymsUkrainian  String[] @default([])
+  coverImage         String?
+  coverImageLarge    String?
+  bannerImage        String?
+  dominantColor      String?
+  genres             String[] @default([])
+  year               Int?
+  season             String?
+  format             String?
+  status             String?
+  episodes           Int?
+  duration           Int?
+  rating             Int?
+  popularity         Int?
+  studios            String[] @default([])
+  country            String?
+  source             String?
+  trailerUrl         String?
+  nextAiringAt       Int?
+  nextAiringEpisode  Int?
+  russianTitleSource String?
+  ukrainianTitleSource String?
+  importedAt         DateTime @default(now())
+  sourceUpdatedAt    DateTime @default(now())
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  localizedTitles    AnimeLocalizedTitle[]
+  titleAliases       AnimeTitleAlias[]
+  animeSeasons       AnimeSeason[]
+  animeEpisodes      AnimeEpisode[]
+  mediaProviderLinks AnimeMediaProviderLink[]
+
+  @@index([status, year])
+  @@index([popularity])
+  @@index([rating])
+}
+
+model AnimeSeason {
+  id          String         @id @default(cuid())
+  animeId     String
+  anime       Anime          @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  number      Int
+  title       String?
+  titleRu     String?
+  titleUk     String?
+  sortOrder   Int            @default(0)
+  isPublished Boolean        @default(false)
+  episodes    AnimeEpisode[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@unique([animeId, number])
+  @@index([animeId, sortOrder])
+}
+
+model AnimeEpisode {
+  id             String               @id @default(cuid())
+  animeId        String
+  anime          Anime                @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  seasonId       String
+  season         AnimeSeason          @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  number         Int
+  absoluteNumber Int?
+  title          String?
+  titleRu        String?
+  titleUk        String?
+  description    String?              @db.Text
+  thumbnailUrl   String?
+  airDate        DateTime?
+  durationSec    Int?
+  introStartSec  Int?
+  introEndSec    Int?
+  outroStartSec  Int?
+  outroEndSec    Int?
+  isFiller       Boolean              @default(false)
+  isRecap        Boolean              @default(false)
+  isPublished    Boolean              @default(false)
+  availableAt    DateTime?
+  videoSources   AnimeVideoSource[]
+  subtitleTracks AnimeSubtitleTrack[]
+  providerReferences AnimeEpisodeProviderReference[]
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  @@unique([seasonId, number])
+  @@index([animeId, seasonId, number])
+  @@index([animeId, absoluteNumber])
+  @@index([isPublished, availableAt])
+  @@index([airDate])
+}
+
+model AnimeMediaProviderConfig {
+  id              String                   @id @default(cuid())
+  key             String                   @unique
+  name            String
+  status          AnimeMediaProviderStatus @default(DISABLED)
+  priority        Int                      @default(100)
+  capabilities    Json
+  authorization   Json
+  lastHealthAt    DateTime?
+  lastHealthError String?
+  links           AnimeMediaProviderLink[]
+  episodeRefs     AnimeEpisodeProviderReference[]
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+
+  @@index([status, priority])
+}
+
+model AnimeMediaProviderLink {
+  id              String                   @id @default(cuid())
+  animeId         String
+  anime           Anime                    @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  providerId      String
+  provider        AnimeMediaProviderConfig @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  providerAnimeId String
+  confidence      Int?
+  matchMethod     String
+  verified        Boolean                  @default(false)
+  metadata        Json?
+  lastSyncedAt    DateTime?
+  syncCursor      String?
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+
+  @@unique([animeId, providerId])
+  @@unique([providerId, providerAnimeId])
+  @@index([providerId, lastSyncedAt])
+}
+
+model AnimeEpisodeProviderReference {
+  id                String                   @id @default(cuid())
+  episodeId         String
+  episode           AnimeEpisode             @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  providerId        String
+  provider          AnimeMediaProviderConfig @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  providerEpisodeId String
+  metadata          Json?
+  lastSyncedAt      DateTime?
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
+
+  @@unique([episodeId, providerId])
+  @@unique([providerId, providerEpisodeId])
+  @@index([providerId, lastSyncedAt])
+}
+
+model AnimeVideoSource {
+  id        String             @id @default(cuid())
+  episodeId String
+  episode   AnimeEpisode       @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  protocol  AnimeVideoProtocol
+  quality   AnimeVideoQuality  @default(AUTO)
+  url       String
+  mimeType  String?
+  language  String             @default("ja")
+  label     String?
+  bandwidth Int?
+  isDefault Boolean            @default(false)
+  isActive  Boolean            @default(true)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  @@index([episodeId, isActive])
+}
+
+model AnimeSubtitleTrack {
+  id        String       @id @default(cuid())
+  episodeId String
+  episode   AnimeEpisode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  language  String
+  label     String
+  url       String
+  format    String       @default("vtt")
+  isDefault Boolean      @default(false)
+  isForced  Boolean      @default(false)
+  isActive  Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([episodeId, language])
+}
+
+model AnimeLocalizedTitle {
+  id          String           @id @default(cuid())
+  animeId     String
+  anilistId   Int
+  locale      AnimeTitleLocale
+  title       String
+  normalized  String
+  source      AnimeTitleSource
+  confidence  Int?
+  verified    Boolean          @default(false)
+  locked      Boolean          @default(false)
+  externalId  String?
+  metadata    Json?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  anime       Anime            @relation(fields: [animeId], references: [id], onDelete: Cascade)
+
+  @@unique([anilistId, locale])
+  @@index([animeId])
+  @@index([anilistId])
+  @@index([locale])
+  @@index([normalized])
+  @@index([source])
+}
+
+model AnimeTitleAlias {
+  id          String            @id @default(cuid())
+  animeId     String
+  anilistId   Int
+  locale      AnimeTitleLocale?
+  title       String
+  normalized  String
+  source      AnimeTitleSource
+  externalId  String?
+  createdAt   DateTime          @default(now())
+  anime       Anime             @relation(fields: [animeId], references: [id], onDelete: Cascade)
+
+  @@unique([anilistId, normalized])
+  @@index([animeId])
+  @@index([anilistId])
+  @@index([normalized])
+}
+
+model AnimeTitleLookupCache {
+  id          String                 @id @default(cuid())
+  anilistId   Int
+  provider    String
+  status      AnimeTitleLookupStatus
+  results     Json?
+  error       String?
+  metadata    Json?
+  retryable   Boolean                @default(false)
+  attemptCount Int                   @default(0)
+  lastAttemptAt DateTime?
+  nextRetryAt DateTime?
+  lastHttpStatus Int?
+  expiresAt   DateTime
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+
+  @@unique([anilistId, provider])
+  @@index([expiresAt])
+  @@index([provider, status, retryable, nextRetryAt])
+}

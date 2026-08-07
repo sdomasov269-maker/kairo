@@ -1,0 +1,9 @@
+{
+  "key": "moonanime",
+  "name": "MoonAnime",
+  "baseUrl": "https://api.moonanime.art",
+  "documentationUrl": "https://api.moonanime.art/docs",
+  "defaultStatus": "UNVERIFIED",
+  "declaredPaths": ["/anime/search", "/anime/{id}/episodes", "/episode/{id}/player"],
+  "notes": ["Claims API-key authentication, webhooks and 60 requests/minute; all claims require OpenAPI verification."]
+}

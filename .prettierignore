@@ -1,0 +1,5 @@
+.next
+node_modules
+obj
+.vs
+package-lock.json
