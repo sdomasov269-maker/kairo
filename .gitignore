@@ -28,3 +28,7 @@ headers.tmp
 *.tsbuildinfo
 reports/*.pdf
 reports/*.html
+
+# Local dependency backups
+node_modules_backup/
+package-lock.backup.json
