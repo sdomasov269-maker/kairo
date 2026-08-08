@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "../styles/responsive/base.css";
+import "../styles/responsive/mobile.css";
+import "../styles/responsive/tablet-fold.css";
+import "../styles/responsive/desktop.css";
 import { LocaleProvider } from "@/i18n";
 import { SessionProvider } from "@/components/auth/SessionProvider";
 import { AppBackground } from "@/components/layout/AppBackground";

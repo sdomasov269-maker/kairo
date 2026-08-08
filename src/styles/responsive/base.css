@@ -1,0 +1,50 @@
+/* Viewport-independent responsive invariants. Loaded after legacy globals. */
+html,
+body {
+  max-width: 100%;
+}
+body,
+.app-shell,
+main {
+  min-width: 0;
+}
+img,
+svg,
+video,
+canvas,
+iframe {
+  max-width: 100%;
+}
+.page-container,
+.content-section {
+  width: min(100%, calc(var(--content-max-width) + var(--page-gutter) * 2));
+}
+.content-section {
+  padding-block: var(--section-gap);
+}
+.page-hero h1,
+.details-copy h1,
+.discovery-hero h1,
+.auth-copy h1,
+.profile-hero h1 {
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+.button,
+.icon-button,
+.row-play,
+.save-button {
+  min-width: 44px;
+  min-height: 44px;
+}
+.confirm-dialog,
+.account-menu-panel,
+.player-menu,
+.search-dialog,
+.filter-panel {
+  max-height: calc(100dvh - 2rem - var(--safe-area-bottom));
+  overscroll-behavior: contain;
+}
+.mobile-nav-backdrop {
+  display: none;
+}

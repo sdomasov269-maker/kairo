@@ -1,0 +1,40 @@
+/* Desktop extensions. Wide remains a desktop sub-mode. */
+@media (min-width: 1024px) {
+  .app-shell-home {
+    --home-page-max: var(--content-max-width);
+  }
+  .app-shell-home .header-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+  .app-shell-home .desktop-nav { justify-self: center; }
+  .app-shell-home .header-actions { justify-self: end; }
+  .home-page .anime-grid {
+    grid-template-columns: repeat(auto-fit, minmax(var(--card-min), 1fr));
+  }
+}
+
+@media (min-width: 1600px) {
+  :root {
+    --card-min: 190px;
+    --card-max: 260px;
+  }
+  .button {
+    min-height: clamp(48px, 3vw, 56px);
+    padding-inline: clamp(1.4rem, 1.5vw, 2rem);
+  }
+}
+
+@media (min-width: 1920px) {
+  .content-section,
+  .page-container,
+  .header-inner { max-width: var(--content-max-width); }
+  .anime-grid,
+  .catalog-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+  .watch-stage { width: min(calc(100% - var(--gutter) * 2), 1600px); }
+  .watch-information { width: min(calc(100% - var(--gutter) * 2), 1440px); }
+}
+
+@media (min-width: 2560px) {
+  :root { --page-gutter: clamp(4rem, 4vw, 7rem); }
+}

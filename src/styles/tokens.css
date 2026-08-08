@@ -32,6 +32,11 @@
   --text-5xl: 3rem;
   --text-6xl: 3.75rem;
   --text-display: clamp(3rem, 7vw, 6rem);
+  --text-page-title: clamp(2.75rem, 6vw, 5.25rem);
+  --text-section-title: clamp(1.75rem, 3vw, 2.5rem);
+  --text-card-title: 0.9375rem;
+  --leading-tight: 1.08;
+  --leading-body: 1.65;
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -63,6 +68,9 @@
   --content-max-width: 108rem;
   --section-gap: clamp(3.75rem, 6vw, 7.5rem);
   --header-height: clamp(4rem, 5vw, 5.25rem);
+  --control-height-sm: 2.5rem;
+  --control-height-md: 2.75rem;
+  --control-height-lg: 3.25rem;
   --text-column-width: 70ch;
   --card-gap: clamp(0.75rem, 1.4vw, 1.75rem);
   --radius: clamp(0.875rem, 1.2vw, 1.5rem);

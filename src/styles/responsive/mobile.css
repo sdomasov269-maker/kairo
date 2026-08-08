@@ -1,0 +1,114 @@
+/* Compact capacity. Legacy thresholds are preserved for zero visual drift. */
+@media (max-width: 767px) {
+  :root {
+    --page-gutter: clamp(1rem, 4.8vw, 2rem);
+    --section-gap: clamp(3.5rem, 12vw, 5rem);
+  }
+  .site-header,
+  .site-header.is-scrolled {
+    min-height: calc(64px + env(safe-area-inset-top, 0px));
+  }
+  .header-inner,
+  .site-header.is-scrolled .header-inner {
+    min-height: 64px;
+  }
+  .desktop-nav {
+    display: none;
+  }
+  .menu-button {
+    display: grid;
+  }
+  .mobile-nav-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    display: block;
+    width: 100%;
+    height: 100dvh;
+    background: rgba(3, 7, 8, 0.72);
+    backdrop-filter: blur(4px);
+  }
+  .mobile-nav {
+    max-height: calc(100dvh - 64px - env(safe-area-inset-top, 0px));
+    overflow-y: auto;
+    padding-bottom: calc(1.5rem + var(--safe-area-bottom));
+  }
+  .locale-switch button {
+    min-width: 32px;
+    min-height: 44px;
+  }
+  .page-hero {
+    padding-top: calc(6.25rem + env(safe-area-inset-top, 0px));
+  }
+  .page-hero h1 {
+    font-size: clamp(2.5rem, 12vw, 4rem);
+  }
+  .section-heading h2 {
+    font-size: clamp(1.8rem, 8vw, 2.5rem);
+  }
+  .anime-grid,
+  .catalog-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.75rem 0.75rem;
+  }
+  .details-copy h1 {
+    font-size: clamp(2.5rem, 11vw, 4rem);
+  }
+  .details-actions,
+  .source-unavailable-actions,
+  .confirm-dialog-actions {
+    flex-wrap: wrap;
+  }
+  .filter-panel {
+    inset: auto 0 0;
+    width: 100%;
+    max-height: min(86dvh, 48rem);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    padding-bottom: calc(1.5rem + var(--safe-area-bottom));
+    transform: translateY(105%);
+  }
+  .filter-panel.is-open {
+    transform: translateY(0);
+  }
+  .confirm-dialog-backdrop,
+  .search-dialog-layer {
+    padding: max(1rem, env(safe-area-inset-top, 0px)) 1rem
+      max(1rem, var(--safe-area-bottom));
+  }
+  .watch-stage {
+    width: 100%;
+  }
+  .kairo-player,
+  .kodik-embed-player {
+    width: 100%;
+    max-height: calc(100dvh - 64px);
+    aspect-ratio: 16 / 9;
+  }
+  .watch-information {
+    width: calc(100% - var(--gutter) * 2);
+  }
+}
+
+@media (max-width: 599px) {
+  .anime-grid,
+  .catalog-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 479px) {
+  .logo { font-size: 23px; }
+  .profile-button { display: none; }
+  .card-title-row h3 { font-size: clamp(13px, 3.8vw, 15px); }
+  .collection-card { min-height: 250px; }
+  .details-actions .button,
+  .source-unavailable-actions .button { flex: 1 1 100%; }
+}
+
+@media (max-width: 374px) {
+  .locale-switch span,
+  .locale-switch button:not(.active) { display: none; }
+  .locale-switch button.active { display: grid; }
+  .anime-grid,
+  .catalog-grid { gap-inline: 0.625rem; }
+}

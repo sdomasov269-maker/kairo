@@ -118,11 +118,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
               />
             </label>
           )}
-          {error && (
-            <p className="auth-error" role="alert">
-              {error}
-            </p>
-          )}
+          <p className="auth-error" role="alert" aria-live="polite">{error || "\u00a0"}</p>
           <button className="button button-primary" disabled={busy}>
             {busy ? "…" : submitLabel}
           </button>

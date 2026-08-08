@@ -16,6 +16,6 @@
 
 @media (min-width: 1200px) {
   .emptyHero {
-    min-height: clamp(32.5rem, 67svh, 48.75rem);
+    min-height: clamp(32.5rem, 67svh, 37.75rem);
   }
 }
