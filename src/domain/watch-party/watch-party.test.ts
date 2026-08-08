@@ -1,0 +1,12 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { generateRoomCode } from "./room-code.ts";
+import { roomCodeSchema, watchPartyEventSchema } from "./schemas.ts";
+import { acceptNewerState, driftAction, expectedPlaybackTime } from "./room-state.ts";
+import type { WatchPartyState } from "./types.ts";
+const state = (revision: number, playing = false): WatchPartyState => ({ roomId: "room", revision, hostUserId: "host", animeId: "anime", slug: "anime-slug", season: 1, episode: 3, translationId: 42, playback: { playing, currentTime: 10, playbackRate: 1.5, updatedAtServerTime: 1_000 } });
+test("room codes are normalized, human-readable and random", () => { const codes = new Set(Array.from({ length: 100 }, () => generateRoomCode())); assert.equal(codes.size, 100); for (const code of codes) assert.equal(roomCodeSchema.parse(code), code); assert.equal(roomCodeSchema.parse("ab7k2q"), "AB7K2Q"); });
+test("realtime payload validation rejects malformed state", () => { assert.equal(watchPartyEventSchema.safeParse({ type: "ROOM_STATE", state: state(1) }).success, true); assert.equal(watchPartyEventSchema.safeParse({ type: "ROOM_STATE", state: { ...state(1), playback: { currentTime: "secret" } } }).success, false); });
+test("stale revisions are ignored", () => { assert.equal(acceptNewerState(state(3), state(2)).revision, 3); assert.equal(acceptNewerState(state(3), state(4)).revision, 4); });
+test("playing snapshots compensate elapsed time and speed", () => { assert.equal(expectedPlaybackTime(state(1, true), 3_000), 13); assert.equal(expectedPlaybackTime(state(1, false), 3_000), 10); });
+test("drift thresholds avoid jitter", () => { assert.equal(driftAction(0.5), "IGNORE"); assert.equal(driftAction(1), "CORRECT"); assert.equal(driftAction(3), "SEEK"); });

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState, type ReactNode } from "react";
 import { AnimeCard } from "./Cards";
+import { DetailSectionHeading } from "./DetailSectionHeading";
 import { useLocale } from "@/i18n";
 import type { Anime } from "@/types/media";
 import {
@@ -177,7 +178,7 @@ export function AnimeDetailsContent({
                 </div>
                 {animeProgress.targetEpisode && (
                   <Link
-                    className="button button-primary"
+                    className="button button-primary detail-card-action"
                     href={`/watch/${anime.slug}/${animeProgress.targetEpisode.episodeNumber}?season=${animeProgress.targetEpisode.seasonNumber}`}
                   >
                     {t.sync.continueWatching}
@@ -291,7 +292,7 @@ export function AnimeDetailsContent({
                   </span>
                 </>
               );
-              return (
+              return available ? (
                 <Link
                   aria-current={current ? "page" : undefined}
                   aria-label={`${t.actions.playEpisode}: ${title}`}
@@ -301,6 +302,14 @@ export function AnimeDetailsContent({
                 >
                   {content}
                 </Link>
+              ) : (
+                <div
+                  aria-label={`${t.actions.playEpisode}: ${title}`}
+                  className="details-episode is-unavailable"
+                  key={episode.id}
+                >
+                  {content}
+                </div>
               );
             })}
           </div>
@@ -352,7 +361,9 @@ export function AnimeDetailsContent({
             <dt>{t.labels.alternativeTitles}</dt>
             <dd>
               {visibleAlternatives.map((title) => (
-                <span key={title}>{title}</span>
+                <span key={title} title={title}>
+                  {title}
+                </span>
               ))}
             </dd>
             {alternatives.length > 5 && (
@@ -380,16 +391,19 @@ export function AnimeDetailsContent({
     });
   }
 
+  const visibleSections = sections.filter(
+    (section) => section.key !== "episodes",
+  );
+
   return (
     <main className="anime-details-main">
-      {sections.map((section, index) => (
+      {visibleSections.map((section, index) => (
         <section
           className={`details-section ${section.className ?? ""}`}
           id={section.id}
           key={section.key}
         >
-          <p className="eyebrow">{String(index + 1).padStart(2, "0")}</p>
-          <h2>{section.title}</h2>
+          <DetailSectionHeading number={index + 3} title={section.title} />
           {section.content}
         </section>
       ))}

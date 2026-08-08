@@ -1,0 +1,100 @@
+.root {
+  position: relative;
+  width: 100%;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  background: #0b1112;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    background var(--duration-fast) var(--ease-standard);
+}
+
+.trigger:hover:not(:disabled),
+.trigger[aria-expanded="true"] {
+  border-color: var(--color-border-strong);
+  background: var(--color-bg-elevated);
+}
+
+.trigger:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.trigger:disabled {
+  cursor: default;
+  opacity: 0.72;
+}
+
+.trigger svg {
+  width: 1rem;
+  flex: 0 0 auto;
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+
+.trigger[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
+.menu {
+  position: absolute;
+  z-index: var(--z-dropdown);
+  top: calc(100% + 0.45rem);
+  left: 0;
+  width: 100%;
+  max-height: 15rem;
+  margin: 0;
+  padding: 0.35rem;
+  overflow-y: auto;
+  list-style: none;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--color-bg-elevated) 96%, transparent);
+  box-shadow: 0 1.25rem 3.5rem rgba(0, 0, 0, 0.48);
+  backdrop-filter: blur(18px);
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 2.5rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.4rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.option:hover,
+.option.active {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.065);
+}
+
+.option.selected {
+  color: var(--color-accent);
+}
+
+.option.disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.option svg {
+  width: 0.9rem;
+  flex: 0 0 auto;
+}

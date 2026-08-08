@@ -1,5 +1,8 @@
 /* Desktop extensions. Wide remains a desktop sub-mode. */
 @media (min-width: 1024px) {
+  .watch-workspace-grid {
+    grid-template-columns: minmax(0, 73fr) minmax(280px, 27fr);
+  }
   .app-shell-home {
     --home-page-max: var(--content-max-width);
   }

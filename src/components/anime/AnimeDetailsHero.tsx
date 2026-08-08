@@ -73,9 +73,11 @@ export function AnimeDetailsHero({
             <p className="eyebrow">
               {anime.isDemo ? t.hero.original : t.catalog.anilistData}
             </p>
-            <h1>{title}</h1>
+            <h1 aria-label={title} tabIndex={0} title={title}>
+              {title}
+            </h1>
             <div className="original-titles">
-              {originalTitle && <p>{originalTitle}</p>}
+              {originalTitle && <p title={originalTitle}>{originalTitle}</p>}
             </div>
             <div className="details-facts">
               {anime.rating && (

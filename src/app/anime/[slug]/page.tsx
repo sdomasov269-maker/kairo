@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AnimeDetailsHero } from "@/components/anime/AnimeDetailsHero";
 import { AnimeDetailsContent } from "@/components/anime/AnimeDetailsContent";
+import { KairoWatchWorkspace } from "@/components/anime/KairoWatchWorkspace";
 import {
   AniListUnavailableState,
   type AniListFailureKind,
@@ -16,15 +17,16 @@ import {
   resolveLocalizedAnimeDescription,
 } from "@/lib/media-localization";
 import { resolveAnimeBySlug, resolveRelatedAnime } from "@/lib/anime/resolve";
-import { getAnimeSeasonsForDetails } from "@/server/services/episode.service";
 import { AniListRequestError } from "@/lib/anilist";
 import type { Anime } from "@/types/media";
-import { kodikService } from "@/server/services/kodik.service";
+import { getKodikAnimeWorkspace } from "@/server/services/kodik-detail.service";
+import styles from "@/components/anime/AnimeDetailsLayout.module.css";
 
 export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ season?: string; episode?: string; room?: string }>;
 }
 
 function failureKind(error: AniListRequestError): AniListFailureKind {
@@ -80,7 +82,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function AnimePage({ params }: PageProps) {
+export default async function AnimePage({ params, searchParams }: PageProps) {
   const { slug } = await params;
   let anime: Anime | null;
   try {
@@ -88,26 +90,29 @@ export default async function AnimePage({ params }: PageProps) {
   } catch (error) {
     if (!(error instanceof AniListRequestError)) throw error;
     return (
-      <AppShell className="app-shell-detail">
+      <AppShell className={`app-shell-detail ${styles.detailPage}`}>
         <AniListUnavailableState kind={failureKind(error)} />
       </AppShell>
     );
   }
   if (!anime) notFound();
   const related = await resolveRelatedAnime(anime);
-  const seasonDetails = await getAnimeSeasonsForDetails(anime.slug);
-  const kodikEpisodes = anime.malId ? await kodikService.getAvailableEpisodeKeys(anime.malId) : new Set<string>();
-  for (const season of seasonDetails) {
-    for (const episode of season.episodes) {
-      if (episode.availability === "NO_VIDEO" && kodikEpisodes.has(`${season.seasonNumber}:${episode.episodeNumber}`)) {
-        episode.availability = "AVAILABLE";
-        episode.watchHref = `/watch/${anime.slug}/${episode.episodeNumber}?season=${season.seasonNumber}`;
-      }
-    }
-  }
-  const episodes = seasonDetails.flatMap((season) => season.episodes.map((episode) => episode.metadata));
+  const { seasons: seasonDetails, workspace } =
+    await getKodikAnimeWorkspace(anime);
+  const query = await searchParams;
+  const initialSeason = /^\d{1,3}$/.test(query?.season ?? "")
+    ? Number(query?.season)
+    : undefined;
+  const initialEpisode = /^\d{1,5}$/.test(query?.episode ?? "")
+    ? Number(query?.episode)
+    : undefined;
+  const episodes = seasonDetails.flatMap((season) =>
+    season.episodes.map((episode) => episode.metadata),
+  );
   const availability = Object.fromEntries(
-    seasonDetails.flatMap((season) => season.episodes.map((episode) => [episode.id, episode.availability])),
+    seasonDetails.flatMap((season) =>
+      season.episodes.map((episode) => [episode.id, episode.availability]),
+    ),
   );
   const watchableEpisodes = episodes.filter(
     (episode) => availability[episode.id] === "AVAILABLE",
@@ -124,14 +129,31 @@ export default async function AnimePage({ params }: PageProps) {
     genre: anime.genres.map((genre) => localizeGenre(genre, "ru")),
   };
   return (
-    <AppShell className="app-shell-detail">
+    <AppShell className={`app-shell-detail ${styles.detailPage}`}>
       <AnimeDetailsHero anime={anime} episodes={watchableEpisodes} />
+      <KairoWatchWorkspace
+        animeId={anime.id}
+        animeSlug={anime.slug}
+        animeTitle={getLocalizedAnimeTitle(anime, "ru")}
+        data={workspace}
+        initialSeason={initialSeason}
+        initialEpisode={initialEpisode}
+        initialRoomCode={
+          /^[A-Za-z2-9]{6}$/.test(query?.room ?? "")
+            ? query!.room!.toUpperCase()
+            : undefined
+        }
+      />
       <AnimeDetailsContent
         anime={anime}
         related={related}
         episodes={episodes}
         availability={availability}
-        seasons={seasonDetails.map((season) => ({ id: season.id, number: season.seasonNumber, title: season.title }))}
+        seasons={seasonDetails.map((season) => ({
+          id: season.id,
+          number: season.seasonNumber,
+          title: season.title,
+        }))}
       />
       <script
         type="application/ld+json"

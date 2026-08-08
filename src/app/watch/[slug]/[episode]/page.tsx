@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { WatchPageContent } from "@/components/player/WatchPageContent";
+import { notFound, redirect } from "next/navigation";
 import {
   getAnimeEpisodes,
   getEpisode,
@@ -9,16 +8,18 @@ import {
 import type { WatchEpisode } from "@/data/watch/types";
 import { resolveAnimeBySlug } from "@/lib/anime/resolve";
 import { getLocalizedAnimeTitle } from "@/lib/media-localization";
-import { getAnimeSeasonsForDetails, resolveWatchEpisode as resolveDbWatchEpisode } from "@/server/services/episode.service";
+import {
+  getAnimeSeasonsForDetails,
+  resolveWatchEpisode as resolveDbWatchEpisode,
+  WatchResolveError,
+} from "@/server/services/episode.service";
+import { resolveKodikWatchPlayback } from "@/server/services/kodik-watch.service";
+import { resolveKodikRuntimeWatchEpisode } from "@/server/services/kodik/runtime-watch";
+import { unifiedWatchUrl } from "@/lib/watch-route";
 
 interface WatchPageProps {
   params: Promise<{ slug: string; episode: string }>;
   searchParams?: Promise<{ season?: string }>;
-}
-
-function resolveKodikEmbedUrl(embedUrl?: string | null) {
-  if (process.env.KODIK_PROVIDER_ENABLED !== "true") return undefined;
-  return embedUrl?.trim() || undefined;
 }
 
 async function resolveWatchPage(
@@ -73,10 +74,12 @@ async function resolveWatchPage(
       ].filter((chapter) => chapter.endTime > chapter.startTime),
     };
     const seasons = await getAnimeSeasonsForDetails(anime.slug);
-    const currentSeason = seasons.find((item) => item.seasonNumber === seasonNumber);
+    const currentSeason = seasons.find(
+      (item) => item.seasonNumber === seasonNumber,
+    );
     const episodes = currentSeason?.episodes.map((item) => item.metadata) ?? [];
-    const kodikEmbedUrl = resolveKodikEmbedUrl(resolved.kodikPlayback?.embedUrl);
-    const availability = kodikEmbedUrl
+    const kodikPlayback = resolved.kodikPlayback;
+    const availability = kodikPlayback
       ? ("AVAILABLE" as const)
       : resolved.availability;
     return {
@@ -86,15 +89,16 @@ async function resolveWatchPage(
       availability,
       episodes,
       episodeAvailability: {
-        ...Object.fromEntries((currentSeason?.episodes ?? []).map((item) => [item.id, item.availability])),
+        ...Object.fromEntries(
+          (currentSeason?.episodes ?? []).map((item) => [
+            item.id,
+            item.availability,
+          ]),
+        ),
         [resolved.metadata.id]: availability,
       },
       availableAt: resolved.metadata.availableAt,
-      kodikPlayback:
-        process.env.KODIK_PROVIDER_ENABLED === "false"
-          ? null
-          : resolved.kodikPlayback,
-      kodikEmbedUrl,
+      kodikPlayback,
       previousHref: resolved.previous
         ? `/watch/${anime.slug}/${resolved.previous.number}?season=${seasonNumber}`
         : undefined,
@@ -102,8 +106,38 @@ async function resolveWatchPage(
         ? `/watch/${anime.slug}/${resolved.next.number}?season=${seasonNumber}`
         : undefined,
     };
-  } catch {
-    if (slug !== "eclipse-protocol") return null;
+  } catch (error) {
+    if (!(error instanceof WatchResolveError)) throw error;
+    if (
+      error.code !== "ANIME_NOT_FOUND" &&
+      error.code !== "SEASON_NOT_FOUND" &&
+      error.code !== "EPISODE_NOT_FOUND"
+    )
+      return null;
+
+    const { episode, kodikPlayback } = await resolveKodikRuntimeWatchEpisode(
+      anime,
+      seasonNumber,
+      episodeNumber,
+      resolveKodikWatchPlayback,
+    );
+    if (slug !== "eclipse-protocol" || kodikPlayback) {
+      const availability = kodikPlayback
+        ? ("AVAILABLE" as const)
+        : ("NO_VIDEO" as const);
+      return {
+        anime,
+        episode,
+        available: Boolean(kodikPlayback),
+        availability,
+        episodes: [],
+        episodeAvailability: {},
+        availableAt: undefined,
+        kodikPlayback,
+        previousHref: undefined,
+        nextHref: undefined,
+      };
+    }
   }
   const metadata = getEpisode(slug, seasonNumber, episodeNumber);
   const release = getPublishedEpisodeRelease(slug, seasonNumber, episodeNumber);
@@ -145,29 +179,45 @@ async function resolveWatchPage(
   const currentIndex = episodes.findIndex(
     (item) => item.episodeNumber === episodeNumber,
   );
-  const kodikEmbedUrl = resolveKodikEmbedUrl();
-  const availability = kodikEmbedUrl
+  const kodikPlayback = await resolveKodikWatchPlayback({
+    ...(anime.anilistId ? { anilistId: anime.anilistId } : {}),
+    ...(anime.malId ? { malId: anime.malId } : {}),
+    ...(anime.year ? { year: anime.year } : {}),
+    titles: {
+      ...(anime.titleRu ? { russian: anime.titleRu } : {}),
+      ...(anime.titleEnglish ? { english: anime.titleEnglish } : {}),
+      ...(anime.titleRomaji ? { romaji: anime.titleRomaji } : {}),
+      ...(anime.titleNative ? { native: anime.titleNative } : {}),
+      aliases: anime.synonyms ?? [],
+    },
+    seasonNumber,
+    episodeNumber,
+  });
+  const availability = kodikPlayback
     ? ("AVAILABLE" as const)
-    : release
-      ? ("AVAILABLE" as const)
-      : ("NO_VIDEO" as const);
+    : ("NO_VIDEO" as const);
   return {
     anime,
     episode,
     available: availability === "AVAILABLE",
     availability,
     episodes,
-    episodeAvailability: Object.fromEntries(episodes.map((item) => [
-      item.id,
-      item.episodeNumber === episodeNumber && kodikEmbedUrl
-        ? "AVAILABLE"
-        : getPublishedEpisodeRelease(slug, item.seasonNumber, item.episodeNumber)
+    episodeAvailability: Object.fromEntries(
+      episodes.map((item) => [
+        item.id,
+        item.episodeNumber === episodeNumber && kodikPlayback
           ? "AVAILABLE"
-          : "NO_VIDEO",
-    ])) as Record<string, import("@/domain/watch").EpisodeAvailability>,
+          : getPublishedEpisodeRelease(
+                slug,
+                item.seasonNumber,
+                item.episodeNumber,
+              )
+            ? "AVAILABLE"
+            : "NO_VIDEO",
+      ]),
+    ) as Record<string, import("@/domain/watch").EpisodeAvailability>,
     availableAt: metadata.availableAt,
-    kodikPlayback: null,
-    kodikEmbedUrl,
+    kodikPlayback,
     previousHref:
       currentIndex > 0
         ? `/watch/${anime.slug}/${episodes[currentIndex - 1].episodeNumber}?season=${seasonNumber}`
@@ -198,23 +248,8 @@ export default async function WatchPage({
   params,
   searchParams,
 }: WatchPageProps) {
-  const result = await resolveWatchPage(params, searchParams);
-  if (!result) notFound();
-  const { anime, episode, available, episodes, episodeAvailability, availableAt, kodikEmbedUrl, previousHref, nextHref } =
-    result;
-  return (
-    <WatchPageContent
-      anime={anime}
-      episode={episode}
-      episodes={episodes}
-      previousHref={previousHref}
-      nextHref={nextHref}
-      available={available}
-      availability={result.availability}
-      availableAt={availableAt}
-      episodeAvailability={episodeAvailability}
-      seasonNumber={Number((await searchParams)?.season ?? 1)}
-      kodikEmbedUrl={kodikEmbedUrl}
-    />
-  );
+  const { slug, episode } = await params;
+  const season = (await searchParams)?.season ?? "1";
+  if (!/^\d{1,5}$/.test(episode) || !/^\d{1,3}$/.test(season)) notFound();
+  redirect(unifiedWatchUrl(slug, Number(season), Number(episode)));
 }

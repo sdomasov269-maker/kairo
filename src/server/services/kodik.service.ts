@@ -1,4 +1,17 @@
 import { z } from "zod";
+import {
+  KodikConfigurationError,
+  KodikRequestError,
+  KodikResponseError,
+} from "./kodik/errors.ts";
+import { kodikMaterialSchema, type KodikMaterial } from "./kodik/schemas.ts";
+import { kodikTitleAttempts, resolveKodikMaterials } from "./kodik/resolver.ts";
+import {
+  KODIK_ANIME_TYPES,
+  type KodikAnimeSource,
+  type KodikResolverInput,
+  type KodikSearchParameters,
+} from "./kodik/types.ts";
 
 const nullableString = z.string().nullable().optional();
 const nullableNumber = z.number().nullable().optional();
@@ -166,7 +179,7 @@ export type KodikDiagnosticReport = {
   errorDetail?: string;
 };
 
-const DEFAULT_BASE_URL = "https://kodikapi.com";
+const DEFAULT_BASE_URL = "https://kodik-api.com";
 const MAX_RESPONSE_BYTES = 2_000_000;
 
 function retryAfterMilliseconds(value: string | null) {
@@ -221,16 +234,20 @@ export class KodikService {
         .map((host) => host.trim().toLowerCase())
         .filter(Boolean),
     );
-    this.baseUrl = (options.baseUrl ?? process.env.KODIK_API_BASE_URL ?? DEFAULT_BASE_URL).replace(
-      /\/$/,
-      "",
-    );
+    this.baseUrl = (
+      options.baseUrl ??
+      process.env.KODIK_API_BASE_URL ??
+      DEFAULT_BASE_URL
+    ).replace(/\/$/, "");
     this.fetchImpl = options.fetchImpl ?? fetch;
-    this.timeoutMs = options.timeoutMs ?? Number(process.env.KODIK_TIMEOUT_MS ?? 10_000);
-    this.maxRetries = options.maxRetries ?? Number(process.env.KODIK_MAX_RETRIES ?? 2);
+    this.timeoutMs =
+      options.timeoutMs ?? Number(process.env.KODIK_TIMEOUT_MS ?? 10_000);
+    this.maxRetries =
+      options.maxRetries ?? Number(process.env.KODIK_MAX_RETRIES ?? 1);
     this.sleep =
       options.sleep ??
-      ((milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds)));
+      ((milliseconds) =>
+        new Promise((resolve) => setTimeout(resolve, milliseconds)));
     this.logger = options.logger ?? console;
   }
 
@@ -259,11 +276,13 @@ export class KodikService {
   private async requestSearch(
     params: Record<string, string | number | boolean>,
     diagnostic = false,
+    restProvider = false,
   ): Promise<KodikSearchResult> {
     const startedAt = Date.now();
-    const requestEnabled = diagnostic
-      ? this.enabled && Boolean(this.token)
-      : this.configured;
+    const requestEnabled =
+      diagnostic || restProvider
+        ? this.enabled && Boolean(this.token)
+        : this.configured;
     if (!requestEnabled || !this.token)
       return {
         ok: false,
@@ -311,7 +330,9 @@ export class KodikService {
             attempt < this.maxRetries &&
             this.shouldRetry(response.status, error)
           ) {
-            const retryAfter = retryAfterMilliseconds(response.headers.get("retry-after"));
+            const retryAfter = retryAfterMilliseconds(
+              response.headers.get("retry-after"),
+            );
             await this.sleep(retryAfter ?? 250 * 2 ** attempt);
             continue;
           }
@@ -451,11 +472,115 @@ export class KodikService {
     return response.ok ? response.results : [];
   }
 
+  private async requestProviderMaterials(
+    params: KodikSearchParameters,
+  ): Promise<KodikMaterial[]> {
+    if (!this.enabled || !this.token) throw new KodikConfigurationError();
+    const serialized = Object.fromEntries(
+      Object.entries(params).flatMap(([key, value]) =>
+        value === undefined
+          ? []
+          : [[key, Array.isArray(value) ? value.join(",") : value]],
+      ),
+    ) as Record<string, string | number | boolean>;
+    const response = await this.requestSearch(serialized, false, true);
+    if (!response.ok) {
+      if (response.error === "NOT_FOUND") return [];
+      if (
+        response.error === "SCHEMA_MISMATCH" ||
+        response.error === "INVALID_JSON" ||
+        response.error === "INVALID_RESPONSE"
+      )
+        throw new KodikResponseError(
+          "Kodik returned an invalid response",
+          response.error,
+        );
+      throw new KodikRequestError(
+        "Kodik request failed",
+        response.status,
+        response.error,
+      );
+    }
+    const materials = response.results.map((result) =>
+      kodikMaterialSchema.safeParse(result),
+    );
+    const malformed = materials.find((result) => !result.success);
+    if (malformed && !malformed.success)
+      throw new KodikResponseError(
+        "Kodik material schema mismatch",
+        "SCHEMA_MISMATCH",
+      );
+    return materials.flatMap((result) => (result.success ? [result.data] : []));
+  }
+
+  private providerSearchParams(detailed: boolean): KodikSearchParameters {
+    return {
+      types: KODIK_ANIME_TYPES,
+      camrip: false,
+      limit: 100,
+      ...(detailed
+        ? {
+            with_seasons: true,
+            with_episodes: true,
+            with_episodes_data: true,
+          }
+        : {}),
+    };
+  }
+
+  private async resolveAnime(
+    input: KodikResolverInput,
+    detailed: boolean,
+  ): Promise<KodikAnimeSource | null> {
+    const common = this.providerSearchParams(detailed);
+    let fuzzyFallback: KodikAnimeSource | null = null;
+    if (input.shikimoriId !== undefined) {
+      const materials = await this.requestProviderMaterials({
+        ...common,
+        shikimori_id: input.shikimoriId,
+      });
+      const match = resolveKodikMaterials(materials, input, (value) =>
+        this.validateEmbedUrl(value),
+      );
+      if (match?.match === "EXACT_EXTERNAL_ID") return match;
+    }
+
+    for (const title of kodikTitleAttempts(input)) {
+      const materials = await this.requestProviderMaterials({
+        ...common,
+        title,
+        year: input.year,
+        strict: false,
+        full_match: false,
+        with_material_data: true,
+      });
+      const match = resolveKodikMaterials(materials, input, (value) =>
+        this.validateEmbedUrl(value),
+      );
+      if (match && match.match !== "FUZZY_TITLE") return match;
+      fuzzyFallback ??= match;
+    }
+    return fuzzyFallback;
+  }
+
+  async searchAnime(
+    input: KodikResolverInput,
+  ): Promise<KodikAnimeSource | null> {
+    return this.resolveAnime(input, false);
+  }
+
+  async getAnimePlaybackData(
+    input: KodikResolverInput,
+  ): Promise<KodikAnimeSource | null> {
+    return this.resolveAnime(input, true);
+  }
+
   private validateEmbedUrl(value: string): string | null {
     try {
       const normalized = value.startsWith("//") ? `https:${value}` : value;
       const url = new URL(normalized);
-      if (url.protocol !== "https:" || url.username || url.password) return null;
+      if (url.protocol !== "https:" || url.username || url.password)
+        return null;
       const host = url.hostname.toLowerCase();
       const allowed = [...this.allowedEmbedHosts].some(
         (candidate) => host === candidate || host.endsWith(`.${candidate}`),
@@ -550,7 +675,11 @@ export class KodikService {
       limit: 100,
     });
     for (const result of results) {
-      const link = this.episodeLink(result, input.seasonNumber, input.episodeNumber);
+      const link = this.episodeLink(
+        result,
+        input.seasonNumber,
+        input.episodeNumber,
+      );
       const embedUrl = link ? this.validateEmbedUrl(link) : null;
       if (embedUrl)
         return { embedUrl, translation: result.translation ?? null };
@@ -604,7 +733,11 @@ export class KodikService {
       };
 
     const exact = response.results.flatMap((result) => {
-      const link = this.episodeLink(result, input.seasonNumber, input.episodeNumber);
+      const link = this.episodeLink(
+        result,
+        input.seasonNumber,
+        input.episodeNumber,
+      );
       return link ? [{ result, link }] : [];
     });
     const accepted = exact.flatMap(({ link }) => {
@@ -619,7 +752,9 @@ export class KodikService {
         return [];
       }
     });
-    const releases = response.results.map((result) => this.normalizeRelease(result));
+    const releases = response.results.map((result) =>
+      this.normalizeRelease(result),
+    );
     return {
       ...base,
       requestStatus: "OK",

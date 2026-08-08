@@ -280,5 +280,5 @@ test("Kodik sends the confirmed shikimori_id parameter and never exposes token",
   assert.equal(parsed.searchParams.get("shikimori_id"), "38000");
   assert.equal(parsed.searchParams.get("token"), configured.token);
   assert.equal(JSON.stringify(logs).includes(configured.token), false);
-  assert.equal(sanitizeKodikUrl(requestedUrl), "https://kodikapi.com/search");
+  assert.equal(sanitizeKodikUrl(requestedUrl), "https://kodik-api.com/search");
 });

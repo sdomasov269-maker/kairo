@@ -37,13 +37,13 @@ export function AnimePageClientActions({
       {target ? (
         <Link
           className="button button-primary"
-          href={`/watch/${slug}/${target.episodeNumber}`}
+          href={`/anime/${slug}?season=${target.seasonNumber}&episode=${target.episodeNumber}#watch`}
         >
           <Play size={18} fill="currentColor" />
           {watchLabel}
         </Link>
       ) : (
-        <a className="button button-primary" href="#episodes">
+        <a className="button button-primary" href="#watch">
           <Play size={18} fill="currentColor" />
           {t.actions.watch}
         </a>

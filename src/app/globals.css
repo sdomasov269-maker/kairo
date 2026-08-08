@@ -25,6 +25,15 @@
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+.watch-party-panel { display: grid; gap: 0.75rem; padding: 1rem; border: 1px solid var(--line); border-radius: 1rem; background: var(--surface); }
+.watch-party-panel p, .watch-party-panel small { margin: 0; color: var(--dim); }
+.watch-party-code { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.watch-party-code span { color: var(--dim); font-size: 0.8rem; }
+.watch-party-code strong { letter-spacing: 0.16em; }
+.watch-party-members { display: flex; align-items: center; gap: 0.5rem; }
+.watch-party-panel .workspace-expand { display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; }
+.watch-party-panel svg { width: 1rem; height: 1rem; }
+
 * {
   box-sizing: border-box;
 }
@@ -2656,6 +2665,216 @@ main {
   border: 1px solid var(--line);
   border-radius: clamp(16px, 2vw, 28px);
   box-shadow: 0 40px 100px rgba(0, 0, 0, 0.35);
+}
+
+/* Unified anime viewing workspace. Device-specific composition lives in responsive layers. */
+.watch-workspace {
+  margin-inline: auto;
+}
+.watch-workspace-heading,
+.workspace-sidebar-title,
+.watch-comments > div:first-child {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.watch-workspace-heading {
+  margin-bottom: clamp(1.25rem, 2vw, 2rem);
+}
+.watch-workspace-heading h2,
+.watch-comments h2 {
+  margin: 0.25rem 0 0;
+  font-size: clamp(1.65rem, 2.4vw, 2.5rem);
+}
+.watch-workspace-heading > span {
+  color: var(--text-muted);
+}
+.watch-workspace-grid {
+  display: grid;
+  align-items: start;
+  gap: clamp(1rem, 1.7vw, 1.75rem);
+}
+.watch-workspace-player {
+  min-width: 0;
+}
+.watch-workspace-player .kairo-player {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: #020405;
+}
+.watch-workspace-sidebar {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+  padding: clamp(1rem, 1.4vw, 1.5rem);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  background: rgba(8, 13, 14, 0.78);
+}
+.workspace-field {
+  display: grid;
+  gap: 0.45rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.workspace-field select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  background: #0b1112;
+}
+.workspace-episodes {
+  min-width: 0;
+}
+.workspace-sidebar-title {
+  margin-bottom: 0.65rem;
+  font-weight: 600;
+}
+.workspace-sidebar-title small {
+  color: var(--text-muted);
+}
+.workspace-episode-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.45rem;
+  max-height: 17rem;
+  overflow-y: auto;
+  padding-right: 0.2rem;
+}
+.workspace-episode-grid button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.55rem;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.035);
+  cursor: pointer;
+  overflow: hidden;
+}
+.workspace-episode-grid button:hover:not(:disabled),
+.workspace-episode-grid button.is-current {
+  border-color: var(--accent);
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+}
+.workspace-episode-grid button:disabled {
+  opacity: 0.32;
+  cursor: not-allowed;
+}
+.workspace-episode-grid button svg {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  width: 0.7rem;
+  height: 0.7rem;
+  color: var(--accent);
+}
+.workspace-episode-grid button i {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: var(--accent);
+}
+.workspace-expand {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+  color: var(--text-muted);
+}
+.workspace-expand svg {
+  width: 1rem;
+  transition: transform 180ms ease;
+}
+.workspace-expand svg.is-open { transform: rotate(180deg); }
+.workspace-status {
+  display: grid;
+  gap: 0.2rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.workspace-status span,
+.workspace-status small { color: var(--text-muted); }
+.watch-comments {
+  margin-top: clamp(2rem, 4vw, 4rem);
+  padding: clamp(1.25rem, 2vw, 2rem);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  background: rgba(8, 13, 14, 0.5);
+}
+.watch-comments > p {
+  margin: 1rem 0 0;
+  color: var(--text-muted);
+}
+.comment-composer {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+.comment-composer textarea {
+  width: 100%;
+  resize: vertical;
+}
+.comment-composer > div,
+.comment-composer > small,
+.comment-list article header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.comment-composer label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+}
+.comment-list {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+.comment-list article {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  gap: 0.8rem;
+  padding: 1rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+.comment-list article.is-reply { margin-left: 3.25rem; }
+.comment-avatar {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--accent) 22%, #101617);
+}
+.comment-list time,
+.comment-reply { color: var(--text-muted); font-size: 0.8rem; }
+.comment-list article p { margin: 0.5rem 0; white-space: pre-wrap; }
+.comment-spoiler {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.05);
 }
 .kairo-player video {
   width: 100%;

@@ -13,6 +13,7 @@ import type { CatalogFilters, CatalogPageInfo } from "../catalog/types.ts";
 const ENDPOINT = "https://graphql.anilist.co";
 const TIMEOUT_MS = 7000;
 const MAX_ERROR_BODY_LENGTH = 2000;
+const isDevelopment = process.env.NODE_ENV === "development";
 
 const headers = {
   "Content-Type": "application/json",
@@ -49,15 +50,50 @@ function isNotFoundGraphQLError(message: string): boolean {
   return /(?:not found|no media)/i.test(message);
 }
 
+function operationName(query: string): string {
+  return query.match(/\b(?:query|mutation)\s+(\w+)/)?.[1] ?? "anonymous";
+}
+
+function safeGraphQLErrorMessage(payload: unknown): string | undefined {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload))
+    return undefined;
+  const errors = (payload as { errors?: unknown }).errors;
+  if (!Array.isArray(errors)) return undefined;
+  const messages = errors
+    .map((error) =>
+      error &&
+      typeof error === "object" &&
+      "message" in error &&
+      typeof error.message === "string"
+        ? error.message.slice(0, 300)
+        : null,
+    )
+    .filter((message): message is string => Boolean(message));
+  return messages.length ? messages.join("; ") : undefined;
+}
+
+function logAniList(event: string, details: Record<string, unknown>) {
+  if (isDevelopment) console.info(`[AniList] ${event}`, details);
+}
+
 async function request<T>(
   query: string,
   variables: Record<string, unknown>,
   revalidate = 86400,
 ): Promise<T | null> {
+  const operation = operationName(query);
+  const anilistId = typeof variables.id === "number" ? variables.id : undefined;
   for (let attempt = 0; attempt < 2; attempt += 1) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
     try {
+      logAniList("request", {
+        operation,
+        anilistId,
+        endpoint: ENDPOINT,
+        attempt: attempt + 1,
+        cache: `Next fetch revalidate=${revalidate}s`,
+      });
       const response = await fetch(ENDPOINT, {
         method: "POST",
         headers,
@@ -67,6 +103,13 @@ async function request<T>(
       });
       const responseBody = await response.text();
       const parsedResponseBody = parseResponseBody(responseBody);
+      logAniList("response", {
+        operation,
+        anilistId,
+        status: response.status,
+        ok: response.ok,
+        errorMessage: safeGraphQLErrorMessage(parsedResponseBody),
+      });
       if (!response.ok) {
         const retryable = isRetryableAniListStatus(response.status);
         if (attempt === 0 && retryable) {
@@ -122,6 +165,19 @@ async function request<T>(
       }
       return payload.data;
     } catch (error) {
+      logAniList("error", {
+        operation,
+        anilistId,
+        type: error instanceof Error ? error.name : typeof error,
+        status: error instanceof AniListRequestError ? error.status : null,
+        message:
+          error instanceof AniListRequestError
+            ? (safeGraphQLErrorMessage(error.parsedResponseBody) ??
+              error.message)
+            : error instanceof Error
+              ? error.message.slice(0, 300)
+              : "Unknown error",
+      });
       if (error instanceof AniListRequestError) {
         if (attempt === 0 && error.retryable) {
           await wait(300);

@@ -87,6 +87,9 @@
   .watch-information {
     width: calc(100% - var(--gutter) * 2);
   }
+  .watch-workspace-grid { grid-template-columns: minmax(0, 1fr); }
+  .watch-workspace-sidebar { padding: 1rem; }
+  .workspace-episode-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 }
 
 @media (max-width: 599px) {
@@ -103,6 +106,8 @@
   .collection-card { min-height: 250px; }
   .details-actions .button,
   .source-unavailable-actions .button { flex: 1 1 100%; }
+  .workspace-episode-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .comment-list article.is-reply { margin-left: 1rem; }
 }
 
 @media (max-width: 374px) {

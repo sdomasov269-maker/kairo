@@ -18,7 +18,7 @@ import {
   type EpisodeAvailability,
   type EpisodeMetadata,
 } from "@/domain/watch";
-import { kodikService } from "@/server/services/kodik.service";
+import { resolveKodikWatchPlayback } from "@/server/services/kodik-watch.service";
 
 type EpisodeRow = AnimeEpisode & {
   videoSources: AnimeVideoSource[];
@@ -258,6 +258,11 @@ export async function resolveWatchEpisode(input: {
   const anime = await prisma.anime.findUnique({
     where: { slug: input.slug },
     include: {
+      localizedTitles: {
+        where: { source: "SHIKIMORI" },
+        select: { externalId: true },
+      },
+      titleAliases: { select: { title: true } },
       animeSeasons: {
         where: { number: input.seasonNumber, isPublished: true },
         include: {
@@ -281,17 +286,34 @@ export async function resolveWatchEpisode(input: {
   if (index < 0) throw new WatchResolveError("EPISODE_NOT_FOUND");
   const episode = season.episodes[index];
   const databaseAvailability = getEpisodeAvailability(episode);
-  const kodikPlayback =
-    databaseAvailability === "NO_VIDEO" && anime.malId
-      ? await kodikService.getEpisodePlayback({
-          malId: anime.malId,
-          seasonNumber: season.number,
-          episodeNumber: episode.number,
-        })
-      : null;
+  const shikimoriId = anime.localizedTitles
+    .map((title) => Number(title.externalId))
+    .find((id) => Number.isSafeInteger(id) && id > 0);
+  const kodikPlayback = await resolveKodikWatchPlayback({
+    anilistId: anime.anilistId,
+    ...(anime.malId ? { malId: anime.malId } : {}),
+    ...(shikimoriId ? { shikimoriId } : {}),
+    ...(anime.year ? { year: anime.year } : {}),
+    titles: {
+      ...(anime.titleRussian ? { russian: anime.titleRussian } : {}),
+      ...(anime.titleEnglish ? { english: anime.titleEnglish } : {}),
+      ...(anime.titleRomaji ? { romaji: anime.titleRomaji } : {}),
+      ...(anime.titleNative ? { native: anime.titleNative } : {}),
+      aliases: [
+        ...anime.synonyms,
+        ...anime.synonymsRussian,
+        ...anime.synonymsUkrainian,
+        ...anime.titleAliases.map((alias) => alias.title),
+      ],
+    },
+    seasonNumber: season.number,
+    episodeNumber: episode.number,
+  });
   const availability: EpisodeAvailability = kodikPlayback
     ? "AVAILABLE"
-    : databaseAvailability;
+    : databaseAvailability === "COMING_SOON"
+      ? "COMING_SOON"
+      : "NO_VIDEO";
   const sources =
     databaseAvailability === "AVAILABLE"
       ? episode.videoSources

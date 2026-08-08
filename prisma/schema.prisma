@@ -64,6 +64,12 @@ enum AnimeVideoQuality {
   P2160
 }
 
+enum WatchPartyStatus {
+  ACTIVE
+  ENDED
+  EXPIRED
+}
+
 enum AnimeMediaProviderStatus {
   ACTIVE
   DEGRADED
@@ -88,6 +94,8 @@ model User {
   animeList     AnimeListEntry[]
   preferences   UserPreferences?
   resetTokens   PasswordResetToken[]
+  comments      Comment[]
+  hostedWatchParties WatchPartyRoom[]
 }
 
 model Account {
@@ -233,10 +241,54 @@ model Anime {
   animeSeasons       AnimeSeason[]
   animeEpisodes      AnimeEpisode[]
   mediaProviderLinks AnimeMediaProviderLink[]
+  comments           Comment[]
+  watchPartyRooms    WatchPartyRoom[]
 
   @@index([status, year])
   @@index([popularity])
   @@index([rating])
+}
+
+model Comment {
+  id            String    @id @default(cuid())
+  animeId       String
+  userId        String
+  parentId      String?
+  seasonNumber  Int?
+  episodeNumber Int?
+  body          String    @db.VarChar(2000)
+  spoiler       Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  anime         Anime     @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent        Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies       Comment[] @relation("CommentReplies")
+
+  @@index([animeId, createdAt])
+  @@index([userId])
+  @@index([parentId])
+}
+
+model WatchPartyRoom {
+  id            String           @id @default(cuid())
+  code          String           @unique @db.VarChar(6)
+  hostUserId    String
+  animeId       String
+  seasonNumber  Int?
+  episodeNumber Int?
+  translationId Int?
+  revision      Int              @default(0)
+  status        WatchPartyStatus @default(ACTIVE)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  expiresAt     DateTime
+  host          User             @relation(fields: [hostUserId], references: [id], onDelete: Cascade)
+  anime         Anime            @relation(fields: [animeId], references: [id], onDelete: Cascade)
+
+  @@index([hostUserId, status])
+  @@index([animeId, status])
+  @@index([status, expiresAt])
 }
 
 model AnimeSeason {

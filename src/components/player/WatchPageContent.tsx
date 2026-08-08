@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { PlayerLoader } from "./PlayerLoader";
 import { KairoUnavailablePlayer } from "./KairoUnavailablePlayer";
 import { useLocale } from "@/i18n";
 import type { WatchEpisode } from "@/data/watch/types";
@@ -10,32 +9,31 @@ import type { EpisodeMetadata } from "@/domain/watch/types";
 import type { Anime } from "@/types/media";
 import { getLocalizedAnimeTitle } from "@/lib/media-localization";
 import type { EpisodeAvailability } from "@/domain/watch";
-import { KodikEmbedPlayer } from "./KodikEmbedPlayer";
+import { KodikWatchPlayer } from "./kodik/KodikWatchPlayer";
+import type { KodikWatchPlaybackDto } from "./kodik/kodik-watch.types";
 
 export function WatchPageContent({
   anime,
   episode,
   episodes,
-  previousHref,
   nextHref,
   available,
   availability,
   availableAt,
   episodeAvailability,
   seasonNumber,
-  kodikEmbedUrl,
+  kodikPlayback,
 }: {
   anime: Anime;
   episode: WatchEpisode;
   episodes: EpisodeMetadata[];
-  previousHref?: string;
   nextHref?: string;
   available: boolean;
   availability: EpisodeAvailability;
   availableAt?: string;
   episodeAvailability: Record<string, EpisodeAvailability>;
   seasonNumber: number;
-  kodikEmbedUrl?: string;
+  kodikPlayback?: KodikWatchPlaybackDto | null;
 }) {
   const { locale, dictionary: t } = useLocale();
   const animeTitle = getLocalizedAnimeTitle(anime, locale);
@@ -62,18 +60,13 @@ export function WatchPageContent({
             {t.labels.episode} {episode.episodeNumber} · {episodeTitle}
           </h1>
         </div>
-        {available && kodikEmbedUrl ? (
-          <KodikEmbedPlayer
-            embedUrl={kodikEmbedUrl}
+        {available && kodikPlayback ? (
+          <KodikWatchPlayer
+            playback={kodikPlayback}
+            animeSlug={anime.slug}
+            seasonNumber={seasonNumber}
+            episodeNumber={episode.episodeNumber}
             title={`${animeTitle} — ${episodeTitle}`}
-          />
-        ) : available ? (
-          <PlayerLoader
-            episode={episode}
-            animeTitle={animeTitle}
-            animePoster={anime.bannerImage ?? anime.coverImageLarge}
-            previousHref={previousHref}
-            nextHref={nextHref}
           />
         ) : (
           <KairoUnavailablePlayer
