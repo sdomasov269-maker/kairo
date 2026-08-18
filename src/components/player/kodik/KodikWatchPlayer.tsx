@@ -124,6 +124,10 @@ export function KodikWatchPlayer({
         setDirectUnavailable(false);
       } catch (error) {
         if (controller.signal.aborted) return;
+        if (!forceRefresh) {
+          void loadDirectPlayback(true);
+          return;
+        }
         if (process.env.NODE_ENV === "development")
           console.warn("[Kairo player] Direct Kodik playback unavailable", error);
         setDirectUnavailable(true);
