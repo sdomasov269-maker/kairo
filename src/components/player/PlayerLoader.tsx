@@ -4,8 +4,8 @@ import dynamic from "next/dynamic";
 import type { WatchEpisode } from "@/data/watch/types";
 import type { KodikPlayerHandle } from "./kodik/kodik-player.types";
 
-const KairoPlayer = dynamic(
-  () => import("./KairoPlayer").then((module) => module.KairoPlayer),
+const HlsKairoPlayer = dynamic(
+  () => import("./HlsKairoPlayer").then((module) => module.HlsKairoPlayer),
   { ssr: false },
 );
 
@@ -26,5 +26,5 @@ export function PlayerLoader(props: {
   };
   onPlaybackError?: (reason?: "fatal" | "stall") => void;
 }) {
-  return <KairoPlayer {...props} />;
+  return <HlsKairoPlayer {...props} />;
 }
