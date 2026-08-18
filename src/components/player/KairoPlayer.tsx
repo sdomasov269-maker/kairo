@@ -566,11 +566,31 @@ export function KairoPlayer({
           timeout: 15_000,
         };
         player.configure({
+          abr: {
+            // Kodik renditions share six-second MPEG-TS boundaries. Avoid
+            // switching on every bandwidth sample, which can repeatedly
+            // reinitialize the decoder at those boundaries.
+            switchInterval: 20,
+            minTimeToSwitch: 12,
+            bandwidthUpgradeTarget: 0.7,
+            bandwidthDowngradeTarget: 0.95,
+            clearBufferSwitch: false,
+            safeMarginSwitch: 8,
+            droppedFrames: true,
+          },
           manifest: { retryParameters: networkRetry },
           streaming: {
             bufferingGoal: 30,
             rebufferingGoal: 6,
             bufferBehind: 30,
+            segmentPrefetchLimit: 2,
+            gapDetectionThreshold: 0.25,
+            gapJumpTimerTime: 0.1,
+            gapPadding: 0.01,
+            stallEnabled: true,
+            stallThreshold: 0.75,
+            stallSkip: 0.12,
+            shouldFixTimestampOffset: true,
             retryParameters: networkRetry,
           },
         });
