@@ -14,6 +14,7 @@ import { WatchComments } from "./WatchComments";
 import { useWatchParty } from "@/components/watch-party/useWatchParty";
 import { WatchPartyPanel } from "@/components/watch-party/WatchPartyPanel";
 import type { KodikPlayerHandle } from "@/components/player/kodik/kodik-player.types";
+import type { DirectPlayback } from "@/components/player/kodik/KodikWatchPlayer";
 import type { WatchPartyState } from "@/domain/watch-party/types";
 import { KairoDropdown } from "@/components/ui/KairoDropdown";
 import {
@@ -36,6 +37,7 @@ export function KairoWatchWorkspace({
   initialSeason,
   initialEpisode,
   initialRoomCode,
+  initialDirectPlayback,
 }: {
   animeSlug: string;
   animeId: string;
@@ -44,6 +46,10 @@ export function KairoWatchWorkspace({
   initialSeason?: number;
   initialEpisode?: number;
   initialRoomCode?: string;
+  initialDirectPlayback?: {
+    playerLink: string;
+    playback: DirectPlayback;
+  } | null;
 }) {
   const { progress } = useAccountData();
   const defaultTranslation =
@@ -203,6 +209,7 @@ export function KairoWatchWorkspace({
                 playerHandleRef.current = handle;
               }}
               partyEvents={party.playerEvents}
+              initialDirectPlayback={initialDirectPlayback}
               title={`${animeTitle} — ${data?.movie ? "фильм" : `серия ${episode}`}`}
             />
           ) : (
