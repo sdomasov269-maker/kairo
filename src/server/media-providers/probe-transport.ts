@@ -65,9 +65,7 @@ export type ProbeTransport = {
   request(
     url: string,
   ): Promise<{ evidence: ProbeResponseEvidence; body: string }>;
-  inspectTls(
-    url: string,
-  ): Promise<{
+  inspectTls(url: string): Promise<{
     authorized: boolean;
     protocol?: string;
     validTo?: string;

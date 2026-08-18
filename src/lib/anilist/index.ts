@@ -3,6 +3,7 @@ export {
   getAnimeByAniListId,
   getAnimeBySearch,
   getAnimeDiscovery,
+  getAiringScheduleRange,
   getRelatedAnime,
   searchAnimeCatalog,
 } from "./client";

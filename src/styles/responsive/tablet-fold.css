@@ -5,24 +5,42 @@
     --card-min: 164px;
     --card-max: 1fr;
   }
-  .desktop-nav { display: none; }
-  .menu-button { display: grid; }
+  .desktop-nav {
+    display: none;
+  }
+  .menu-button {
+    display: grid;
+  }
   .anime-grid,
-  .catalog-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .catalog-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
   .watch-information {
     grid-template-columns: minmax(0, 1fr) minmax(250px, 34%);
     gap: clamp(2rem, 5vw, 4rem);
   }
-  .watch-workspace-grid { grid-template-columns: minmax(0, 1fr); }
-  .watch-workspace-sidebar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .watch-workspace-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .watch-workspace-sidebar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
   .workspace-episodes,
-  .workspace-status { grid-column: 1 / -1; }
-  .workspace-episode-grid { grid-template-columns: repeat(10, minmax(0, 1fr)); }
+  .workspace-status {
+    grid-column: 1 / -1;
+  }
+  .workspace-episode-grid {
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+  }
 }
 
 /* Height is a secondary modifier; it never promotes landscape to desktop. */
 @media (orientation: landscape) and (max-height: 560px) and (max-width: 1023px) {
-  .watch-stage { padding-block: 0; }
+  .watch-stage {
+    padding-block: 0;
+  }
   .kairo-player,
-  .kodik-embed-player { max-height: 100dvh; }
+  .kodik-embed-player {
+    max-height: 100dvh;
+  }
 }

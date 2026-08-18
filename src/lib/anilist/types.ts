@@ -20,6 +20,7 @@ export interface AniListRelationEdge {
 export interface AniListMedia {
   id: number;
   type?: "ANIME" | "MANGA";
+  isAdult?: boolean;
   idMal: number | null;
   title: AniListTitle;
   description: string | null;
@@ -43,6 +44,12 @@ export interface AniListMedia {
   nextAiringEpisode: { airingAt: number; episode: number } | null;
   relations: { edges: AniListRelationEdge[] };
   trailer: { id: string; site: string; thumbnail: string | null } | null;
+}
+export interface AniListAiringSchedule {
+  id: number;
+  airingAt: number;
+  episode: number;
+  media: AniListMedia | null;
 }
 export interface AniListGraphQLError {
   message: string;

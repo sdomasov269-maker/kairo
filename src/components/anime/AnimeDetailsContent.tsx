@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState, type ReactNode } from "react";
 import { AnimeCard } from "./Cards";
+import { KairoWebGLSurface } from "@/components/effects/KairoWebGLSurface";
 import { DetailSectionHeading } from "./DetailSectionHeading";
 import { useLocale } from "@/i18n";
 import type { Anime } from "@/types/media";
@@ -382,11 +383,11 @@ export function AnimeDetailsContent({
       key: "related",
       title: t.labels.related,
       content: (
-        <div className="anime-grid related-grid">
+        <KairoWebGLSurface className="anime-grid related-grid">
           {related.map((item, index) => (
             <AnimeCard anime={item} index={index} key={item.id} />
           ))}
-        </div>
+        </KairoWebGLSurface>
       ),
     });
   }

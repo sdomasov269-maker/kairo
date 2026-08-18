@@ -4,9 +4,12 @@ import "../styles/responsive/base.css";
 import "../styles/responsive/mobile.css";
 import "../styles/responsive/tablet-fold.css";
 import "../styles/responsive/desktop.css";
+import "lenis/dist/lenis.css";
 import { LocaleProvider } from "@/i18n";
 import { SessionProvider } from "@/components/auth/SessionProvider";
 import { AppBackground } from "@/components/layout/AppBackground";
+import { Header } from "@/components/navigation/Header";
+import { KairoWebGLEnvironment } from "@/components/webgl/KairoWebGLEnvironment";
 import { siteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
@@ -34,7 +37,12 @@ export default function RootLayout({
       <body>
         <AppBackground />
         <LocaleProvider>
-          <SessionProvider>{children}</SessionProvider>
+          <SessionProvider>
+            <KairoWebGLEnvironment>
+              <Header />
+              <div className="global-page-content">{children}</div>
+            </KairoWebGLEnvironment>
+          </SessionProvider>
         </LocaleProvider>
       </body>
     </html>

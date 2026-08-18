@@ -18,9 +18,7 @@
   "paths": {
     "/accounts/otp/get": {
       "post": {
-        "tags": [
-          "Аккаунты.ОдноразовыеПароли"
-        ],
+        "tags": ["Аккаунты.ОдноразовыеПароли"],
         "summary": "Запрашивает OTP",
         "description": "Запрашиваем новый одноразовый пароль",
         "operationId": "53594955e6c7f55f3787b13c20118a94",
@@ -29,9 +27,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "required": [
-                  "device_id"
-                ],
+                "required": ["device_id"],
                 "properties": {
                   "device_id": {
                     "type": "string"
@@ -64,9 +60,7 @@
     },
     "/accounts/otp/accept": {
       "post": {
-        "tags": [
-          "Аккаунты.ОдноразовыеПароли"
-        ],
+        "tags": ["Аккаунты.ОдноразовыеПароли"],
         "summary": "Присоединяем пользователя к выданному OTP",
         "description": "Присоединяем пользователя к выданному одноразовому паролю",
         "operationId": "7fad0328b8acfe70c095adefd72c4612",
@@ -75,9 +69,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "required": [
-                  "code"
-                ],
+                "required": ["code"],
                 "properties": {
                   "code": {
                     "type": "integer"
@@ -111,9 +103,7 @@
     },
     "/accounts/otp/login": {
       "post": {
-        "tags": [
-          "Аккаунты.ОдноразовыеПароли"
-        ],
+        "tags": ["Аккаунты.ОдноразовыеПароли"],
         "summary": "Авторизуемся по OTP",
         "description": "Авторизуемся по выданному одноразовому паролю",
         "operationId": "790d35f354c43efd3523b84a80ead587",
@@ -122,10 +112,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "required": [
-                  "code",
-                  "device_id"
-                ],
+                "required": ["code", "device_id"],
                 "properties": {
                   "code": {
                     "type": "integer"
@@ -164,9 +151,7 @@
     },
     "/accounts/users/auth/login": {
       "post": {
-        "tags": [
-          "Аккаунты.Пользователи.Авторизация"
-        ],
+        "tags": ["Аккаунты.Пользователи.Авторизация"],
         "summary": "Авторизация пользователя",
         "description": "Авторизация пользователя по логину и паролю. Создание сессии пользователя, выдача токена авторизации для использования в cookies или в Bearer Token",
         "operationId": "14fa6a915a5b4509014a513e36168abd",
@@ -176,10 +161,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "required": [
-                  "login",
-                  "password"
-                ],
+                "required": ["login", "password"],
                 "properties": {
                   "login": {
                     "type": "string"
@@ -215,9 +197,7 @@
     },
     "/accounts/users/auth/social/{provider}/login": {
       "get": {
-        "tags": [
-          "Аккаунты.Пользователи.Авторизация.СоциальныеСети"
-        ],
+        "tags": ["Аккаунты.Пользователи.Авторизация.СоциальныеСети"],
         "summary": "Авторизация пользователя через социальные сети",
         "description": "Позволяет авторизовать пользователя через некоторые социальные сети",
         "operationId": "0095f8a8662997958527805d12c27324",
@@ -251,9 +231,7 @@
     },
     "/accounts/users/auth/social/authenticate": {
       "get": {
-        "tags": [
-          "Аккаунты.Пользователи.Авторизация.СоциальныеСети"
-        ],
+        "tags": ["Аккаунты.Пользователи.Авторизация.СоциальныеСети"],
         "summary": "Аутентифицировать пользователя через социальные сети",
         "description": "Позволяет аутентифицировать авторизованного через социальную сеть пользователя",
         "operationId": "42e1d4b7dc7676b933bcc6bf6a9109cf",
@@ -287,9 +265,7 @@
     },
     "/accounts/users/auth/logout": {
       "post": {
-        "tags": [
-          "Аккаунты.Пользователи.Авторизация"
-        ],
+        "tags": ["Аккаунты.Пользователи.Авторизация"],
         "summary": "Деавторизация пользователя",
         "description": "Деавторизовать пользователя",
         "operationId": "132d66679910512b70001a8bb5f25141",
@@ -317,9 +293,7 @@
     },
     "/accounts/users/auth/password/forget": {
       "post": {
-        "tags": [
-          "Аккаунты.Пользователи.Авторизация.Пароль"
-        ],
+        "tags": ["Аккаунты.Пользователи.Авторизация.Пароль"],
         "summary": "Восстановление пароля",
         "description": "Отправление ссылки на восстановление забытого пароля",
         "operationId": "d549714f7696a9126c11c3254303cbe8",
@@ -329,9 +303,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "required": [
-                  "email"
-                ],
+                "required": ["email"],
                 "properties": {
                   "email": {
                     "type": "string"
@@ -351,9 +323,7 @@
     },
     "/accounts/users/auth/password/reset": {
       "post": {
-        "tags": [
-          "Аккаунты.Пользователи.Авторизация.Пароль"
-        ],
+        "tags": ["Аккаунты.Пользователи.Авторизация.Пароль"],
         "summary": "Сброс и установка нового пароля",
         "description": "Сброс и установка нового пароля",
         "operationId": "96e405c4aad009c4c555165b0657b576",
@@ -363,11 +333,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "required": [
-                  "token",
-                  "password",
-                  "password_confirmation"
-                ],
+                "required": ["token", "password", "password_confirmation"],
                 "properties": {
                   "token": {
                     "type": "string"
@@ -399,9 +365,7 @@
     },
     "/accounts/users/me/collections/references/age-ratings": {
       "get": {
-        "tags": [
-          "Аккаунты.Пользователи.Мое.Коллекции.Справочники"
-        ],
+        "tags": ["Аккаунты.Пользователи.Мое.Коллекции.Справочники"],
         "summary": "Список возрастных рейтингов в коллекциях пользователя",
         "description": "Возвращает список возрастных рейтингов в коллекциях текущего пользователя",
         "operationId": "8b157a7586e3c56605e42d0d328ad854",
@@ -429,9 +393,7 @@
     },
     "/accounts/users/me/collections/references/genres": {
       "get": {
-        "tags": [
-          "Аккаунты.Пользователи.Мое.Коллекции.Справочники"
-        ],
+        "tags": ["Аккаунты.Пользователи.Мое.Коллекции.Справочники"],
         "summary": "Список жанров в коллекциях пользователя",
         "description": "Возвращает список жанров в коллекциях текущего пользователя",
         "operationId": "cdedb51df9d04015c63f820e18ae98d4",
@@ -459,9 +421,7 @@
     },
     "/accounts/users/me/collections/references/types": {
       "get": {
-        "tags": [
-          "Аккаунты.Пользователи.Мое.Коллекции.Справочники"
-        ],
+        "tags": ["Аккаунты.Пользователи.Мое.Коллекции.Справочники"],
         "summary": "Список типов в коллекциях пользователя",
         "description": "Возвращает список типов в коллекциях текущего пользователя",
         "operationId": "3bfa46759da920c8dfb3ab23f95b2b83",
@@ -489,9 +449,7 @@
     },
     "/accounts/users/me/collections/references/years": {
       "get": {
-        "tags": [
-          "Аккаунты.Пользователи.Мое.Коллекции.Справочники"
-        ],
+        "tags": ["Аккаунты.Пользователи.Мое.Коллекции.Справочники"],
         "summary": "Список годов в коллекциях пользователя",
         "description": "Возвращает список годов в коллекциях текущего пользователя",
         "operationId": "7adae426acd92ba3f282eb1cb38ce4c4",
@@ -519,9 +477,7 @@
     },
     "/accounts/users/me/collections/ids": {
       "get": {
-        "tags": [
-          "Аккаунты.Пользователи.Мое.Коллекции"
-        ],
+        "tags": ["Аккаунты.Пользователи.Мое.Коллекции"],
         "summary": "Список идентификаторов релизов добавленных в коллекции",
         "description": "Возвращает данные по идентификаторам релизов и типов коллекций авторизованного пользователя",
         "operationId": "3952a0264ef53d5cebaebac72b70ea2a",
@@ -552,9 +508,7 @@
     },
     "/accounts/users/me/collections/releases": {
       "get": {
-        "tags": [
-          "Аккаунты.Пользователи.Мое.Коллекции"
-        ],
+        "tags": ["Аккаунты.Пользователи.Мое.Коллекции"],
         "summary": "Список релизов добавленных в коллекцию [GET]",
         "description": "Возвращает данные по релизам из определенной коллекции авторизованного пользователя",
         "operationId": "ff552f54874b00625454339a7c989109",
@@ -654,9 +608,7 @@
         ]
       },
       "post": {
-        "tags": [
-          "Аккаунты.Пользователи.Мое.Коллекции"
-        ],
+        "tags": ["Аккаунты.Пользователи.Мое.Коллекции"],
         "summary": "Список релизов добавленных в коллекцию [POST]",
         "description": "Возвращает данные по релизам из определенной коллекции авторизованного пользователя",
         "operationId": "713f5e158bb307116510418108b79ab2",
@@ -745,9 +697,7 @@
     },
     "/accounts/users/me/collections": {
       "post": {
-        "tags": [
-          "Аккаунты.Пользователи.Мое.Коллекции"
-        ],
+        "tags": ["Аккаунты.Пользователи.Мое.Коллекции"],
         "summary": "Добавить релизы в коллекции",
         "description": "Добавляет релизы в соответствующие коллекции авторизованного пользователя",
         "operationId": "cfc448915a4cb9569951de2b0118db9d",
@@ -758,10 +708,7 @@
               "schema": {
                 "type": "array",
                 "items": {
-                  "required": [
-                    "release_id",
-                    "type_of_collection"
-                  ],
+                  "required": ["release_id", "type_of_collection"],
                   "properties": {
                     "release_id": {
                       "type": "number"
@@ -804,9 +751,7 @@
         ]
       },
       "delete": {
-        "tags": [
-          "Аккаунты.Пользователи.Мое.Коллекции"
-        ],
+        "tags": ["Аккаунты.Пользователи.Мое.Коллекции"],
         "summary": "Удалить релизы из коллекций",
         "description": "Удаляет релизы из соответствующих коллекций авторизованного пользователя",
         "operationId": "e7c7a8cb031577e009c11a5128c63191",
@@ -817,9 +762,7 @@
               "schema": {
                 "type": "array",
                 "items": {
-                  "required": [
-                    "release_id"
-                  ],
+                  "required": ["release_id"],
                   "properties": {
                     "release_id": {
                       "type": "number"
@@ -861,9 +804,7 @@
     },
     "/accounts/users/me/favorites/references/age-ratings": {
       "get": {
-        "tags": [
-          "Аккаунты.Пользователи.Мое.Избранное.Справочники"
-        ],
+        "tags": ["Аккаунты.Пользователи.Мое.Избранное.Справочники"],
         "summary": "Список возрастных рейтингов в избранном пользователя",
         "description": "Возвращает список возрастных рейтингов в избранном текущего пользователя",
         "operationId": "0079b1666727fca03a65def7b2882ce7",
@@ -891,9 +832,7 @@
     },
     "/accounts/users/me/favorites/references/genres": {
       "get": {
-        "tags": [
-          "Аккаунты.Пользователи.Мое.Избранное.Справочники"
-        ],
+        "tags": ["Аккаунты.Пользователи.Мое.Избранное.Справочники"],
         "summary": "Список жанров в избранном пользователя",
         "description": "Возвращает список жанров в избранном текущего пользователя",
         "operationId": "5714dc01fd354c98f2a92e9103f41df3",
@@ -921,9 +860,7 @@
     },
     "/accounts/users/me/favorites/references/sorting": {
       "get": {
-        "tags": [
-          "Аккаунты.Пользователи.Мое.Избранное.Справочники"
-        ],
+        "tags": ["Аккаунты.Пользователи.Мое.Избранное.Справочники"],
         "summary": "Список опций сортировки в избранном пользователя",
         "description": "Возвращает список опций сортировки в избранном текущего пользователя",
         "operationId": "4d9e1c473afa35932a2daf2715d7657c",
@@ -951,9 +888,7 @@
     },
     "/accounts/users/me/favorites/references/types": {
       "get": {
-        "tags": [
-          "Аккаунты.Пользователи.Мое.Избранное.Справочники"
-        ],
+        "tags": ["Аккаунты.Пользователи.Мое.Избранное.Справочники"],
         "summary": "Список типов релизов в избранном пользователя",
         "description": "Возвращает список типов релизов в избранном текущего пользователя",
         "operationId": "8c7dd07d3f58867144a0fd88482aadac",
@@ -981,9 +916,7 @@
     },
     "/accounts/users/me/favorites/references/years": {
       "get": {
-        "tags": [
-          "Аккаунты.Пользователи.Мое.Избранное.Справочники"
-        ],
+        "tags": ["Аккаунты.Пользователи.Мое.Избранное.Справочники"],
         "summary": "Список годов выхода релизов в избранном пользователя",
         "description": "Возвращает список годов выхода релизов в избранном текущего пользователя",
         "operationId": "da82e99bb7f630094ff8adb44cc9da5e",
@@ -1011,9 +944,7 @@
     },
     "/accounts/users/me/favorites/ids": {
       "get": {
-        "tags": [
-          "Аккаунты.Пользователи.Мое.Избранное"
-        ],
+        "tags": ["Аккаунты.Пользователи.Мое.Избранное"],
         "summary": "Список идентификаторов релизов добавленных в избранное",
         "description": "Возвращает данные по идентификаторам релизов из избранного авторизованного пользователя",
         "operationId": "4706b730c52b2dfad48751c7c10757dc",
@@ -1041,9 +972,7 @@
     },
     "/accounts/users/me/favorites/releases": {
       "get": {
-        "tags": [
-          "Аккаунты.Пользователи.Мое.Избранное"
-        ],
+        "tags": ["Аккаунты.Пользователи.Мое.Избранное"],
         "summary": "Список релизов в избранном пользователя",
         "description": "Возвращает данные по релизам из избранного текущего пользователя",
         "operationId": "5baafd8eec6b0a60ff67a4ac6038f4a9",
@@ -1143,9 +1072,7 @@
         ]
       },
       "post": {
-        "tags": [
-          "Аккаунты.Пользователи.Мое.Избранное"
-        ],
+        "tags": ["Аккаунты.Пользователи.Мое.Избранное"],
         "summary": "Список релизов в избранном пользователя",
         "description": "Возвращает данные по релизам из избранного текущего пользователя",
         "operationId": "89e379bb7614921658d8cbaa36b8cbdd",
@@ -1236,9 +1163,7 @@
     },
     "/accounts/users/me/favorites": {
       "post": {
-        "tags": [
-          "Аккаунты.Пользователи.Мое.Избранное"
-        ],
+        "tags": ["Аккаунты.Пользователи.Мое.Избранное"],
         "summary": "Добавить релизы в избранное",
         "description": "Добавляет релизы в избранное авторизованного пользователя",
         "operationId": "7050ee79698aa22d0b67d8d6a1ec5a3b",
@@ -1249,9 +1174,7 @@
               "schema": {
                 "type": "array",
                 "items": {
-                  "required": [
-                    "release_id"
-                  ],
+                  "required": ["release_id"],
                   "properties": {
                     "release_id": {
                       "type": "integer"
@@ -1285,9 +1208,7 @@
         ]
       },
       "delete": {
-        "tags": [
-          "Аккаунты.Пользователи.Мое.Избранное"
-        ],
+        "tags": ["Аккаунты.Пользователи.Мое.Избранное"],
         "summary": "Удалить релизы из избранного",
         "description": "Удаляет релизы из избранного авторизованного пользователя",
         "operationId": "1d04983f0ba43d7c0ad3be4bc567de1f",
@@ -1298,9 +1219,7 @@
               "schema": {
                 "type": "array",
                 "items": {
-                  "required": [
-                    "release_id"
-                  ],
+                  "required": ["release_id"],
                   "properties": {
                     "release_id": {
                       "type": "integer"
@@ -1336,9 +1255,7 @@
     },
     "/accounts/users/me/profile": {
       "get": {
-        "tags": [
-          "Аккаунты.Пользователи.Мое.Профиль"
-        ],
+        "tags": ["Аккаунты.Пользователи.Мое.Профиль"],
         "summary": "Профиль авторизованного пользователя",
         "description": "Возвращает данные профиля авторизованного пользователя",
         "operationId": "69fcaa197a8b8cf6c6a4b8dd655ff0f2",
@@ -1377,9 +1294,7 @@
     },
     "/accounts/users/me/views/history": {
       "get": {
-        "tags": [
-          "Аккаунты.Пользователи.Мое.Просмотры"
-        ],
+        "tags": ["Аккаунты.Пользователи.Мое.Просмотры"],
         "summary": "История просмотренных эпизодов",
         "description": "Возвращает историю просмотров эпизодов авторизованного пользователя",
         "operationId": "98e2d85bdf06f190dde743b204aacaa0",
@@ -1424,9 +1339,7 @@
     },
     "/accounts/users/me/views/timecodes": {
       "get": {
-        "tags": [
-          "Аккаунты.Пользователи.Мое.Просмотры"
-        ],
+        "tags": ["Аккаунты.Пользователи.Мое.Просмотры"],
         "summary": "Таймкоды просмотренных эпизодов",
         "description": "Возвращает таймкоды по прогрессу просмотренных эпизодов",
         "operationId": "8c43236d8913f7775c5c4781ed2a1aff",
@@ -1467,9 +1380,7 @@
         ]
       },
       "post": {
-        "tags": [
-          "Аккаунты.Пользователи.Мое.Просмотры"
-        ],
+        "tags": ["Аккаунты.Пользователи.Мое.Просмотры"],
         "summary": "Обновление таймкодов прогресса просмотренного эпизода",
         "description": "Обновляет таймкоды просмотренных эпизодов",
         "operationId": "de259a20def1fb0f5237f3f3ceb477ea",
@@ -1480,11 +1391,7 @@
               "schema": {
                 "type": "array",
                 "items": {
-                  "required": [
-                    "time",
-                    "is_watched",
-                    "release_episode_id"
-                  ],
+                  "required": ["time", "is_watched", "release_episode_id"],
                   "properties": {
                     "time": {
                       "type": "number"
@@ -1519,9 +1426,7 @@
         ]
       },
       "delete": {
-        "tags": [
-          "Аккаунты.Пользователи.Мое.Просмотры"
-        ],
+        "tags": ["Аккаунты.Пользователи.Мое.Просмотры"],
         "summary": "Удаление таймкодов просмотра эпизодов",
         "description": "Удаляет данные по таймкодам просмотров для указанных эпизодов",
         "operationId": "04d4073f12d50d4998b33ce7bbc94d8b",
@@ -1532,9 +1437,7 @@
               "schema": {
                 "type": "array",
                 "items": {
-                  "required": [
-                    "release_episode_id"
-                  ],
+                  "required": ["release_episode_id"],
                   "properties": {
                     "release_episode_id": {
                       "type": "string",
@@ -1565,9 +1468,7 @@
     },
     "/media/vasts": {
       "get": {
-        "tags": [
-          "Реклама.Vasts"
-        ],
+        "tags": ["Реклама.Vasts"],
         "summary": "Список возможных VAST реклам",
         "description": "Возвращает список со всеми доступными для использования VAST кампаниями",
         "operationId": "5ace32aaaadd1b77c3d172d6b952a502",
@@ -1587,9 +1488,7 @@
     },
     "/media/manifest.xml": {
       "get": {
-        "tags": [
-          "Реклама.Vasts"
-        ],
+        "tags": ["Реклама.Vasts"],
         "summary": "VAST XML с цепочкой реклам",
         "description": "Возвращает XML страницу со всеми доступными для использования VAST кампаниями. Можно просто отдавать этот URL в любой VAST плеер, который поддерживает загрузку vast XML по url",
         "operationId": "71b3eb0cca9e96d4fc48d0d77fa35eab",
@@ -1605,9 +1504,7 @@
     },
     "/anime/catalog/releases": {
       "get": {
-        "tags": [
-          "Аниме.Каталог"
-        ],
+        "tags": ["Аниме.Каталог"],
         "summary": "Список релизов в каталоге",
         "description": "Возвращает список релизов по заданными параметрам",
         "operationId": "deb730a26ed7580e04c822a12b782831",
@@ -1747,9 +1644,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Аниме.Каталог"
-        ],
+        "tags": ["Аниме.Каталог"],
         "summary": "Список релизов в каталоге",
         "description": "Возвращает список релизов по заданными параметрам",
         "operationId": "1774e330982ade57101c5af1a263b3ad",
@@ -1854,9 +1749,7 @@
     },
     "/anime/catalog/references/age-ratings": {
       "get": {
-        "tags": [
-          "Аниме.Каталог.Справочники"
-        ],
+        "tags": ["Аниме.Каталог.Справочники"],
         "summary": "Список возрастных рейтингов в каталоге",
         "description": "Возвращает список возможных возрастных рейтингов в каталоге",
         "operationId": "7ccd6ec065f6a366883534288e06b946",
@@ -1876,9 +1769,7 @@
     },
     "/anime/catalog/references/genres": {
       "get": {
-        "tags": [
-          "Аниме.Каталог.Справочники"
-        ],
+        "tags": ["Аниме.Каталог.Справочники"],
         "summary": "Список жанров в каталоге",
         "description": "Возвращает список всех жанров в каталоге",
         "operationId": "0849587143559ca91b030ecce1b78924",
@@ -1898,9 +1789,7 @@
     },
     "/anime/catalog/references/production-statuses": {
       "get": {
-        "tags": [
-          "Аниме.Каталог.Справочники"
-        ],
+        "tags": ["Аниме.Каталог.Справочники"],
         "summary": "Список возможных статусов озвучки релиза в каталоге",
         "description": "Возвращает список возможных статусов озвучки релиза в каталоге",
         "operationId": "48840b125443cfd04e9def7e82332c74",
@@ -1920,9 +1809,7 @@
     },
     "/anime/catalog/references/publish-statuses": {
       "get": {
-        "tags": [
-          "Аниме.Каталог.Справочники"
-        ],
+        "tags": ["Аниме.Каталог.Справочники"],
         "summary": "Список возможных статусов выхода релиза в каталоге",
         "description": "Возвращает список возможных статусов выхода релиза в каталоге",
         "operationId": "b05b5536b808dab15831b8ceb0b07b3e",
@@ -1942,9 +1829,7 @@
     },
     "/anime/catalog/references/seasons": {
       "get": {
-        "tags": [
-          "Аниме.Каталог.Справочники"
-        ],
+        "tags": ["Аниме.Каталог.Справочники"],
         "summary": "Список сезонов релиза в каталоге",
         "description": "Возвращает список возможных сезонов релизов в каталоге",
         "operationId": "02c7342e6e3681bd3e68185ed969aef2",
@@ -1964,9 +1849,7 @@
     },
     "/anime/catalog/references/sorting": {
       "get": {
-        "tags": [
-          "Аниме.Каталог.Справочники"
-        ],
+        "tags": ["Аниме.Каталог.Справочники"],
         "summary": "Список возможных типов сортировок в каталоге",
         "description": "Возвращает список возможных типов сортировок в каталоге",
         "operationId": "7d515de59290b809d09c1e61804c7dfd",
@@ -1986,9 +1869,7 @@
     },
     "/anime/catalog/references/types": {
       "get": {
-        "tags": [
-          "Аниме.Каталог.Справочники"
-        ],
+        "tags": ["Аниме.Каталог.Справочники"],
         "summary": "Список типов релизов в каталоге",
         "description": "Возвращает список возможных типов релизов в каталоге",
         "operationId": "00815d61be831012848cb3f964a73701",
@@ -2008,9 +1889,7 @@
     },
     "/anime/catalog/references/years": {
       "get": {
-        "tags": [
-          "Аниме.Каталог.Справочники"
-        ],
+        "tags": ["Аниме.Каталог.Справочники"],
         "summary": "Список годов в каталоге",
         "description": "Возвращает список годов в каталоге",
         "operationId": "107dd05a40cd2fcfb05ce6f2c9e587b8",
@@ -2030,9 +1909,7 @@
     },
     "/anime/franchises": {
       "get": {
-        "tags": [
-          "Аниме.Франшизы"
-        ],
+        "tags": ["Аниме.Франшизы"],
         "summary": "Получить список франшиз",
         "description": "Возвращает список франшиз.",
         "operationId": "4bfab3225e23cca7cce5c8e932d261be",
@@ -2060,9 +1937,7 @@
     },
     "/anime/franchises/{franchiseId}": {
       "get": {
-        "tags": [
-          "Аниме.Франшизы"
-        ],
+        "tags": ["Аниме.Франшизы"],
         "summary": "Получить франшизу",
         "description": "Возвращает данные франшизы",
         "operationId": "70ff1847fe22225d4cae12ad31075057",
@@ -2099,9 +1974,7 @@
     },
     "/anime/franchises/random": {
       "get": {
-        "tags": [
-          "Аниме.Франшизы"
-        ],
+        "tags": ["Аниме.Франшизы"],
         "summary": "Получить список случайных франшиз",
         "description": "Возвращает список случайных франшиз.",
         "operationId": "8cad50ab682ef2cb29271df2ba543628",
@@ -2138,9 +2011,7 @@
     },
     "/anime/franchises/release/{releaseId}": {
       "get": {
-        "tags": [
-          "Аниме.Франшизы"
-        ],
+        "tags": ["Аниме.Франшизы"],
         "summary": "Получить список франшиз для релиза",
         "description": "Возвращает список франшиз, в которых участвует релиз",
         "operationId": "d27fdeccbad6ce91c882fd615561a4ad",
@@ -2177,9 +2048,7 @@
     },
     "/anime/genres": {
       "get": {
-        "tags": [
-          "Аниме.Жанры"
-        ],
+        "tags": ["Аниме.Жанры"],
         "summary": "Список всех жанров",
         "description": "Возвращает список всех жанров",
         "operationId": "c674398f4cecb9b21a2d7743b16bd4d5",
@@ -2207,9 +2076,7 @@
     },
     "/anime/genres/{genreId}": {
       "get": {
-        "tags": [
-          "Аниме.Жанры"
-        ],
+        "tags": ["Аниме.Жанры"],
         "summary": "Данные по жанру",
         "description": "Возвращает данные по жанру",
         "operationId": "8276762d056f3ccc731848b30a89dc7a",
@@ -2243,9 +2110,7 @@
     },
     "/anime/genres/random": {
       "get": {
-        "tags": [
-          "Аниме.Жанры"
-        ],
+        "tags": ["Аниме.Жанры"],
         "summary": "Список случайных жанров",
         "description": "Возвращает список случайных жанров",
         "operationId": "9822b098b63cec6ffbd72c091251d9d1",
@@ -2279,9 +2144,7 @@
     },
     "/anime/genres/{genreId}/releases": {
       "get": {
-        "tags": [
-          "Аниме.Жанры"
-        ],
+        "tags": ["Аниме.Жанры"],
         "summary": "Список релизов жанра",
         "description": "Возвращает список всех релизов жанра",
         "operationId": "3e7da8fb153756860d8739524f021926",
@@ -2324,9 +2187,7 @@
     },
     "/anime/releases/latest": {
       "get": {
-        "tags": [
-          "Аниме.Релизы"
-        ],
+        "tags": ["Аниме.Релизы"],
         "summary": "Последние релизы",
         "description": "Возвращает данные по последним релизам",
         "operationId": "da7be4d3e8d38a49fcf71358df5c0a76",
@@ -2366,9 +2227,7 @@
     },
     "/anime/releases/random": {
       "get": {
-        "tags": [
-          "Аниме.Релизы"
-        ],
+        "tags": ["Аниме.Релизы"],
         "summary": "Данные по случайным релизам",
         "description": "Возвращает данные по случайным релизам",
         "operationId": "9eb40a19816cdbb7621cb40d6c8eef3b",
@@ -2405,9 +2264,7 @@
     },
     "/anime/releases/recommended": {
       "get": {
-        "tags": [
-          "Аниме.Релизы"
-        ],
+        "tags": ["Аниме.Релизы"],
         "summary": "Данные по рекомендованным релизам",
         "description": "Возвращает данные по рекомендованным релизам",
         "operationId": "990d70067d30af5eda130e840fcef7ac",
@@ -2456,9 +2313,7 @@
     },
     "/anime/releases/list": {
       "get": {
-        "tags": [
-          "Аниме.Релизы"
-        ],
+        "tags": ["Аниме.Релизы"],
         "summary": "Данные по списку релизов",
         "description": "Возвращает данные по списку релизов",
         "operationId": "6efff710532e9015d91227fdb616faeb",
@@ -2521,9 +2376,7 @@
     },
     "/anime/releases/{idOrAlias}": {
       "get": {
-        "tags": [
-          "Аниме.Релизы"
-        ],
+        "tags": ["Аниме.Релизы"],
         "summary": "Данные по релизу",
         "description": "Возвращает данные по релизу",
         "operationId": "1a04f3ab108f6960aacb815ecabe29d2",
@@ -2560,9 +2413,7 @@
     },
     "/anime/releases/{idOrAlias}/members": {
       "get": {
-        "tags": [
-          "Аниме.Релизы"
-        ],
+        "tags": ["Аниме.Релизы"],
         "summary": "Список участников, которые работали над релизом",
         "description": "Возвращает данные по участникам релиза",
         "operationId": "073e49978330ed579e84cc9deb3ba3e6",
@@ -2599,9 +2450,7 @@
     },
     "/anime/releases/{idOrAlias}/episodes/timecodes": {
       "get": {
-        "tags": [
-          "Аниме.Релизы"
-        ],
+        "tags": ["Аниме.Релизы"],
         "summary": "Данные по таймкодам просмотра эпизодов релиза",
         "description": "Возвращает данные по всем существующим таймкодам просмотра эпизодов релиза. Имеет 1-2-x минутный кэш.",
         "operationId": "ca61988f225283fc8a0db99f4f4cfab4",
@@ -2646,9 +2495,7 @@
     },
     "/anime/releases/episodes/{releaseEpisodeId}": {
       "get": {
-        "tags": [
-          "Аниме.Релизы.Эпизоды"
-        ],
+        "tags": ["Аниме.Релизы.Эпизоды"],
         "summary": "Данные по эпизоду",
         "description": "Возвращает данные по эпизоду",
         "operationId": "d5f0cbb2ce401655a7af10ca7b50eb41",
@@ -2685,9 +2532,7 @@
     },
     "/anime/releases/episodes/{releaseEpisodeId}/timecode": {
       "get": {
-        "tags": [
-          "Аниме.Релизы.Эпизоды"
-        ],
+        "tags": ["Аниме.Релизы.Эпизоды"],
         "summary": "Данные по просмотру эпизода",
         "description": "Возвращает данные по просмотру указанного эпизода авторизованным пользователем. Имеет 1-2-x минутный кэш.",
         "operationId": "3983ade6cbabc60d428294310a365755",
@@ -2732,9 +2577,7 @@
     },
     "/anime/schedule/now": {
       "get": {
-        "tags": [
-          "Аниме.Релизы.РасписаниеРелизов"
-        ],
+        "tags": ["Аниме.Релизы.РасписаниеРелизов"],
         "summary": "Данные по расписанию релизов на текущую дату",
         "description": "Возвращает список релизов в расписании на текущую дату",
         "operationId": "2050390fd4fc22b85e05f08f5d9fdf4c",
@@ -2762,9 +2605,7 @@
     },
     "/anime/schedule/week": {
       "get": {
-        "tags": [
-          "Аниме.Релизы.РасписаниеРелизов"
-        ],
+        "tags": ["Аниме.Релизы.РасписаниеРелизов"],
         "summary": "Данные по расписанию релизов на текущую неделю",
         "description": "Возвращает список релизов в расписании на текущую неделю",
         "operationId": "210dca9590f9b5be1dbef022cdb2221d",
@@ -2792,9 +2633,7 @@
     },
     "/anime/torrents": {
       "get": {
-        "tags": [
-          "Аниме.Торренты"
-        ],
+        "tags": ["Аниме.Торренты"],
         "summary": "Данные по торрентам",
         "description": "Возвращает данные по последним торрентам",
         "operationId": "fcca810f1ea3f9fbd7de393b7a6ccd1b",
@@ -2831,9 +2670,7 @@
     },
     "/anime/torrents/{hashOrId}": {
       "get": {
-        "tags": [
-          "Аниме.Торренты"
-        ],
+        "tags": ["Аниме.Торренты"],
         "summary": "Данные по торренту",
         "description": "Возвращает данные по торренту",
         "operationId": "a55686f9bd5cdcaf372a85f3ec2fc65c",
@@ -2873,9 +2710,7 @@
     },
     "/anime/torrents/{hashOrId}/file": {
       "get": {
-        "tags": [
-          "Аниме.Торренты"
-        ],
+        "tags": ["Аниме.Торренты"],
         "summary": "Торрент-файл по его hash или id",
         "description": "Возвращает торрент-файл",
         "operationId": "0d2789b05c70d7a360902559c116e4b4",
@@ -2914,9 +2749,7 @@
     },
     "/anime/torrents/release/{releaseId}": {
       "get": {
-        "tags": [
-          "Аниме.Торренты"
-        ],
+        "tags": ["Аниме.Торренты"],
         "summary": "Данные по торрентам для релиза",
         "description": "Возвращает данные по торрентам релиза",
         "operationId": "520cfcb16987b608d2965d42df8d3010",
@@ -2956,9 +2789,7 @@
     },
     "/anime/torrents/rss": {
       "get": {
-        "tags": [
-          "Аниме.Торренты"
-        ],
+        "tags": ["Аниме.Торренты"],
         "summary": "RSS лента последних торрентов",
         "description": "Возвращает данные по последним торрентам в виде XML документа",
         "operationId": "530df7fab8c5f401c1827acf9de7a991",
@@ -2994,9 +2825,7 @@
     },
     "/anime/torrents/rss/release/{releaseId}": {
       "get": {
-        "tags": [
-          "Аниме.Торренты"
-        ],
+        "tags": ["Аниме.Торренты"],
         "summary": "RSS лента торрентов релиза",
         "description": "Возвращает данные по торрентам релиза в виде RSS ленты",
         "operationId": "b0a67aeaf4fb4d0e67b47452c1f71161",
@@ -3032,9 +2861,7 @@
     },
     "/app/search/releases": {
       "get": {
-        "tags": [
-          "Приложение.Поиск"
-        ],
+        "tags": ["Приложение.Поиск"],
         "summary": "Поиск релизов",
         "description": "Возвращает данные по релизам, которые удовлетворяют поисковому запросу",
         "operationId": "bdc9c56b8c4464f3629eaccabac8db20",
@@ -3071,9 +2898,7 @@
     },
     "/app/status": {
       "get": {
-        "tags": [
-          "Приложение.Статус"
-        ],
+        "tags": ["Приложение.Статус"],
         "summary": "Статус API",
         "description": "Возвращает информацию о статусе API",
         "operationId": "5523c4a4ef98641efa267e67891c7762",
@@ -3093,9 +2918,7 @@
     },
     "/media/promotions": {
       "get": {
-        "tags": [
-          "Медиа.Промо"
-        ],
+        "tags": ["Медиа.Промо"],
         "summary": "Список промо-материалов",
         "description": "Возвращает список промо-материалов или рекламные кампании в случайном порядке",
         "operationId": "a9e450153c7cb6120c51bb4737c830f8",
@@ -3123,9 +2946,7 @@
     },
     "/media/videos": {
       "get": {
-        "tags": [
-          "Медиа.Видеоконтент"
-        ],
+        "tags": ["Медиа.Видеоконтент"],
         "summary": "Список видео-роликов",
         "description": "Возвращает список последних видео-роликов",
         "operationId": "13324a2b1d96abfe1fbb72686b164afd",
@@ -3162,9 +2983,7 @@
     },
     "/teams/": {
       "get": {
-        "tags": [
-          "Команды"
-        ],
+        "tags": ["Команды"],
         "summary": "Список команд АниЛибрии",
         "description": "Возвращает список всех команд",
         "operationId": "b8116e18f2ffc250bda35faa120bbe2d",
@@ -3192,9 +3011,7 @@
     },
     "/teams/roles": {
       "get": {
-        "tags": [
-          "Команды"
-        ],
+        "tags": ["Команды"],
         "summary": "Список ролей",
         "description": "Возвращает список всех ролей в командах",
         "operationId": "a9c6af5eb738ffb0b0ffe2827ab8a66a",
@@ -3222,9 +3039,7 @@
     },
     "/teams/users": {
       "get": {
-        "tags": [
-          "Команды"
-        ],
+        "tags": ["Команды"],
         "summary": "Список анилибрийцов",
         "description": "Возвращает список всех анилибрийцов с указанием команды и своих ролей",
         "operationId": "7595de64ca791916074cb8c193a21604",
@@ -3378,24 +3193,13 @@
       "enums.accounts.users.user.social.type": {
         "title": "enums.accounts.users.user.social.type",
         "type": "string",
-        "enum": [
-          "vk",
-          "google",
-          "patreon",
-          "discord"
-        ]
+        "enum": ["vk", "google", "patreon", "discord"]
       },
       "enums.accounts.users.user.collection.type": {
         "title": "enums.accounts.users.user.collection.type",
         "description": "Тип коллекции",
         "type": "string",
-        "enum": [
-          "PLANNED",
-          "WATCHED",
-          "WATCHING",
-          "POSTPONED",
-          "ABANDONED"
-        ]
+        "enum": ["PLANNED", "WATCHED", "WATCHING", "POSTPONED", "ABANDONED"]
       },
       "enums.accounts.users.user.favorite.filter.sorting": {
         "title": "enums.accounts.users.user.favorite.filter.sorting",
@@ -3977,10 +3781,7 @@
         "title": "enums.ads.banner.placement",
         "description": "Позиции размещения рекламных баннеров",
         "type": "string",
-        "enum": [
-          "HOME_SUPPORT",
-          "RELEASE_SIDEBAR"
-        ]
+        "enum": ["HOME_SUPPORT", "RELEASE_SIDEBAR"]
       },
       "models.ads.banners.v1.banner": {
         "title": "models.ads.banners.v1.banner",
@@ -4070,18 +3871,12 @@
       "enums.anime.catalog.filter.productionStatus": {
         "title": "enums.anime.catalog.filter.productionStatus",
         "type": "string",
-        "enum": [
-          "IS_IN_PRODUCTION",
-          "IS_NOT_IN_PRODUCTION"
-        ]
+        "enum": ["IS_IN_PRODUCTION", "IS_NOT_IN_PRODUCTION"]
       },
       "enums.anime.catalog.filter.publishStatus": {
         "title": "enums.anime.catalog.filter.publishStatus",
         "type": "string",
-        "enum": [
-          "IS_ONGOING",
-          "IS_NOT_ONGOING"
-        ]
+        "enum": ["IS_ONGOING", "IS_NOT_ONGOING"]
       },
       "enums.anime.catalog.filter.sorting": {
         "title": "enums.anime.catalog.filter.sorting",
@@ -4466,50 +4261,22 @@
       "enums.anime.releases.release.ageRating": {
         "title": "enums.anime.releases.release.ageRating",
         "type": "string",
-        "enum": [
-          "R0_PLUS",
-          "R6_PLUS",
-          "R12_PLUS",
-          "R16_PLUS",
-          "R18_PLUS"
-        ]
+        "enum": ["R0_PLUS", "R6_PLUS", "R12_PLUS", "R16_PLUS", "R18_PLUS"]
       },
       "enums.anime.releases.release.publishDay": {
         "title": "enums.anime.releases.release.publishDay",
         "type": "integer",
-        "enum": [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ]
+        "enum": [1, 2, 3, 4, 5, 6, 7]
       },
       "enums.anime.releases.release.season": {
         "title": "enums.anime.releases.release.season",
         "type": "string",
-        "enum": [
-          "winter",
-          "spring",
-          "summer",
-          "autumn"
-        ]
+        "enum": ["winter", "spring", "summer", "autumn"]
       },
       "enums.anime.releases.release.type": {
         "title": "enums.anime.releases.release.type",
         "type": "string",
-        "enum": [
-          "TV",
-          "ONA",
-          "WEB",
-          "OVA",
-          "OAD",
-          "MOVIE",
-          "DORAMA",
-          "SPECIAL"
-        ]
+        "enum": ["TV", "ONA", "WEB", "OVA", "OAD", "MOVIE", "DORAMA", "SPECIAL"]
       },
       "enums.anime.releases.release.member.role": {
         "title": "enums.anime.releases.release.member.role",
@@ -5139,36 +4906,19 @@
         "title": "enums.anime.torrents.torrent.codec",
         "description": "Список возможных значений кодека видеодорожки в торренте",
         "type": "string",
-        "enum": [
-          "AV1",
-          "x264/AVC",
-          "x265/HEVC",
-          "x265hq/HEVC-HQ"
-        ]
+        "enum": ["AV1", "x264/AVC", "x265/HEVC", "x265hq/HEVC-HQ"]
       },
       "enums.anime.torrents.torrent.color": {
         "title": "enums.anime.torrents.torrent.color",
         "description": "Список возможных значений глубины цвета видеодорожки",
         "type": "string",
-        "enum": [
-          "8bit",
-          "10Bit"
-        ]
+        "enum": ["8bit", "10Bit"]
       },
       "enums.anime.torrents.torrent.quality": {
         "title": "enums.anime.torrents.torrent.quality",
         "description": "Список возможных значений качества видео в торренте",
         "type": "string",
-        "enum": [
-          "360p",
-          "480p",
-          "576p",
-          "720p",
-          "1080p",
-          "2k",
-          "4k",
-          "8k"
-        ]
+        "enum": ["360p", "480p", "576p", "720p", "1080p", "2k", "4k", "8k"]
       },
       "enums.anime.torrents.torrent.type": {
         "title": "enums.anime.torrents.torrent.type",
@@ -5190,9 +4940,7 @@
         "title": "enums.anime.torrents.torrentMember.role",
         "description": "Список ролей участников торрента",
         "type": "string",
-        "enum": [
-          "HEVC"
-        ]
+        "enum": ["HEVC"]
       },
       "responses.api.v1.anime.torrents": {
         "properties": {
@@ -5606,9 +5354,7 @@
         "title": "enums.media.videos.video.origin.type",
         "description": "Перечисление типов источников видео",
         "type": "string",
-        "enum": [
-          "YOUTUBE_PLAYLIST"
-        ]
+        "enum": ["YOUTUBE_PLAYLIST"]
       },
       "responses.v1.media.videos": {
         "title": "responses.v1.media.videos",

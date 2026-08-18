@@ -2,8 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { KodikService, sanitizeKodikUrl } from "./kodik.service.ts";
 
-const jsonResponse = (body: unknown, status = 200, headers?: HeadersInit) =>
-  async () => Response.json(body, { status, headers });
+const jsonResponse =
+  (body: unknown, status = 200, headers?: HeadersInit) =>
+  async () =>
+    Response.json(body, { status, headers });
 
 const configured = {
   token: "never-print-this-token",
@@ -23,7 +25,11 @@ test("Kodik stays inert until explicitly configured", async () => {
     }) as typeof fetch,
   });
   assert.equal(
-    await service.getEpisodePlayback({ malId: 1, seasonNumber: 1, episodeNumber: 1 }),
+    await service.getEpisodePlayback({
+      malId: 1,
+      seasonNumber: 1,
+      episodeNumber: 1,
+    }),
     null,
   );
   assert.equal(calls, 0);
@@ -61,7 +67,11 @@ test("Kodik resolves an allowlisted HTTPS episode and normalizes translations", 
     }) as typeof fetch,
   });
   assert.deepEqual(
-    await service.getEpisodePlayback({ malId: 1, seasonNumber: 1, episodeNumber: 2 }),
+    await service.getEpisodePlayback({
+      malId: 1,
+      seasonNumber: 1,
+      episodeNumber: 2,
+    }),
     {
       embedUrl: "https://kodik.info/episode/2",
       translation: { id: "7", title: "Dub", type: null },
@@ -201,11 +211,14 @@ test("Kodik distinguishes invalid JSON, content type and schema mismatch", async
     {
       expected: "INVALID_JSON",
       fetchImpl: async () =>
-        new Response("not-json", { headers: { "content-type": "application/json" } }),
+        new Response("not-json", {
+          headers: { "content-type": "application/json" },
+        }),
     },
     {
       expected: "UNEXPECTED_CONTENT_TYPE",
-      fetchImpl: async () => new Response("<html />", { headers: { "content-type": "text/html" } }),
+      fetchImpl: async () =>
+        new Response("<html />", { headers: { "content-type": "text/html" } }),
     },
     {
       expected: "SCHEMA_MISMATCH",
@@ -254,7 +267,11 @@ test("Kodik rejects malformed, non-HTTPS and unexpected embed hosts", async () =
       fetchImpl: jsonResponse({ results: [{ link }] }) as typeof fetch,
     });
     assert.equal(
-      await service.getEpisodePlayback({ malId: 1, seasonNumber: 1, episodeNumber: 1 }),
+      await service.getEpisodePlayback({
+        malId: 1,
+        seasonNumber: 1,
+        episodeNumber: 1,
+      }),
       null,
     );
   }
@@ -275,7 +292,11 @@ test("Kodik sends the confirmed shikimori_id parameter and never exposes token",
       return Response.json({ results: [] });
     }) as typeof fetch,
   });
-  await service.diagnoseEpisode({ malId: 38_000, seasonNumber: 1, episodeNumber: 1 });
+  await service.diagnoseEpisode({
+    malId: 38_000,
+    seasonNumber: 1,
+    episodeNumber: 1,
+  });
   const parsed = new URL(requestedUrl);
   assert.equal(parsed.searchParams.get("shikimori_id"), "38000");
   assert.equal(parsed.searchParams.get("token"), configured.token);

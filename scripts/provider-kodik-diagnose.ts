@@ -1,5 +1,8 @@
 import { PrismaClient } from "@prisma/client";
-import { KodikService, type KodikSearchStatus } from "../src/server/services/kodik.service.ts";
+import {
+  KodikService,
+  type KodikSearchStatus,
+} from "../src/server/services/kodik.service.ts";
 
 const prisma = new PrismaClient();
 const args = new Map(
@@ -10,16 +13,21 @@ const args = new Map(
 );
 
 const positiveInteger = (name: string, fallback?: number) => {
-  const raw = args.get(name) ?? (fallback === undefined ? undefined : String(fallback));
+  const raw =
+    args.get(name) ?? (fallback === undefined ? undefined : String(fallback));
   const value = Number(raw);
   if (!Number.isSafeInteger(value) || value < 1)
     throw new Error(`--${name} must be a positive integer`);
   return value;
 };
 
-const selectors = ["anime-id", "anilist-id", "shikimori-id", "mal-id", "title"].filter(
-  (name) => args.has(name),
-);
+const selectors = [
+  "anime-id",
+  "anilist-id",
+  "shikimori-id",
+  "mal-id",
+  "title",
+].filter((name) => args.has(name));
 
 type LocalAnime = {
   id: string;
@@ -53,14 +61,21 @@ const animeSelect = {
 
 async function resolveLocalAnime(): Promise<LocalAnime | null> {
   if (args.has("anime-id"))
-    return prisma.anime.findUnique({ where: { id: args.get("anime-id") }, select: animeSelect });
+    return prisma.anime.findUnique({
+      where: { id: args.get("anime-id") },
+      select: animeSelect,
+    });
   if (args.has("anilist-id"))
     return prisma.anime.findUnique({
       where: { anilistId: positiveInteger("anilist-id") },
       select: animeSelect,
     });
   if (args.has("title")) {
-    const title = args.get("title")?.normalize("NFKC").trim().replace(/\s+/g, " ");
+    const title = args
+      .get("title")
+      ?.normalize("NFKC")
+      .trim()
+      .replace(/\s+/g, " ");
     if (!title) throw new Error("--title must not be empty");
     const matches = await prisma.anime.findMany({
       where: {
@@ -79,7 +94,9 @@ async function resolveLocalAnime(): Promise<LocalAnime | null> {
       select: animeSelect,
     });
     if (matches.length > 1) {
-      const error = new Error(`AMBIGUOUS_MATCH: ${matches.map((item) => item.slug).join(", ")}`);
+      const error = new Error(
+        `AMBIGUOUS_MATCH: ${matches.map((item) => item.slug).join(", ")}`,
+      );
       error.name = "AmbiguousMatchError";
       throw error;
     }
@@ -110,8 +127,17 @@ async function main() {
     );
 
   const localAnime = await resolveLocalAnime();
-  if ((args.has("anime-id") || args.has("anilist-id") || args.has("title")) && !localAnime) {
-    console.log(JSON.stringify({ provider: "kodik", status: "NOT_FOUND", scope: "local-anime" }, null, 2));
+  if (
+    (args.has("anime-id") || args.has("anilist-id") || args.has("title")) &&
+    !localAnime
+  ) {
+    console.log(
+      JSON.stringify(
+        { provider: "kodik", status: "NOT_FOUND", scope: "local-anime" },
+        null,
+        2,
+      ),
+    );
     process.exitCode = 3;
     return;
   }
@@ -163,7 +189,8 @@ async function main() {
     security: { tokenLogged: false, databaseWrites: 0, mediaRequests: 0 },
   };
 
-  if (args.has("json") || !args.has("verbose")) console.log(JSON.stringify(output, null, 2));
+  if (args.has("json") || !args.has("verbose"))
+    console.log(JSON.stringify(output, null, 2));
   else {
     console.table({
       slug: localAnime?.slug ?? null,
@@ -184,7 +211,10 @@ async function main() {
 
 main()
   .catch((error) => {
-    console.error(error instanceof Error ? error.message : "Kodik diagnostics failed");
-    process.exitCode = error instanceof Error && error.name === "AmbiguousMatchError" ? 6 : 1;
+    console.error(
+      error instanceof Error ? error.message : "Kodik diagnostics failed",
+    );
+    process.exitCode =
+      error instanceof Error && error.name === "AmbiguousMatchError" ? 6 : 1;
   })
   .finally(() => prisma.$disconnect());

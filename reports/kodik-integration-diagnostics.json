@@ -31,30 +31,170 @@
     "configured": false
   },
   "issues": [
-    { "id": "KODIK-001", "severity": "Critical", "category": "API", "status": "FIXED", "summary": "Network, HTTP and empty responses were converted to mock OK results" },
-    { "id": "KODIK-002", "severity": "Critical", "category": "UI", "status": "FIXED", "summary": "One public embed was presented as video for arbitrary anime" },
-    { "id": "KODIK-003", "severity": "High", "category": "NETWORK", "status": "NEEDS_MANUAL_ACTION", "summary": "API and iframe domains fail DNS resolution" },
-    { "id": "KODIK-004", "severity": "High", "category": "CONFIG", "status": "NEEDS_MANUAL_ACTION", "summary": "Playback disabled and embed allowlist missing" },
-    { "id": "KODIK-005", "severity": "High", "category": "API", "status": "FIXED", "summary": "HTTP and transient errors lacked distinct statuses and retry policy" },
-    { "id": "KODIK-006", "severity": "High", "category": "SCHEMA", "status": "FIXED", "summary": "Invalid JSON and schema mismatch were conflated" },
-    { "id": "KODIK-007", "severity": "Medium", "category": "CONFIG", "status": "FIXED", "summary": "API base URL was hardcoded" },
-    { "id": "KODIK-008", "severity": "Medium", "category": "TEST", "status": "FIXED", "summary": "Read-only diagnostic CLI and differentiated exit codes were missing" },
-    { "id": "KODIK-009", "severity": "High", "category": "SECURITY", "status": "NEEDS_MANUAL_ACTION", "summary": "Official playback contract and permission are not verified" },
-    { "id": "KODIK-010", "severity": "Informational", "category": "TEST", "status": "BLOCKED", "summary": "No controllable browser was available for Console and Network inspection" }
+    {
+      "id": "KODIK-001",
+      "severity": "Critical",
+      "category": "API",
+      "status": "FIXED",
+      "summary": "Network, HTTP and empty responses were converted to mock OK results"
+    },
+    {
+      "id": "KODIK-002",
+      "severity": "Critical",
+      "category": "UI",
+      "status": "FIXED",
+      "summary": "One public embed was presented as video for arbitrary anime"
+    },
+    {
+      "id": "KODIK-003",
+      "severity": "High",
+      "category": "NETWORK",
+      "status": "NEEDS_MANUAL_ACTION",
+      "summary": "API and iframe domains fail DNS resolution"
+    },
+    {
+      "id": "KODIK-004",
+      "severity": "High",
+      "category": "CONFIG",
+      "status": "NEEDS_MANUAL_ACTION",
+      "summary": "Playback disabled and embed allowlist missing"
+    },
+    {
+      "id": "KODIK-005",
+      "severity": "High",
+      "category": "API",
+      "status": "FIXED",
+      "summary": "HTTP and transient errors lacked distinct statuses and retry policy"
+    },
+    {
+      "id": "KODIK-006",
+      "severity": "High",
+      "category": "SCHEMA",
+      "status": "FIXED",
+      "summary": "Invalid JSON and schema mismatch were conflated"
+    },
+    {
+      "id": "KODIK-007",
+      "severity": "Medium",
+      "category": "CONFIG",
+      "status": "FIXED",
+      "summary": "API base URL was hardcoded"
+    },
+    {
+      "id": "KODIK-008",
+      "severity": "Medium",
+      "category": "TEST",
+      "status": "FIXED",
+      "summary": "Read-only diagnostic CLI and differentiated exit codes were missing"
+    },
+    {
+      "id": "KODIK-009",
+      "severity": "High",
+      "category": "SECURITY",
+      "status": "NEEDS_MANUAL_ACTION",
+      "summary": "Official playback contract and permission are not verified"
+    },
+    {
+      "id": "KODIK-010",
+      "severity": "Informational",
+      "category": "TEST",
+      "status": "BLOCKED",
+      "summary": "No controllable browser was available for Console and Network inspection"
+    }
   ],
   "testedAnime": [
-    { "internalId": "cmsd598qz000li6n4u5toqtac", "slug": "anilist-16498-attack-on-titan", "anilistId": 16498, "malId": 16498, "shikimoriIdUsed": 16498, "strategy": "shikimori_id", "resultCount": 0, "status": "NETWORK_ERROR", "error": "ENOTFOUND" },
-    { "internalId": "cmsd598va002ei6n4561a5ob3", "slug": "anilist-101922-demon-slayer-kimetsu-no-yaiba", "anilistId": 101922, "malId": 38000, "strategy": "shikimori_id", "resultCount": null, "status": "BLOCKED_NETWORK" },
-    { "internalId": "cmsd598sz001ei6n4gthxrdiy", "slug": "anilist-1535-death-note", "anilistId": 1535, "malId": 1535, "strategy": "shikimori_id", "resultCount": null, "status": "BLOCKED_NETWORK" },
-    { "internalId": "cmsd5bk940014i6u8cncelw6i", "slug": "anilist-20954-a-silent-voice", "anilistId": 20954, "malId": 28851, "strategy": "shikimori_id", "resultCount": null, "status": "BLOCKED_NETWORK" },
-    { "internalId": "cmsd5bkd0002ci6u8sqvmhf5b", "slug": "anilist-20958-attack-on-titan-season-2", "anilistId": 20958, "malId": 25777, "strategy": "shikimori_id", "resultCount": null, "status": "BLOCKED_NETWORK" },
-    { "internalId": "cmsd4hxly0001i6twagcloiad", "slug": "anilist-21-one-piece", "anilistId": 21, "malId": 21, "strategy": "shikimori_id", "resultCount": null, "status": "BLOCKED_NETWORK" },
-    { "internalId": "cmsd5bk9t001ci6u8bv9x43at", "slug": "anilist-176496-solo-leveling-season-2-arise-from-the-shadow", "anilistId": 176496, "malId": 58567, "strategy": "shikimori_id", "resultCount": null, "status": "BLOCKED_NETWORK" },
-    { "internalId": "cmsd598um0024i6n4vgf0i2k6", "slug": "anilist-172463-jujutsu-kaisen-season-3-the-culling-game-part-1", "anilistId": 172463, "malId": 57658, "strategy": "shikimori_id", "resultCount": null, "status": "BLOCKED_NETWORK" }
+    {
+      "internalId": "cmsd598qz000li6n4u5toqtac",
+      "slug": "anilist-16498-attack-on-titan",
+      "anilistId": 16498,
+      "malId": 16498,
+      "shikimoriIdUsed": 16498,
+      "strategy": "shikimori_id",
+      "resultCount": 0,
+      "status": "NETWORK_ERROR",
+      "error": "ENOTFOUND"
+    },
+    {
+      "internalId": "cmsd598va002ei6n4561a5ob3",
+      "slug": "anilist-101922-demon-slayer-kimetsu-no-yaiba",
+      "anilistId": 101922,
+      "malId": 38000,
+      "strategy": "shikimori_id",
+      "resultCount": null,
+      "status": "BLOCKED_NETWORK"
+    },
+    {
+      "internalId": "cmsd598sz001ei6n4gthxrdiy",
+      "slug": "anilist-1535-death-note",
+      "anilistId": 1535,
+      "malId": 1535,
+      "strategy": "shikimori_id",
+      "resultCount": null,
+      "status": "BLOCKED_NETWORK"
+    },
+    {
+      "internalId": "cmsd5bk940014i6u8cncelw6i",
+      "slug": "anilist-20954-a-silent-voice",
+      "anilistId": 20954,
+      "malId": 28851,
+      "strategy": "shikimori_id",
+      "resultCount": null,
+      "status": "BLOCKED_NETWORK"
+    },
+    {
+      "internalId": "cmsd5bkd0002ci6u8sqvmhf5b",
+      "slug": "anilist-20958-attack-on-titan-season-2",
+      "anilistId": 20958,
+      "malId": 25777,
+      "strategy": "shikimori_id",
+      "resultCount": null,
+      "status": "BLOCKED_NETWORK"
+    },
+    {
+      "internalId": "cmsd4hxly0001i6twagcloiad",
+      "slug": "anilist-21-one-piece",
+      "anilistId": 21,
+      "malId": 21,
+      "strategy": "shikimori_id",
+      "resultCount": null,
+      "status": "BLOCKED_NETWORK"
+    },
+    {
+      "internalId": "cmsd5bk9t001ci6u8bv9x43at",
+      "slug": "anilist-176496-solo-leveling-season-2-arise-from-the-shadow",
+      "anilistId": 176496,
+      "malId": 58567,
+      "strategy": "shikimori_id",
+      "resultCount": null,
+      "status": "BLOCKED_NETWORK"
+    },
+    {
+      "internalId": "cmsd598um0024i6n4vgf0i2k6",
+      "slug": "anilist-172463-jujutsu-kaisen-season-3-the-culling-game-part-1",
+      "anilistId": 172463,
+      "malId": 57658,
+      "strategy": "shikimori_id",
+      "resultCount": null,
+      "status": "BLOCKED_NETWORK"
+    }
   ],
   "network": {
-    "api": { "host": "kodikapi.com", "dns": "ENOTFOUND", "tls": "NOT_STARTED", "http": "NOT_STARTED", "dnsDurationMs": 68, "fetchDurationMs": 39 },
-    "iframe": { "host": "kodik.info", "dns": "ENOTFOUND", "tls": "NOT_STARTED", "http": "NOT_STARTED", "dnsDurationMs": 48, "fetchDurationMs": 3 },
+    "api": {
+      "host": "kodikapi.com",
+      "dns": "ENOTFOUND",
+      "tls": "NOT_STARTED",
+      "http": "NOT_STARTED",
+      "dnsDurationMs": 68,
+      "fetchDurationMs": 39
+    },
+    "iframe": {
+      "host": "kodik.info",
+      "dns": "ENOTFOUND",
+      "tls": "NOT_STARTED",
+      "http": "NOT_STARTED",
+      "dnsDurationMs": 48,
+      "fetchDurationMs": 3
+    },
     "cspBlocksFrame": false,
     "corsApplicableToApi": false
   },
@@ -78,21 +218,41 @@
     "npm test",
     "npm run dev",
     "npm run build",
-    "npm run build -- --webpack"
-    ,"python scripts/generate-kodik-diagnostics-pdf.py"
+    "npm run build -- --webpack",
+    "python scripts/generate-kodik-diagnostics-pdf.py"
   ],
   "tests": [
     { "name": "typecheck", "status": "PASS" },
     { "name": "lint", "status": "PASS" },
     { "name": "kodik-unit", "status": "PASS", "passed": 15, "failed": 0 },
     { "name": "full-unit", "status": "PASS", "passed": 143, "failed": 0 },
-    { "name": "diagnostic-cli", "status": "PASS_EXPECTED_NETWORK_ERROR", "exitCode": 4 },
+    {
+      "name": "diagnostic-cli",
+      "status": "PASS_EXPECTED_NETWORK_ERROR",
+      "exitCode": 4
+    },
     { "name": "dev-home", "status": "PASS", "httpStatus": 200 },
     { "name": "anime-page", "status": "PASS", "httpStatus": 200 },
-    { "name": "watch-page", "status": "PASS", "httpStatus": 200, "kodikIframePresent": false, "localUnavailableStatePresent": true },
+    {
+      "name": "watch-page",
+      "status": "PASS",
+      "httpStatus": 200,
+      "kodikIframePresent": false,
+      "localUnavailableStatePresent": true
+    },
     { "name": "browser-console-network", "status": "BLOCKED_NO_BROWSER" },
-    { "name": "production-build", "status": "BLOCKED_ENVIRONMENT", "detail": "compiled successfully then spawn EPERM" }
-    ,{ "name": "pdf-open-render-visual", "status": "PASS", "pages": 18, "renderedPages": 18, "iterations": 2 }
+    {
+      "name": "production-build",
+      "status": "BLOCKED_ENVIRONMENT",
+      "detail": "compiled successfully then spawn EPERM"
+    },
+    {
+      "name": "pdf-open-render-visual",
+      "status": "PASS",
+      "pages": 18,
+      "renderedPages": 18,
+      "iterations": 2
+    }
   ],
   "risks": [
     "External API and regional DNS availability",

@@ -20,7 +20,9 @@ export async function GET(request: Request) {
   let localResults: Awaited<ReturnType<typeof findAnimeByAniListIds>> = [];
   try {
     const localIds = await findAniListIdsByLocalizedQuery(query, 12);
-    localResults = await enrichAnimeListWithLocalizedTitles(await findAnimeByAniListIds(localIds));
+    localResults = await enrichAnimeListWithLocalizedTitles(
+      await findAnimeByAniListIds(localIds),
+    );
   } catch {
     // The public search remains available before/while the localization migration is deployed.
   }
@@ -38,12 +40,19 @@ export async function GET(request: Request) {
     const backup = await getJikanAnimeBySearch(query);
     if (backup.ok && backup.data) {
       return NextResponse.json({
-        results: localResults.length ? localResults.slice(0, 6) : await enrichAnimeListWithLocalizedTitles([applyCanonicalTitleLocalization(mapJikanAnime(backup.data))]),
+        results: localResults.length
+          ? localResults.slice(0, 6)
+          : await enrichAnimeListWithLocalizedTitles([
+              applyCanonicalTitleLocalization(mapJikanAnime(backup.data)),
+            ]),
         source: "backup",
       });
     }
     if (localResults.length) {
-      return NextResponse.json({ results: localResults.slice(0, 6), source: "local" });
+      return NextResponse.json({
+        results: localResults.slice(0, 6),
+        source: "local",
+      });
     }
     return NextResponse.json(
       { error: "AniList is temporarily unavailable", results: [] },
@@ -51,28 +60,32 @@ export async function GET(request: Request) {
     );
   }
   const normalizedQuery = normalizeAnimeTitle(query);
-  const enriched = await enrichAnimeListWithLocalizedTitles((page?.media ?? [])
-    .map(mapAniListAnime)
-    .map(applyCanonicalTitleLocalization));
-  const curatedRemote = enriched
-    .filter((anime) =>
-      [
-        anime.title,
-        anime.titleRu,
-        anime.titleUk,
-        anime.titleEnglish,
-        anime.titleNative,
-        anime.titleRomaji,
-        ...(anime.localization?.ru?.synonyms ?? []),
-        ...(anime.localization?.uk?.synonyms ?? []),
-        ...(anime.synonyms ?? []),
-      ].some(
-        (title) =>
-          title && normalizeAnimeTitle(title).includes(normalizedQuery),
-      ),
-    );
+  const enriched = await enrichAnimeListWithLocalizedTitles(
+    (page?.media ?? [])
+      .map(mapAniListAnime)
+      .map(applyCanonicalTitleLocalization),
+  );
+  const curatedRemote = enriched.filter((anime) =>
+    [
+      anime.title,
+      anime.titleRu,
+      anime.titleUk,
+      anime.titleEnglish,
+      anime.titleNative,
+      anime.titleRomaji,
+      ...(anime.localization?.ru?.synonyms ?? []),
+      ...(anime.localization?.uk?.synonyms ?? []),
+      ...(anime.synonyms ?? []),
+    ].some(
+      (title) => title && normalizeAnimeTitle(title).includes(normalizedQuery),
+    ),
+  );
   const curated = [...localResults, ...curatedRemote];
   return NextResponse.json({
-    results: [...new Map(curated.map((anime) => [anime.anilistId ?? anime.slug, anime])).values()].slice(0, 6),
+    results: [
+      ...new Map(
+        curated.map((anime) => [anime.anilistId ?? anime.slug, anime]),
+      ).values(),
+    ].slice(0, 6),
   });
 }

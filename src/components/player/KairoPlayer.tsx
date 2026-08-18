@@ -28,6 +28,8 @@ import { useLocale } from "@/i18n";
 import type { WatchEpisode } from "@/data/watch/types";
 import type { PlayerProgress, QualityOption } from "./types";
 import { useAccountData } from "@/components/data/AccountDataProvider";
+import type { KodikPlayerHandle } from "./kodik/kodik-player.types";
+import { setMediaPlaybackActive } from "./playback-activity";
 
 type ShakaModule = typeof import("shaka-player/dist/shaka-player.compiled.js");
 type ShakaPlayerInstance = InstanceType<ShakaModule["default"]["Player"]>;
@@ -73,12 +75,26 @@ export function KairoPlayer({
   animePoster,
   previousHref,
   nextHref,
+  seasonNumber = 1,
+  onHandle,
+  partyEvents,
+  onPlaybackError,
 }: {
   episode: WatchEpisode;
   animeTitle: string;
   animePoster?: string;
   previousHref?: string;
   nextHref?: string;
+  seasonNumber?: number;
+  onHandle?: (handle: KodikPlayerHandle | null) => void;
+  partyEvents?: {
+    onPlay?: () => void;
+    onPause?: () => void;
+    onSeek?: (time: number) => void;
+    onTimeUpdate?: (time: number) => void;
+    onSpeedChange?: (speed: number) => void;
+  };
+  onPlaybackError?: (reason?: "fatal" | "stall") => void;
 }) {
   const { locale, dictionary: t } = useLocale();
   const { progress, preferences, upsertProgress, updatePreferences } =
@@ -101,7 +117,11 @@ export function KairoPlayer({
   const retryPositionRef = useRef(0);
   const autoRetryUsedRef = useRef(false);
   const lastSaveRef = useRef(0);
+  const idleSaveRef = useRef<number | null>(null);
   const lastNonZeroVolumeRef = useRef(1);
+  useEffect(() => {
+    lastSaveRef.current = Date.now();
+  }, []);
   const [status, setStatus] = useState<PlayerStatus>("idle");
   const [fatalError, setFatalError] = useState<string | null>(null);
   const [diagnostic, setDiagnostic] = useState<PlayerDiagnostic | null>(null);
@@ -166,6 +186,75 @@ export function KairoPlayer({
     left: number;
   } | null>(null);
   const [nextPromptDismissed, setNextPromptDismissed] = useState(false);
+  const playbackErrorRef = useRef(onPlaybackError);
+  const partyEventsRef = useRef(partyEvents);
+  useEffect(() => {
+    playbackErrorRef.current = onPlaybackError;
+    partyEventsRef.current = partyEvents;
+  }, [onPlaybackError, partyEvents]);
+
+  useEffect(() => {
+    const handle: KodikPlayerHandle = {
+      play: () => {
+        const video = videoRef.current;
+        if (!video) return false;
+        void video.play();
+        return true;
+      },
+      pause: () => {
+        const video = videoRef.current;
+        if (!video) return false;
+        video.pause();
+        return true;
+      },
+      seek: (seconds) => {
+        const video = videoRef.current;
+        if (!video || !Number.isFinite(seconds)) return false;
+        video.currentTime = Math.max(
+          0,
+          Math.min(video.duration || Infinity, seconds),
+        );
+        return true;
+      },
+      setVolume: (value) => {
+        const video = videoRef.current;
+        if (!video || !Number.isFinite(value)) return false;
+        video.volume = Math.max(0, Math.min(1, value));
+        return true;
+      },
+      mute: () => {
+        if (!videoRef.current) return false;
+        videoRef.current.muted = true;
+        return true;
+      },
+      unmute: () => {
+        if (!videoRef.current) return false;
+        videoRef.current.muted = false;
+        return true;
+      },
+      setSpeed: (value) => {
+        const video = videoRef.current;
+        if (!video || !Number.isFinite(value) || value <= 0) return false;
+        video.playbackRate = value;
+        return true;
+      },
+      enterPip: () => {
+        const video = videoRef.current;
+        if (!video || !("requestPictureInPicture" in video)) return false;
+        void video.requestPictureInPicture();
+        return true;
+      },
+      exitPip: () => {
+        if (!document.pictureInPictureElement) return false;
+        void document.exitPictureInPicture();
+        return true;
+      },
+      changeEpisode: () => false,
+      getTime: () => Boolean(videoRef.current),
+    };
+    onHandle?.(handle);
+    return () => onHandle?.(null);
+  }, [onHandle]);
   const ready = ["ready", "playing", "paused", "buffering", "ended"].includes(
     status,
   );
@@ -247,7 +336,7 @@ export function KairoPlayer({
       if (!video || !Number.isFinite(video.duration)) return;
       upsertProgress({
         animeSlug: episode.animeSlug,
-        seasonNumber: 1,
+        seasonNumber,
         episodeNumber: episode.episodeNumber,
         currentTime: video.currentTime,
         duration: video.duration,
@@ -256,7 +345,7 @@ export function KairoPlayer({
       });
       lastSaveRef.current = Date.now();
     },
-    [episode.animeSlug, episode.episodeNumber, upsertProgress],
+    [episode.animeSlug, episode.episodeNumber, seasonNumber, upsertProgress],
   );
   const saveProgressRef = useRef(saveProgress);
 
@@ -265,6 +354,39 @@ export function KairoPlayer({
   }, [saveProgress]);
 
   useEffect(() => () => saveProgressRef.current(), []);
+  const scheduleProgressSave = useCallback(() => {
+    if (idleSaveRef.current !== null) return;
+    const commit = () => {
+      idleSaveRef.current = null;
+      saveProgressRef.current();
+    };
+    const requestIdle = (
+      window as unknown as {
+        requestIdleCallback?: typeof window.requestIdleCallback;
+      }
+    ).requestIdleCallback;
+    if (requestIdle) {
+      idleSaveRef.current = requestIdle(commit, {
+        timeout: 5_000,
+      });
+      return;
+    }
+    idleSaveRef.current = window.setTimeout(commit, 1_000);
+  }, []);
+  useEffect(
+    () => () => {
+      if (idleSaveRef.current === null) return;
+      const cancelIdle = (
+        window as unknown as {
+          cancelIdleCallback?: typeof window.cancelIdleCallback;
+        }
+      ).cancelIdleCallback;
+      if (cancelIdle) cancelIdle(idleSaveRef.current);
+      else window.clearTimeout(idleSaveRef.current);
+      idleSaveRef.current = null;
+    },
+    [],
+  );
 
   const scheduleControlsHide = useCallback(() => {
     clearHideTimer();
@@ -296,6 +418,7 @@ export function KairoPlayer({
     if (!video || !source) {
       setFatalError(t.player.loadError);
       setStatus("fatal-error");
+      playbackErrorRef.current?.();
       return;
     }
     const sessionId = ++sessionRef.current;
@@ -368,6 +491,7 @@ export function KairoPlayer({
           if (autoRetryUsedRef.current) {
             setFatalError(t.player.loadError);
             setStatus("fatal-error");
+            playbackErrorRef.current?.();
             return;
           }
           autoRetryUsedRef.current = true;
@@ -380,6 +504,7 @@ export function KairoPlayer({
         navigator.onLine ? t.player.loadError : t.player.connectionLost,
       );
       setStatus("fatal-error");
+      playbackErrorRef.current?.();
     };
     const initialize = async () => {
       try {
@@ -405,9 +530,20 @@ export function KairoPlayer({
           loadCompleted = true;
           logDiagnostic("Native MP4 load started");
           const migrated = progressRef.current.find(
-            (entry) => entry.animeSlug === episode.animeSlug && entry.seasonNumber === 1 && entry.episodeNumber === episode.episodeNumber,
+            (entry) =>
+              entry.animeSlug === episode.animeSlug &&
+              entry.seasonNumber === seasonNumber &&
+              entry.episodeNumber === episode.episodeNumber,
           );
-          if (migrated && !migrated.completed && migrated.currentTime > 5) setResumeProgress({ animeSlug: migrated.animeSlug, episode: migrated.episodeNumber, currentTime: migrated.currentTime, duration: migrated.duration, completed: migrated.completed, updatedAt: migrated.updatedAt });
+          if (migrated && !migrated.completed && migrated.currentTime > 5)
+            setResumeProgress({
+              animeSlug: migrated.animeSlug,
+              episode: migrated.episodeNumber,
+              currentTime: migrated.currentTime,
+              duration: migrated.duration,
+              completed: migrated.completed,
+              updatedAt: migrated.updatedAt,
+            });
           return;
         }
         const imported =
@@ -422,6 +558,22 @@ export function KairoPlayer({
         player = new shaka.Player();
         playerRef.current = player;
         player.addEventListener("error", onShakaError);
+        const networkRetry = {
+          maxAttempts: 5,
+          baseDelay: 750,
+          backoffFactor: 1.8,
+          fuzzFactor: 0.5,
+          timeout: 15_000,
+        };
+        player.configure({
+          manifest: { retryParameters: networkRetry },
+          streaming: {
+            bufferingGoal: 30,
+            rebufferingGoal: 6,
+            bufferBehind: 30,
+            retryParameters: networkRetry,
+          },
+        });
         const syncVariantState = () => {
           if (!player || !isCurrent()) return;
           const tracks = player.getVariantTracks();
@@ -561,7 +713,7 @@ export function KairoPlayer({
         const migrated = progressRef.current.find(
           (entry) =>
             entry.animeSlug === episode.animeSlug &&
-            entry.seasonNumber === 1 &&
+            entry.seasonNumber === seasonNumber &&
             entry.episodeNumber === episode.episodeNumber,
         );
         const saved: PlayerProgress | null = migrated
@@ -593,6 +745,7 @@ export function KairoPlayer({
           navigator.onLine ? t.player.loadError : t.player.connectionLost,
         );
         setStatus("fatal-error");
+        playbackErrorRef.current?.("fatal");
       }
     };
     void initialize();
@@ -614,6 +767,7 @@ export function KairoPlayer({
   }, [
     episode.animeSlug,
     episode.episodeNumber,
+    seasonNumber,
     episode.subtitles,
     clearHideTimer,
     retryNonce,
@@ -629,16 +783,42 @@ export function KairoPlayer({
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+    let stallPosition = video.currentTime;
+    let lastProgressAt = Date.now();
+    let stallEscalated = false;
+    const resetStallWatchdog = () => {
+      stallPosition = video.currentTime;
+      lastProgressAt = Date.now();
+      stallEscalated = false;
+    };
+    const stallWatchdog = window.setInterval(() => {
+      if (video.paused || video.ended) {
+        resetStallWatchdog();
+        return;
+      }
+      if (Math.abs(video.currentTime - stallPosition) >= 0.5) {
+        resetStallWatchdog();
+        return;
+      }
+      if (!stallEscalated && Date.now() - lastProgressAt >= 12_000) {
+        stallEscalated = true;
+        showToast(t.player.reconnecting);
+        playbackErrorRef.current?.("stall");
+      }
+    }, 2_000);
     const onTime = () => {
       setCurrentTime(video.currentTime);
+      partyEventsRef.current?.onTimeUpdate?.(video.currentTime);
       setDuration(Number.isFinite(video.duration) ? video.duration : 0);
       const end = video.buffered.length
         ? video.buffered.end(video.buffered.length - 1)
         : 0;
       setBuffered(end);
-      if (Date.now() - lastSaveRef.current > 20000) saveProgress();
+      if (Date.now() - lastSaveRef.current > 20_000) scheduleProgressSave();
     };
     const onPlay = () => {
+      setMediaPlaybackActive(video, true);
+      resetStallWatchdog();
       setStatus("playing");
       setFatalError(null);
       setDiagnostic(null);
@@ -646,19 +826,30 @@ export function KairoPlayer({
         window.clearTimeout(recoveryTimerRef.current);
         recoveryTimerRef.current = null;
       }
+      partyEventsRef.current?.onPlay?.();
+    };
+    const onPlaying = () => {
+      setMediaPlaybackActive(video, true);
+      resetStallWatchdog();
     };
     const onPause = () => {
+      resetStallWatchdog();
+      setMediaPlaybackActive(video, false);
       if (!video.ended) setStatus("paused");
       keepControlsVisible();
       saveProgress();
+      partyEventsRef.current?.onPause?.();
     };
     const onEnded = () => {
+      resetStallWatchdog();
+      setMediaPlaybackActive(video, false);
       setStatus("ended");
       setFatalError(null);
       saveProgress(true);
       if (autoplayNext && nextHref) setAutoNextCountdown(5);
     };
     const onCanPlay = () => {
+      setMediaPlaybackActive(video, !video.paused && !video.ended);
       setFatalError(null);
       setDiagnostic(null);
       setStatus(video.paused ? "paused" : "playing");
@@ -668,7 +859,9 @@ export function KairoPlayer({
       }
     };
     const onWaiting = () => {
-      if (!video.paused && !video.ended) setStatus("buffering");
+      if (!video.paused && !video.ended) {
+        setStatus("buffering");
+      }
     };
     const onMediaError = () => {
       const mediaError = video.error;
@@ -691,6 +884,7 @@ export function KairoPlayer({
       if (source?.type === "mp4") {
         setFatalError(t.player.loadError);
         setStatus("fatal-error");
+        playbackErrorRef.current?.();
         return;
       }
       if (mediaError.code === MediaError.MEDIA_ERR_NETWORK) {
@@ -700,6 +894,7 @@ export function KairoPlayer({
       }
       setFatalError(t.player.loadError);
       setStatus("fatal-error");
+      playbackErrorRef.current?.();
     };
     const onVolume = () => {
       setVolume(video.volume);
@@ -707,8 +902,12 @@ export function KairoPlayer({
       if (!video.muted && video.volume > 0)
         lastNonZeroVolumeRef.current = video.volume;
     };
+    const onSeeked = () => partyEventsRef.current?.onSeek?.(video.currentTime);
+    const onRateChange = () =>
+      partyEventsRef.current?.onSpeedChange?.(video.playbackRate);
     video.addEventListener("timeupdate", onTime);
     video.addEventListener("play", onPlay);
+    video.addEventListener("playing", onPlaying);
     video.addEventListener("pause", onPause);
     video.addEventListener("ended", onEnded);
     video.addEventListener("waiting", onWaiting);
@@ -718,9 +917,14 @@ export function KairoPlayer({
     video.addEventListener("canplay", onCanPlay);
     video.addEventListener("error", onMediaError);
     video.addEventListener("volumechange", onVolume);
+    video.addEventListener("seeked", onSeeked);
+    video.addEventListener("ratechange", onRateChange);
     return () => {
+      window.clearInterval(stallWatchdog);
+      setMediaPlaybackActive(video, false);
       video.removeEventListener("timeupdate", onTime);
       video.removeEventListener("play", onPlay);
+      video.removeEventListener("playing", onPlaying);
       video.removeEventListener("pause", onPause);
       video.removeEventListener("ended", onEnded);
       video.removeEventListener("waiting", onWaiting);
@@ -730,6 +934,8 @@ export function KairoPlayer({
       video.removeEventListener("canplay", onCanPlay);
       video.removeEventListener("error", onMediaError);
       video.removeEventListener("volumechange", onVolume);
+      video.removeEventListener("seeked", onSeeked);
+      video.removeEventListener("ratechange", onRateChange);
     };
   }, [
     autoplayNext,
@@ -737,6 +943,7 @@ export function KairoPlayer({
     nextHref,
     router,
     saveProgress,
+    scheduleProgressSave,
     showToast,
     source?.type,
     t.player.loadError,
@@ -847,7 +1054,7 @@ export function KairoPlayer({
   const togglePlay = () => {
     const video = videoRef.current;
     if (!video) return;
-    if (video.paused) void video.play();
+    if (video.paused) void video.play().catch(() => undefined);
     else video.pause();
   };
   const finishMenuSelection = () => {
@@ -1079,8 +1286,13 @@ export function KairoPlayer({
         controls={false}
         crossOrigin="anonymous"
         poster={animePoster}
-        aria-label={`${t.player.demoVideo}: ${animeTitle}`}
-        onClick={revealControls}
+        aria-label={
+          source?.isDemo ? `${t.player.demoVideo}: ${animeTitle}` : animeTitle
+        }
+        onClick={() => {
+          revealControls();
+          togglePlay();
+        }}
         onDoubleClick={(event) => {
           const bounds = event.currentTarget.getBoundingClientRect();
           const ratio = (event.clientX - bounds.left) / bounds.width;
@@ -1090,11 +1302,21 @@ export function KairoPlayer({
           revealControls();
         }}
       >
-        {source?.type === "mp4" && episode.subtitles.map((subtitle) => (
-          <track default={subtitle.isDefault} key={subtitle.id} kind="subtitles" label={subtitle.label} src={subtitle.url} srcLang={subtitle.language} />
-        ))}
+        {source?.type === "mp4" &&
+          episode.subtitles.map((subtitle) => (
+            <track
+              default={subtitle.isDefault}
+              key={subtitle.id}
+              kind="subtitles"
+              label={subtitle.label}
+              src={subtitle.url}
+              srcLang={subtitle.language}
+            />
+          ))}
       </video>
-      <div className="player-demo-badge">{t.player.demoVideo}</div>
+      {source?.isDemo && (
+        <div className="player-demo-badge">{t.player.demoVideo}</div>
+      )}
       {(loading || showBuffering) && (
         <div className="player-loading">
           <i />
@@ -1591,7 +1813,9 @@ export function KairoPlayer({
           </div>
         </>
       )}
-      <p className="player-demo-notice">{t.player.demoNotice}</p>
+      {source?.isDemo && (
+        <p className="player-demo-notice">{t.player.demoNotice}</p>
+      )}
     </div>
   );
 }

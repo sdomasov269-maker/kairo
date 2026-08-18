@@ -1,6 +1,42 @@
 import { createProbeTransport } from "../src/server/media-providers/probe-transport.ts";
 const configured = process.env.KODIK_API_BASE_URL?.trim();
-if (!configured) { console.log("Provider: Kodik\nStatus: PARTNER_ACCESS_REQUIRED\nKODIK_API_BASE_URL is not configured.\nNetwork requests: 0\nPlayback requests: 0\nDatabase writes: 0"); process.exit(0); }
-const url = new URL(configured); if (url.search || url.hash) throw new Error("KODIK_API_BASE_URL must not contain query or fragment");
-const transport = createProbeTransport(); const result = await transport.request(url.toString()); const tls = await transport.inspectTls(url.toString());
-console.log(JSON.stringify({ provider: "Kodik", status: "PARTNER_ACCESS_REQUIRED", url: result.evidence.url, httpStatus: result.evidence.status, contentType: result.evidence.contentType ?? "UNKNOWN", headers: result.evidence.headers, dnsAddresses: transport.dnsAddresses, tls, authentication: "UNKNOWN", declaredEndpoints: "UNKNOWN", rateLimits: result.evidence.headers["x-ratelimit-limit"] ?? result.evidence.headers["ratelimit-limit"] ?? "UNKNOWN", cors: result.evidence.headers["access-control-allow-origin"] ?? "UNKNOWN", externalEmbedPolicy: "UNKNOWN", domainRestrictions: "UNKNOWN", networkRequests: transport.requests, playbackRequests: 0, databaseWrites: 0 }, null, 2));
+if (!configured) {
+  console.log(
+    "Provider: Kodik\nStatus: PARTNER_ACCESS_REQUIRED\nKODIK_API_BASE_URL is not configured.\nNetwork requests: 0\nPlayback requests: 0\nDatabase writes: 0",
+  );
+  process.exit(0);
+}
+const url = new URL(configured);
+if (url.search || url.hash)
+  throw new Error("KODIK_API_BASE_URL must not contain query or fragment");
+const transport = createProbeTransport();
+const result = await transport.request(url.toString());
+const tls = await transport.inspectTls(url.toString());
+console.log(
+  JSON.stringify(
+    {
+      provider: "Kodik",
+      status: "PARTNER_ACCESS_REQUIRED",
+      url: result.evidence.url,
+      httpStatus: result.evidence.status,
+      contentType: result.evidence.contentType ?? "UNKNOWN",
+      headers: result.evidence.headers,
+      dnsAddresses: transport.dnsAddresses,
+      tls,
+      authentication: "UNKNOWN",
+      declaredEndpoints: "UNKNOWN",
+      rateLimits:
+        result.evidence.headers["x-ratelimit-limit"] ??
+        result.evidence.headers["ratelimit-limit"] ??
+        "UNKNOWN",
+      cors: result.evidence.headers["access-control-allow-origin"] ?? "UNKNOWN",
+      externalEmbedPolicy: "UNKNOWN",
+      domainRestrictions: "UNKNOWN",
+      networkRequests: transport.requests,
+      playbackRequests: 0,
+      databaseWrites: 0,
+    },
+    null,
+    2,
+  ),
+);

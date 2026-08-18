@@ -1,9 +1,14 @@
-import type { AniListMedia, AniListResponse } from "./types.ts";
+import type {
+  AniListAiringSchedule,
+  AniListMedia,
+  AniListResponse,
+} from "./types.ts";
 import { AniListRequestError, isRetryableAniListStatus } from "./errors.ts";
 import {
   ANIME_BATCH,
   ANIME_BY_ID,
   ANIME_BY_SEARCH,
+  AIRING_SCHEDULE_PAGE,
   CATALOG_PAGE,
   DISCOVERY_PAGE,
 } from "./queries.ts";
@@ -233,6 +238,46 @@ export async function getAnimeDiscovery({
     10800,
   );
   return Array.isArray(data?.Page?.media) ? data.Page.media : [];
+}
+
+export async function getAiringScheduleRange(
+  start: Date,
+  end: Date,
+): Promise<AniListAiringSchedule[]> {
+  const startSeconds = Math.floor(start.getTime() / 1000);
+  const endSeconds = Math.floor(end.getTime() / 1000);
+  if (
+    !Number.isFinite(startSeconds) ||
+    !Number.isFinite(endSeconds) ||
+    startSeconds >= endSeconds
+  )
+    return [];
+  const entries: AniListAiringSchedule[] = [];
+  for (let page = 1; page <= 10; page += 1) {
+    const data = await request<{
+      Page: {
+        pageInfo: { hasNextPage: boolean };
+        airingSchedules: AniListAiringSchedule[];
+      };
+    }>(
+      AIRING_SCHEDULE_PAGE,
+      {
+        page,
+        perPage: 50,
+        airingAtGreater: startSeconds - 1,
+        airingAtLesser: endSeconds,
+      },
+      900,
+    );
+    const batch = Array.isArray(data?.Page?.airingSchedules)
+      ? data.Page.airingSchedules
+      : [];
+    entries.push(...batch);
+    if (!data?.Page?.pageInfo?.hasNextPage) break;
+  }
+  return [...new Map(entries.map((entry) => [entry.id, entry])).values()]
+    .filter((entry) => entry.media?.type === "ANIME" && !entry.media.isAdult)
+    .sort((a, b) => a.airingAt - b.airingAt);
 }
 
 export async function getAnimeByAniListId(

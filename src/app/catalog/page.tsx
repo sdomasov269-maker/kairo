@@ -105,7 +105,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
     total: curated.length,
   };
   return (
-    <AppShell className="app-shell-discovery">
+    <AppShell className="app-shell-discovery app-shell-catalog">
       <DiscoveryPageShell
         className="catalog-page"
         hero={<CatalogHero />}

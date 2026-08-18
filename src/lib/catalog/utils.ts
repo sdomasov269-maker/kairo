@@ -49,7 +49,7 @@ export function parseCatalogParams(params: ParamsInput): CatalogFilters {
   return {
     search: search || undefined,
     page: integer(first(params.page), 1, 500) ?? 1,
-    perPage: 18,
+    perPage: 24,
     genres,
     year: integer(first(params.year), 1940, new Date().getFullYear() + 2),
     season: season && seasons.has(season) ? season : undefined,

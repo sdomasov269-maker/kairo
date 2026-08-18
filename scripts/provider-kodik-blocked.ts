@@ -1,1 +1,17 @@
-const mode = process.argv[2] ?? "operation"; console.log(JSON.stringify({ provider: "Kodik", operation: mode, status: "PARTNER_ACCESS_REQUIRED", message: "Official documentation, API credentials and written integration permission are required", networkRequests: 0, playbackRequests: 0, databaseWrites: 0 }, null, 2));
+const mode = process.argv[2] ?? "operation";
+console.log(
+  JSON.stringify(
+    {
+      provider: "Kodik",
+      operation: mode,
+      status: "PARTNER_ACCESS_REQUIRED",
+      message:
+        "Official documentation, API credentials and written integration permission are required",
+      networkRequests: 0,
+      playbackRequests: 0,
+      databaseWrites: 0,
+    },
+    null,
+    2,
+  ),
+);

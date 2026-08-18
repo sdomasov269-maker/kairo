@@ -8,6 +8,7 @@ import type { Anime, WatchingProgress } from "@/types/media";
 import { AnimePoster } from "./AnimePoster";
 import { useLocale } from "@/i18n";
 import { OverflowMarqueeText } from "@/components/ui/OverflowMarqueeText";
+import { KairoDomCurlTarget } from "@/components/effects/KairoDomCurlTarget";
 import {
   formatScore,
   getLocalizedAnimeTitle,
@@ -15,20 +16,29 @@ import {
   localizeStatus,
 } from "@/lib/media-localization";
 
-export function AnimeCard({ anime, index }: { anime: Anime; index: number }) {
+export function AnimeCard({
+  anime,
+  index,
+  compactHover = false,
+}: {
+  anime: Anime;
+  index: number;
+  compactHover?: boolean;
+}) {
   const [saved, setSaved] = useState(false);
   const reduced = useReducedMotion();
   const { locale, dictionary: t } = useLocale();
-  const title = anime.displayTitleLocale === locale && anime.displayTitle
-    ? anime.displayTitle
-    : getLocalizedAnimeTitle(anime, locale);
+  const title =
+    anime.displayTitleLocale === locale && anime.displayTitle
+      ? anime.displayTitle
+      : getLocalizedAnimeTitle(anime, locale);
   const status = localizeStatus(anime.status, locale);
   const genres = anime.genres.map((genre) => localizeGenre(genre, locale));
   return (
     <motion.article
       className="anime-card"
       data-card-index={index}
-      whileHover={reduced ? undefined : { y: -7 }}
+      whileHover={reduced ? undefined : { y: compactHover ? -3 : -7 }}
       transition={{ duration: 0.3 }}
     >
       <div className="poster-shell">
@@ -53,7 +63,7 @@ export function AnimeCard({ anime, index }: { anime: Anime; index: number }) {
           {status}
         </span>
       </div>
-      <div className="card-copy">
+      <KairoDomCurlTarget className="card-copy" kind="text">
         <div className="card-title-row">
           <h3>
             <Link
@@ -78,7 +88,7 @@ export function AnimeCard({ anime, index }: { anime: Anime; index: number }) {
           <p title={genres.join(" · ")}>{genres.slice(0, 2).join(" · ")}</p>
           <span className="card-year">{anime.year}</span>
         </div>
-      </div>
+      </KairoDomCurlTarget>
     </motion.article>
   );
 }
@@ -96,7 +106,7 @@ export function ContinueWatchingCard({ item }: { item: WatchingProgress }) {
           <Play size={18} fill="currentColor" />
         </button>
       </div>
-      <div className="watch-copy">
+      <KairoDomCurlTarget className="watch-copy" kind="text">
         <div className="watch-title">
           <p>
             {t.labels.episode} {item.episode}
@@ -108,7 +118,7 @@ export function ContinueWatchingCard({ item }: { item: WatchingProgress }) {
         <span>
           {t.labels.remaining}: {item.remaining}
         </span>
-      </div>
+      </KairoDomCurlTarget>
       <div className="progress" aria-label={`${item.progress}%`}>
         <i style={{ width: `${item.progress}%` }} />
       </div>

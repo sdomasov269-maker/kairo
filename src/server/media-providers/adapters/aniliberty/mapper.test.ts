@@ -1,7 +1,48 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { episodeReferenceMetadata, mapAniLibertyCandidate, mapAniLibertyEpisode, mapAniLibertyRelease } from "./mapper.ts";
-const release = { id: 42, year: 2024, name: { main: "Русское название", english: "English title" }, type: { value: "TV" }, description: "Description", episodes_total: 12 };
-test("search and release mapping preserve identity metadata", () => { assert.deepEqual(mapAniLibertyCandidate(release), { providerAnimeId: "42", title: "Русское название", alternativeTitles: ["English title"], year: 2024, format: "TV", confidence: 0 }); assert.equal(mapAniLibertyRelease(release).episodeCount, 12); });
-test("episode mapping is stable and metadata never stores media URLs", () => { const episode = { id: "episode-1", ordinal: 1, sort_order: 1, name: "Серия", duration: 1440, hls_720: "https://media.invalid/secret.m3u8", updated_at: "2026-01-01T00:00:00Z" }; const mapped = mapAniLibertyEpisode(episode); const metadata = episodeReferenceMetadata(episode); assert.equal(mapped.episodeNumber, 1); assert.deepEqual(metadata.availableQualities, ["720p"]); assert.equal(JSON.stringify(metadata).includes("m3u8"), false); });
-test("fractional ordinals are retained in reference metadata", () => { const episode = { id: "special", ordinal: 12.5, sort_order: 13 }; assert.equal(mapAniLibertyEpisode(episode).episodeNumber, 13); assert.equal(episodeReferenceMetadata(episode).ordinal, 12.5); });
+import {
+  episodeReferenceMetadata,
+  mapAniLibertyCandidate,
+  mapAniLibertyEpisode,
+  mapAniLibertyRelease,
+} from "./mapper.ts";
+const release = {
+  id: 42,
+  year: 2024,
+  name: { main: "Русское название", english: "English title" },
+  type: { value: "TV" },
+  description: "Description",
+  episodes_total: 12,
+};
+test("search and release mapping preserve identity metadata", () => {
+  assert.deepEqual(mapAniLibertyCandidate(release), {
+    providerAnimeId: "42",
+    title: "Русское название",
+    alternativeTitles: ["English title"],
+    year: 2024,
+    format: "TV",
+    confidence: 0,
+  });
+  assert.equal(mapAniLibertyRelease(release).episodeCount, 12);
+});
+test("episode mapping is stable and metadata never stores media URLs", () => {
+  const episode = {
+    id: "episode-1",
+    ordinal: 1,
+    sort_order: 1,
+    name: "Серия",
+    duration: 1440,
+    hls_720: "https://media.invalid/secret.m3u8",
+    updated_at: "2026-01-01T00:00:00Z",
+  };
+  const mapped = mapAniLibertyEpisode(episode);
+  const metadata = episodeReferenceMetadata(episode);
+  assert.equal(mapped.episodeNumber, 1);
+  assert.deepEqual(metadata.availableQualities, ["720p"]);
+  assert.equal(JSON.stringify(metadata).includes("m3u8"), false);
+});
+test("fractional ordinals are retained in reference metadata", () => {
+  const episode = { id: "special", ordinal: 12.5, sort_order: 13 };
+  assert.equal(mapAniLibertyEpisode(episode).episodeNumber, 13);
+  assert.equal(episodeReferenceMetadata(episode).ordinal, 12.5);
+});
