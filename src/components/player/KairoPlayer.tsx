@@ -700,7 +700,7 @@ export function KairoPlayer({
               )[0] ?? null;
           if (preferredVariant) {
             player.configure({ abr: { enabled: false } });
-            player.selectVariantTrack(preferredVariant, true);
+            player.selectVariantTrack(preferredVariant, false);
             setQualityMode("manual");
           }
         } else {
@@ -1107,7 +1107,7 @@ export function KairoPlayer({
       ) ?? tracks.find((item) => item.height === height);
     if (track) {
       player.configure({ abr: { enabled: false } });
-      player.selectVariantTrack(track, true);
+      player.selectVariantTrack(track, false);
       const active = player.getVariantTracks().find((item) => item.active);
       setQualityMode("manual");
       setActiveHeight(
@@ -1145,7 +1145,7 @@ export function KairoPlayer({
           ? candidate
           : best;
       }, null) ?? track;
-    player.selectVariantTrack(selected, true);
+    player.selectVariantTrack(selected, false);
     if (qualityMode === "auto") player.configure({ abr: { enabled: true } });
     setVariantTracks(player.getVariantTracks());
     updatePreferences({
