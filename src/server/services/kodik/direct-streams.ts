@@ -9,14 +9,12 @@ const SKIP_RE =
   /parseSkipButtons?\(["']([^"']+)["']\s*,\s*["']([^"']+)["']\)/i;
 
 const SOURCE_CACHE_MS = 5 * 60_000;
-const ENDPOINT_CACHE_MS = 2 * 60_000;
 const REQUEST_TIMEOUT_MS = 8_000;
 const DEFAULT_ENDPOINT = "/ftor";
 
 type CacheEntry<T> = { value: T; expiresAt: number };
 
 const sourceCache = new Map<string, CacheEntry<KodikDirectPlayback>>();
-const endpointCache = new Map<string, CacheEntry<string>>();
 
 export type KodikDirectSource = {
   quality: number;
@@ -209,16 +207,12 @@ async function discoverEndpoint(
   playerOrigin: string,
   page: string,
   fetcher: typeof fetch,
-  now: number,
   cookieJar: Map<string, string>,
   playerUrl: string,
-  forceRefresh: boolean,
 ) {
   const scriptPath = page.match(PLAYER_SCRIPT_RE)?.[1];
   if (!scriptPath) return DEFAULT_ENDPOINT;
   const scriptUrl = new URL(scriptPath, playerOrigin).toString();
-  const cached = forceRefresh ? undefined : endpointCache.get(scriptUrl);
-  if (cached && cached.expiresAt > now) return cached.value;
   const response = await request(
     fetcher,
     scriptUrl,
@@ -242,10 +236,6 @@ async function discoverEndpoint(
       "PLAYER_FORMAT_CHANGED",
       "Kodik video endpoint has an invalid format",
     );
-  endpointCache.set(scriptUrl, {
-    value: endpoint,
-    expiresAt: now + ENDPOINT_CACHE_MS,
-  });
   return endpoint;
 }
 
@@ -309,10 +299,8 @@ export async function resolveKodikDirectPlayback(
     parsed.origin,
     page,
     fetcher,
-    now,
     cookieJar,
     parsed.url,
-    options.forceRefresh === true,
   );
   const infoUrl = new URL(endpoint, parsed.origin);
   infoUrl.search = new URLSearchParams({
@@ -380,5 +368,4 @@ export async function resolveKodikDirectPlayback(
 
 export function clearKodikDirectStreamCaches() {
   sourceCache.clear();
-  endpointCache.clear();
 }
