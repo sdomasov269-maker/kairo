@@ -3,17 +3,15 @@
   .watch-workspace-grid {
     grid-template-columns: minmax(0, 73fr) minmax(280px, 27fr);
   }
-  .app-shell-home {
-    --home-page-max: var(--content-max-width);
-  }
-  .app-shell-home .header-inner {
+  .header-inner {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   }
-  .app-shell-home .desktop-nav { justify-self: center; }
-  .app-shell-home .header-actions { justify-self: end; }
-  .home-page .anime-grid {
-    grid-template-columns: repeat(auto-fit, minmax(var(--card-min), 1fr));
+  .desktop-nav {
+    justify-self: center;
+  }
+  .header-actions {
+    justify-self: end;
   }
 }
 
@@ -31,13 +29,23 @@
 @media (min-width: 1920px) {
   .content-section,
   .page-container,
-  .header-inner { max-width: var(--content-max-width); }
+  .header-inner {
+    max-width: var(--content-max-width);
+  }
   .anime-grid,
-  .catalog-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
-  .watch-stage { width: min(calc(100% - var(--gutter) * 2), 1600px); }
-  .watch-information { width: min(calc(100% - var(--gutter) * 2), 1440px); }
+  .catalog-grid {
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  }
+  .watch-stage {
+    width: min(calc(100% - var(--gutter) * 2), 1600px);
+  }
+  .watch-information {
+    width: min(calc(100% - var(--gutter) * 2), 1440px);
+  }
 }
 
 @media (min-width: 2560px) {
-  :root { --page-gutter: clamp(4rem, 4vw, 7rem); }
+  :root {
+    --page-gutter: clamp(4rem, 4vw, 7rem);
+  }
 }

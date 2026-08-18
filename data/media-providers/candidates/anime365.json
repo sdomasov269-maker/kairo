@@ -4,5 +4,7 @@
   "baseUrl": "https://anime365.ru",
   "defaultStatus": "NO_PUBLIC_DOCUMENTATION",
   "declaredPaths": [],
-  "notes": ["No verified public API or authorized embed documentation is configured."]
+  "notes": [
+    "No verified public API or authorized embed documentation is configured."
+  ]
 }

@@ -1,7 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { parseKodikMessage, resolveKodikPlayerOrigin } from "./kodik-player-events";
+import {
+  parseKodikMessage,
+  resolveKodikPlayerOrigin,
+} from "./kodik-player-events";
 import type {
   KodikEpisodeChangeCommand,
   KodikPlayerCallbacks,
@@ -45,7 +48,10 @@ export function useKodikPlayer({
     (value: KodikPlayerCommand) => {
       const targetWindow = iframeRef.current?.contentWindow;
       if (!targetWindow || !targetOrigin) return false;
-      targetWindow.postMessage({ key: "kodik_player_api", value }, targetOrigin);
+      targetWindow.postMessage(
+        { key: "kodik_player_api", value },
+        targetOrigin,
+      );
       return true;
     },
     [iframeRef, targetOrigin],
@@ -69,7 +75,10 @@ export function useKodikPlayer({
           handlers.onPause?.();
           break;
         case "kodik_player_seek":
-          setState((current) => ({ ...current, currentTime: message.value.time }));
+          setState((current) => ({
+            ...current,
+            currentTime: message.value.time,
+          }));
           handlers.onSeek?.(message.value.time);
           break;
         case "kodik_player_time_update":
@@ -130,12 +139,15 @@ export function useKodikPlayer({
   const changeEpisode = useCallback(
     ({ episode, season, withoutReload }: KodikEpisodeChangeCommand) => {
       if (!Number.isInteger(episode) || episode < 0) return false;
-      if (season !== undefined && (!Number.isInteger(season) || season < 0)) return false;
+      if (season !== undefined && (!Number.isInteger(season) || season < 0))
+        return false;
       return sendCommand({
         method: "change_episode",
         episode,
         ...(season === undefined ? {} : { season }),
-        ...(withoutReload === undefined ? {} : { without_reload: withoutReload }),
+        ...(withoutReload === undefined
+          ? {}
+          : { without_reload: withoutReload }),
       });
     },
     [sendCommand],

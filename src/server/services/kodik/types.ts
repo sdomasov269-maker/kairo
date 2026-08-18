@@ -42,14 +42,10 @@ export type KodikResolverInput = {
 };
 
 export type KodikMatchConfidence =
-  | "EXACT_EXTERNAL_ID"
-  | "EXACT_TITLE_AND_YEAR"
-  | "EXACT_TITLE"
-  | "FUZZY_TITLE";
+  "EXACT_EXTERNAL_ID" | "EXACT_TITLE_AND_YEAR" | "EXACT_TITLE" | "FUZZY_TITLE";
 
 export type KodikBlockedSeasons =
-  | "all"
-  | Record<string, "all" | Array<string | number>>;
+  "all" | Record<string, "all" | Array<string | number>>;
 
 export type NormalizedKodikEpisode = {
   number: number;

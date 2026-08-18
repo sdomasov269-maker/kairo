@@ -1,16 +1,6 @@
-export type AppBackgroundVariant =
-  "default" | "discovery" | "detail" | "watch" | "auth";
-
-export function AppBackground({
-  variant = "default",
-}: {
-  variant?: AppBackgroundVariant;
-}) {
+export function AppBackground() {
   return (
-    <div
-      className={`app-background app-background-${variant}`}
-      aria-hidden="true"
-    >
+    <div className="app-background" aria-hidden="true">
       <i />
       <i />
     </div>

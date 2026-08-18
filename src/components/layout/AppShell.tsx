@@ -1,5 +1,4 @@
 import { Footer } from "@/components/layout/Footer";
-import { Header } from "@/components/navigation/Header";
 
 export function AppShell({
   children,
@@ -10,7 +9,6 @@ export function AppShell({
 }) {
   return (
     <div className={`app-shell ${className}`}>
-      <Header />
       {children}
       <Footer />
     </div>

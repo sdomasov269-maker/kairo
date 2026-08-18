@@ -25,8 +25,19 @@ export function KairoUnavailablePlayer({
     >
       <div className="unavailable-player-message">
         <span>KAIRO</span>
-        <h2>{availability === "COMING_SOON" ? t.catalog.episodesNotReleased : t.player.videoUnavailable}</h2>
-        <p>{availability === "COMING_SOON" && availableAt ? new Intl.DateTimeFormat(undefined, { dateStyle: "long", timeStyle: "short" }).format(new Date(availableAt)) : t.player.videoUnavailableDescription}</p>
+        <h2>
+          {availability === "COMING_SOON"
+            ? t.catalog.episodesNotReleased
+            : t.player.videoUnavailable}
+        </h2>
+        <p>
+          {availability === "COMING_SOON" && availableAt
+            ? new Intl.DateTimeFormat(undefined, {
+                dateStyle: "long",
+                timeStyle: "short",
+              }).format(new Date(availableAt))
+            : t.player.videoUnavailableDescription}
+        </p>
         <div>
           <Link
             className="button button-primary"

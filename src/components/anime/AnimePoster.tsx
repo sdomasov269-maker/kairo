@@ -1,11 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { Anime } from "@/types/media";
 import { useLocale } from "@/i18n";
 import { getLocalizedAnimeTitle } from "@/lib/media-localization";
 import { resolveAnimeCover } from "@/lib/catalog/poster";
+import { useKairoWebGLSurface } from "@/components/effects/KairoWebGLSurface";
+import { registerDomImageTarget } from "@/components/webgl/dom-sync/DomTargetRegistry";
 
 interface AnimePosterProps {
   anime: Anime;
@@ -26,6 +28,10 @@ export function AnimePoster({
 }: AnimePosterProps) {
   const [failed, setFailed] = useState(false);
   const [backgroundReady, setBackgroundReady] = useState(false);
+  const [webglSource, setWebglSource] = useState<string | null>(null);
+  const posterRef = useRef<HTMLDivElement>(null);
+  const webglKey = useId();
+  const webglEnabled = useKairoWebGLSurface();
   const { locale } = useLocale();
   const localizedTitle = getLocalizedAnimeTitle(anime, locale);
   const source = resolveAnimeCover(anime);
@@ -33,7 +39,10 @@ export function AnimePoster({
     if (!backgroundMode || !source) return;
     const image = new window.Image();
     if (priority) image.fetchPriority = "high";
-    image.onload = () => setBackgroundReady(true);
+    image.onload = () => {
+      setBackgroundReady(true);
+      setWebglSource(image.currentSrc || source);
+    };
     image.onerror = () => setFailed(true);
     image.src = source;
     return () => {
@@ -41,10 +50,22 @@ export function AnimePoster({
       image.onerror = null;
     };
   }, [backgroundMode, priority, source]);
+  useEffect(() => {
+    const element = posterRef.current;
+    if (
+      !webglEnabled ||
+      !webglSource ||
+      !element ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    )
+      return;
+    return registerDomImageTarget({ key: webglKey, src: webglSource, element });
+  }, [webglEnabled, webglKey, webglSource]);
   const showImage = Boolean(source && !failed);
   const showFallback = !showImage || (backgroundMode && !backgroundReady);
   return (
     <div
+      ref={posterRef}
       className={`poster art-${anime.art} ${className}`}
       style={
         {
@@ -78,6 +99,7 @@ export function AnimePoster({
           sizes={sizes}
           priority={priority}
           className="poster-image"
+          onLoad={(event) => setWebglSource(event.currentTarget.currentSrc)}
           onError={() => setFailed(true)}
         />
       )}
@@ -90,6 +112,7 @@ export function AnimePoster({
           sizes={sizes}
           priority={priority}
           className="poster-image"
+          onLoad={(event) => setWebglSource(event.currentTarget.currentSrc)}
           onError={() => setFailed(true)}
         />
       )}

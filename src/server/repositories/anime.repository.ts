@@ -128,11 +128,36 @@ export async function listAnime() {
   ).map(mapAnimeRecord);
 }
 
+export async function findAnimeByCalendarSeasonPage(
+  season: string,
+  year: number,
+  skip = 0,
+  take = 50,
+) {
+  const where = { season, year };
+  const [total, records] = await prisma.$transaction([
+    prisma.anime.count({ where }),
+    prisma.anime.findMany({
+      where,
+      orderBy: [{ popularity: "desc" }, { rating: "desc" }, { id: "asc" }],
+      skip,
+      take,
+    }),
+  ]);
+  return { total, anime: records.map(mapAnimeRecord) };
+}
+
 export async function findAnimeByAniListIds(anilistIds: number[]) {
   if (!anilistIds.length) return [];
-  const records = await prisma.anime.findMany({ where: { anilistId: { in: anilistIds } } });
+  const records = await prisma.anime.findMany({
+    where: { anilistId: { in: anilistIds } },
+  });
   const order = new Map(anilistIds.map((id, index) => [id, index]));
-  return records.sort((a, b) => (order.get(a.anilistId) ?? 0) - (order.get(b.anilistId) ?? 0)).map(mapAnimeRecord);
+  return records
+    .sort(
+      (a, b) => (order.get(a.anilistId) ?? 0) - (order.get(b.anilistId) ?? 0),
+    )
+    .map(mapAnimeRecord);
 }
 
 export async function findRelatedAnime(anime: Anime, take = 6) {

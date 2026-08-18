@@ -14,6 +14,7 @@ export function getKodikResumePosition(
   entry: WatchProgressEntry | undefined,
 ): number | null {
   if (!entry || entry.completed || entry.currentTime <= 5) return null;
-  if (entry.duration > 0 && entry.currentTime >= entry.duration - 15) return null;
+  if (entry.duration > 0 && entry.currentTime >= entry.duration - 15)
+    return null;
   return entry.currentTime;
 }

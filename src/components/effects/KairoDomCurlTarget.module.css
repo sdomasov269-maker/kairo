@@ -1,0 +1,12 @@
+.target {
+  transform: translate3d(var(--kairo-curl-x, 0), var(--kairo-curl-y, 0), 0)
+    scaleX(var(--kairo-curl-scale-x, 1));
+  transform-origin: center;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .target {
+    transform: none;
+  }
+}

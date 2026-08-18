@@ -1,6 +1,10 @@
 import { z } from "zod";
 
-export const roomCodeSchema = z.string().trim().toUpperCase().regex(/^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{6}$/);
+export const roomCodeSchema = z
+  .string()
+  .trim()
+  .toUpperCase()
+  .regex(/^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{6}$/);
 export const createRoomSchema = z.object({
   animeId: z.string().min(1).max(64),
   slug: z.string().min(1).max(120),
@@ -32,5 +36,9 @@ export const watchPartyStateSchema = z.object({
 });
 export const watchPartyEventSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("ROOM_STATE"), state: watchPartyStateSchema }),
-  z.object({ type: z.literal("ROOM_ENDED"), roomId: z.string().min(1), revision: z.number().int().nonnegative() }),
+  z.object({
+    type: z.literal("ROOM_ENDED"),
+    roomId: z.string().min(1),
+    revision: z.number().int().nonnegative(),
+  }),
 ]);

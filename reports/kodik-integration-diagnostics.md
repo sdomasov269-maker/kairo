@@ -63,18 +63,18 @@ Anime page / Watch page (Server Components)
 
 ## 4. Конфигурация и безопасность
 
-| Проверка | Результат |
-|---|---|
-| `KODIK_API_TOKEN` в `.env.local` | Присутствует, непустой, 49 символов |
-| Кавычки/внешние пробелы | Не обнаружены |
-| System process env | Токен отсутствует; ожидаемо загружается из env-файла Next.js |
-| `NEXT_PUBLIC_KODIK_API_TOKEN` | Использование в коде не найдено |
-| `KODIK_PROVIDER_ENABLED` | `true` |
-| `KODIK_PLAYBACK_ENABLED` | `false` |
-| `KODIK_ALLOWED_EMBED_HOSTS` | Не настроен |
-| Рабочий `configured` | `false` |
-| Токен в логах/CLI | Не выводится; URL очищается до origin + pathname |
-| Запросы из client bundle | Не обнаружены; сервис расположен в `src/server` и импортируется server page/service |
+| Проверка                         | Результат                                                                           |
+| -------------------------------- | ----------------------------------------------------------------------------------- |
+| `KODIK_API_TOKEN` в `.env.local` | Присутствует, непустой, 49 символов                                                 |
+| Кавычки/внешние пробелы          | Не обнаружены                                                                       |
+| System process env               | Токен отсутствует; ожидаемо загружается из env-файла Next.js                        |
+| `NEXT_PUBLIC_KODIK_API_TOKEN`    | Использование в коде не найдено                                                     |
+| `KODIK_PROVIDER_ENABLED`         | `true`                                                                              |
+| `KODIK_PLAYBACK_ENABLED`         | `false`                                                                             |
+| `KODIK_ALLOWED_EMBED_HOSTS`      | Не настроен                                                                         |
+| Рабочий `configured`             | `false`                                                                             |
+| Токен в логах/CLI                | Не выводится; URL очищается до origin + pathname                                    |
+| Запросы из client bundle         | Не обнаружены; сервис расположен в `src/server` и импортируется server page/service |
 
 Отдельный пакет `server-only` в зависимостях отсутствует, поэтому прямой `import "server-only"` не добавлялся: это сломало бы Node unit tests. Эквивалентная граница обеспечивается размещением и цепочкой импортов, но рекомендуется позже добавить автоматическую lint/bundle-проверку.
 
@@ -82,33 +82,33 @@ Anime page / Watch page (Server Components)
 
 Все восемь строк проверены на наличие локальных идентификаторов. Один безопасный CLI-запрос выполнен для Attack on Titan; остальные upstream-поиски сознательно не повторялись, потому что глобальный DNS-блокер возникает до обработки параметров и повторные запросы не дали бы новых доказательств.
 
-| Тайтл | Internal ID | AniList | MAL/Shikimori | Тип/год | Стратегия | Результаты | Релиз/перевод/эпизоды | Статус |
-|---|---|---:|---:|---|---|---:|---|---|
-| Attack on Titan / Атака титанов | `cmsd598qz000li6n4u5toqtac` | 16498 | 16498 | TV, 2013 | shikimori_id | 0 | не получены | NETWORK_ERROR ENOTFOUND |
-| Demon Slayer / Клинок, рассекающий демонов | `cmsd598va002ei6n4561a5ob3` | 101922 | 38000 | TV, 2019 | shikimori_id | n/a | заблокировано DNS | BLOCKED_NETWORK |
-| Death Note / Тетрадь смерти | `cmsd598sz001ei6n4gthxrdiy` | 1535 | 1535 | TV, 2006 | shikimori_id | n/a | заблокировано DNS | BLOCKED_NETWORK |
-| A Silent Voice / Форма голоса | `cmsd5bk940014i6u8cncelw6i` | 20954 | 28851 | Movie, 2016 | shikimori_id | n/a | заблокировано DNS | BLOCKED_NETWORK |
-| Attack on Titan Season 2 | `cmsd5bkd0002ci6u8sqvmhf5b` | 20958 | 25777 | TV, 2017 | shikimori_id | n/a | заблокировано DNS | BLOCKED_NETWORK |
-| One Piece / Ван-Пис | `cmsd4hxly0001i6twagcloiad` | 21 | 21 | TV, 1999, airing | shikimori_id | n/a | заблокировано DNS | BLOCKED_NETWORK |
-| Solo Leveling Season 2 | `cmsd5bk9t001ci6u8bv9x43at` | 176496 | 58567 | TV, 2025 | shikimori_id | n/a | заблокировано DNS | BLOCKED_NETWORK |
-| Jujutsu Kaisen Season 3 | `cmsd598um0024i6n4vgf0i2k6` | 172463 | 57658 | TV, 2026 | shikimori_id | n/a | заблокировано DNS | BLOCKED_NETWORK |
+| Тайтл                                      | Internal ID                 | AniList | MAL/Shikimori | Тип/год          | Стратегия    | Результаты | Релиз/перевод/эпизоды | Статус                  |
+| ------------------------------------------ | --------------------------- | ------: | ------------: | ---------------- | ------------ | ---------: | --------------------- | ----------------------- |
+| Attack on Titan / Атака титанов            | `cmsd598qz000li6n4u5toqtac` |   16498 |         16498 | TV, 2013         | shikimori_id |          0 | не получены           | NETWORK_ERROR ENOTFOUND |
+| Demon Slayer / Клинок, рассекающий демонов | `cmsd598va002ei6n4561a5ob3` |  101922 |         38000 | TV, 2019         | shikimori_id |        n/a | заблокировано DNS     | BLOCKED_NETWORK         |
+| Death Note / Тетрадь смерти                | `cmsd598sz001ei6n4gthxrdiy` |    1535 |          1535 | TV, 2006         | shikimori_id |        n/a | заблокировано DNS     | BLOCKED_NETWORK         |
+| A Silent Voice / Форма голоса              | `cmsd5bk940014i6u8cncelw6i` |   20954 |         28851 | Movie, 2016      | shikimori_id |        n/a | заблокировано DNS     | BLOCKED_NETWORK         |
+| Attack on Titan Season 2                   | `cmsd5bkd0002ci6u8sqvmhf5b` |   20958 |         25777 | TV, 2017         | shikimori_id |        n/a | заблокировано DNS     | BLOCKED_NETWORK         |
+| One Piece / Ван-Пис                        | `cmsd4hxly0001i6twagcloiad` |      21 |            21 | TV, 1999, airing | shikimori_id |        n/a | заблокировано DNS     | BLOCKED_NETWORK         |
+| Solo Leveling Season 2                     | `cmsd5bk9t001ci6u8bv9x43at` |  176496 |         58567 | TV, 2025         | shikimori_id |        n/a | заблокировано DNS     | BLOCKED_NETWORK         |
+| Jujutsu Kaisen Season 3                    | `cmsd598um0024i6n4vgf0i2k6` |  172463 |         57658 | TV, 2026         | shikimori_id |        n/a | заблокировано DNS     | BLOCKED_NETWORK         |
 
 Локальная БД содержит 4207 аниме, из них 3821 имеют `malId`. Отдельного поля Shikimori ID в Prisma нет; текущий подтверждённый код использует MAL ID как значение параметра `shikimori_id`. Параметры `anilist_id`, `myanimelist_id` и прямой upstream title search не добавлялись без подтверждённого контракта API.
 
 ## 6. Выявленные проблемы и журнал
 
-| ID | Severity | Категория | Симптом и причина | Проверка/доказательство | Исправление | Статус |
-|---|---|---|---|---|---|---|
-| KODIK-001 | Critical | API | HTTP, DNS и пустые results превращались в mock `OK` | Unit tests старой логики ожидали mock для 401/network/[] | Удалён mock; добавлена классификация | FIXED |
-| KODIK-002 | Critical | UI | Один публичный embed выдавался как видео любого тайтла | `resolveKodikEmbedUrl` не требовал реальный release | Удалена дефолтная ссылка; iframe только с реальным URL | FIXED |
-| KODIK-003 | High | NETWORK | API и iframe не разрешаются по DNS | `dns.lookup`, TLS и fetch: `ENOTFOUND` | Обход не внедрялся; требуется сеть/DNS | NEEDS_MANUAL_ACTION |
-| KODIK-004 | High | CONFIG | Playback выключен и allowlist пуст | `.env.local`: playback false, hosts absent | Безопасно оставлено выключенным | NEEDS_MANUAL_ACTION |
-| KODIK-005 | High | API | 401/403/429/5xx/timeout не различались | Анализ `requestSearch` | Добавлены отдельные статусы и bounded retry | FIXED |
-| KODIK-006 | High | SCHEMA | Invalid JSON и schema mismatch сливались | Анализ catch вокруг parse | Разделены content-type, JSON, schema и size | FIXED |
-| KODIK-007 | Medium | CONFIG | Endpoint был жёстко задан | URL создавался из literal | Используется `KODIK_API_BASE_URL` с безопасным default | FIXED |
-| KODIK-008 | Medium | TEST | Не было полноценного read-only CLI и exit codes | Существующий `test-kodik.ts` поддерживал только 3 селектора и общий exit 1 | Добавлен `providers:kodik:diagnose` | FIXED |
-| KODIK-009 | High | SECURITY | Письменное разрешение/официальный контракт playback не подтверждены | Существующие policy/docs имеют `PARTNER_ACCESS_REQUIRED` | Код не обходит policy; требуется владелец проекта | NEEDS_MANUAL_ACTION |
-| KODIK-010 | Informational | TEST | Управляемый браузер недоступен | Browser runtime вернул пустой список | Серверные HTTP checks выполнены; browser check отложен | BLOCKED |
+| ID        | Severity      | Категория | Симптом и причина                                                   | Проверка/доказательство                                                    | Исправление                                            | Статус              |
+| --------- | ------------- | --------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------ | ------------------- |
+| KODIK-001 | Critical      | API       | HTTP, DNS и пустые results превращались в mock `OK`                 | Unit tests старой логики ожидали mock для 401/network/[]                   | Удалён mock; добавлена классификация                   | FIXED               |
+| KODIK-002 | Critical      | UI        | Один публичный embed выдавался как видео любого тайтла              | `resolveKodikEmbedUrl` не требовал реальный release                        | Удалена дефолтная ссылка; iframe только с реальным URL | FIXED               |
+| KODIK-003 | High          | NETWORK   | API и iframe не разрешаются по DNS                                  | `dns.lookup`, TLS и fetch: `ENOTFOUND`                                     | Обход не внедрялся; требуется сеть/DNS                 | NEEDS_MANUAL_ACTION |
+| KODIK-004 | High          | CONFIG    | Playback выключен и allowlist пуст                                  | `.env.local`: playback false, hosts absent                                 | Безопасно оставлено выключенным                        | NEEDS_MANUAL_ACTION |
+| KODIK-005 | High          | API       | 401/403/429/5xx/timeout не различались                              | Анализ `requestSearch`                                                     | Добавлены отдельные статусы и bounded retry            | FIXED               |
+| KODIK-006 | High          | SCHEMA    | Invalid JSON и schema mismatch сливались                            | Анализ catch вокруг parse                                                  | Разделены content-type, JSON, schema и size            | FIXED               |
+| KODIK-007 | Medium        | CONFIG    | Endpoint был жёстко задан                                           | URL создавался из literal                                                  | Используется `KODIK_API_BASE_URL` с безопасным default | FIXED               |
+| KODIK-008 | Medium        | TEST      | Не было полноценного read-only CLI и exit codes                     | Существующий `test-kodik.ts` поддерживал только 3 селектора и общий exit 1 | Добавлен `providers:kodik:diagnose`                    | FIXED               |
+| KODIK-009 | High          | SECURITY  | Письменное разрешение/официальный контракт playback не подтверждены | Существующие policy/docs имеют `PARTNER_ACCESS_REQUIRED`                   | Код не обходит policy; требуется владелец проекта      | NEEDS_MANUAL_ACTION |
+| KODIK-010 | Informational | TEST      | Управляемый браузер недоступен                                      | Browser runtime вернул пустой список                                       | Серверные HTTP checks выполнены; browser check отложен | BLOCKED             |
 
 За время проверки база данных не изменялась. Массовые импорты и destructive Prisma-команды не выполнялись.
 
@@ -124,17 +124,17 @@ Anime page / Watch page (Server Components)
 
 ## 8. Изменённые файлы
 
-| Файл | Назначение | Изменение |
-|---|---|---|
-| `src/server/services/kodik.service.ts` | Runtime Kodik | Статусы, retry, timeout, schema, нормализация, safe logging, base URL, no mock |
-| `src/server/services/kodik.service.test.ts` | Unit tests | 15 сценариев ошибок, security, translation и embed validation |
-| `src/app/watch/[slug]/[episode]/page.tsx` | Watch resolver | Удалён универсальный чужой embed; учитывается provider flag и реальный URL |
-| `scripts/provider-kodik-diagnose.ts` | Read-only CLI | Селекторы, локальные ID, JSON/table output, exit codes |
-| `package.json` | npm scripts | Добавлена команда `providers:kodik:diagnose` |
-| `docs/providers/kodik.md` | Документация | Актуализированы статусы и CLI |
-| `scripts/generate-kodik-diagnostics-pdf.py` | PDF generator | Автономная генерация PDF с embedded Arial/Unicode без внешних пакетов |
-| `reports/kodik-integration-diagnostics.html` | Альтернативный print source | Стилизованный HTML source; Edge print был заблокирован sandbox |
-| `reports/kodik-integration-diagnostics.*` | Отчёты | Markdown, JSON и PDF диагностики |
+| Файл                                         | Назначение                  | Изменение                                                                      |
+| -------------------------------------------- | --------------------------- | ------------------------------------------------------------------------------ |
+| `src/server/services/kodik.service.ts`       | Runtime Kodik               | Статусы, retry, timeout, schema, нормализация, safe logging, base URL, no mock |
+| `src/server/services/kodik.service.test.ts`  | Unit tests                  | 15 сценариев ошибок, security, translation и embed validation                  |
+| `src/app/watch/[slug]/[episode]/page.tsx`    | Watch resolver              | Удалён универсальный чужой embed; учитывается provider flag и реальный URL     |
+| `scripts/provider-kodik-diagnose.ts`         | Read-only CLI               | Селекторы, локальные ID, JSON/table output, exit codes                         |
+| `package.json`                               | npm scripts                 | Добавлена команда `providers:kodik:diagnose`                                   |
+| `docs/providers/kodik.md`                    | Документация                | Актуализированы статусы и CLI                                                  |
+| `scripts/generate-kodik-diagnostics-pdf.py`  | PDF generator               | Автономная генерация PDF с embedded Arial/Unicode без внешних пакетов          |
+| `reports/kodik-integration-diagnostics.html` | Альтернативный print source | Стилизованный HTML source; Edge print был заблокирован sandbox                 |
+| `reports/kodik-integration-diagnostics.*`    | Отчёты                      | Markdown, JSON и PDF диагностики                                               |
 
 Prisma schema и миграции не менялись.
 
@@ -166,32 +166,32 @@ Windows.Data.Pdf render-to-PNG validation (18/18 pages)
 
 ## 10. Результаты тестов
 
-| Проверка | Результат |
-|---|---|
-| TypeScript `tsc --noEmit` | PASS |
-| ESLint изменённых файлов | PASS |
-| Полный `npm run lint` | PASS |
-| Kodik unit tests | PASS, 15/15 |
-| Полный test suite | PASS, 143/143 |
-| Diagnostic CLI | Корректный `NETWORK_ERROR`, exit code 4, ENOTFOUND, 3 bounded attempts |
-| Dev server `/` | HTTP 200 |
-| Anime page Bleach | HTTP 200, 382970 bytes |
-| Watch page Bleach episode 1 | HTTP 200, unavailable/local player state, Kodik iframe отсутствует |
-| Browser console/Network | BLOCKED: browser runtime unavailable |
-| Production build Turbopack | Compilation PASS, затем environment `spawn EPERM` |
-| Production build webpack | `spawn EPERM` до компиляции; системное ограничение повторилось |
-| PDF open/page count | PASS, Windows PDF engine, 18 pages |
-| PDF render | PASS, 18/18 PNG pages |
-| PDF visual QA | PASS after one iteration; кириллица, margins, page numbers и wrapping корректны |
+| Проверка                    | Результат                                                                       |
+| --------------------------- | ------------------------------------------------------------------------------- |
+| TypeScript `tsc --noEmit`   | PASS                                                                            |
+| ESLint изменённых файлов    | PASS                                                                            |
+| Полный `npm run lint`       | PASS                                                                            |
+| Kodik unit tests            | PASS, 15/15                                                                     |
+| Полный test suite           | PASS, 143/143                                                                   |
+| Diagnostic CLI              | Корректный `NETWORK_ERROR`, exit code 4, ENOTFOUND, 3 bounded attempts          |
+| Dev server `/`              | HTTP 200                                                                        |
+| Anime page Bleach           | HTTP 200, 382970 bytes                                                          |
+| Watch page Bleach episode 1 | HTTP 200, unavailable/local player state, Kodik iframe отсутствует              |
+| Browser console/Network     | BLOCKED: browser runtime unavailable                                            |
+| Production build Turbopack  | Compilation PASS, затем environment `spawn EPERM`                               |
+| Production build webpack    | `spawn EPERM` до компиляции; системное ограничение повторилось                  |
+| PDF open/page count         | PASS, Windows PDF engine, 18 pages                                              |
+| PDF render                  | PASS, 18/18 PNG pages                                                           |
+| PDF visual QA               | PASS after one iteration; кириллица, margins, page numbers и wrapping корректны |
 
 `spawn EPERM` зафиксирован как ограничение среды. Он не воспроизводится в `tsc`, lint, tests или dev server.
 
 ## 11. Сетевой отчёт
 
-| Target | DNS | TLS | HTTP | Duration | Вывод |
-|---|---|---|---|---:|---|
-| `kodikapi.com` | ENOTFOUND | не начат | не начат | DNS 68 ms, fetch 39 ms | API недоступен из текущей сети |
-| `kodik.info` iframe | ENOTFOUND | не начат | не начат | DNS 48 ms, fetch 3 ms | iframe недоступен из текущей сети |
+| Target              | DNS       | TLS      | HTTP     |               Duration | Вывод                             |
+| ------------------- | --------- | -------- | -------- | ---------------------: | --------------------------------- |
+| `kodikapi.com`      | ENOTFOUND | не начат | не начат | DNS 68 ms, fetch 39 ms | API недоступен из текущей сети    |
+| `kodik.info` iframe | ENOTFOUND | не начат | не начат |  DNS 48 ms, fetch 3 ms | iframe недоступен из текущей сети |
 
 Публичные источники недавно наблюдали DNS-записи `kodikapi.com`, поэтому результат классифицирован как локальная/региональная/временная DNS-недоступность, а не доказанное закрытие домена. IP-адреса в отчёт намеренно не включены. CORS не относится к API-запросу, поскольку он выполняется на сервере. Redirect chain, remote X-Frame-Options и внутреннее видео нельзя проверить до DNS resolution.
 

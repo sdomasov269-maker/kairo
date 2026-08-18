@@ -1,11 +1,6 @@
 export type AnimeTitleLocale = "ru" | "uk";
 export type AnimeTitleSource =
-  | "SHIKIMORI"
-  | "WIKIDATA"
-  | "WIKIPEDIA"
-  | "IMPORTED"
-  | "AI"
-  | "MANUAL";
+  "SHIKIMORI" | "WIKIDATA" | "WIKIPEDIA" | "IMPORTED" | "AI" | "MANUAL";
 
 export type AnimeTitleCandidateInput = {
   anilistId: number;
@@ -31,7 +26,8 @@ export type LocalizedTitleResult = {
 };
 
 export type ProviderLookup = {
-  status: "found" | "not-found" | "ambiguous" | "not-eligible" | "temporary-error";
+  status:
+    "found" | "not-found" | "ambiguous" | "not-eligible" | "temporary-error";
   results: LocalizedTitleResult[];
   diagnostics?: Record<string, unknown>;
 };

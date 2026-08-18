@@ -1,6 +1,12 @@
 "use client";
 
-export function KodikEmbedPlayer({ embedUrl, title }: { embedUrl: string; title: string }) {
+export function KodikEmbedPlayer({
+  embedUrl,
+  title,
+}: {
+  embedUrl: string;
+  title: string;
+}) {
   return (
     <div className="kairo-player kodik-embed-player">
       <iframe

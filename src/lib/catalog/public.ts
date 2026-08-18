@@ -71,9 +71,11 @@ export async function getPublicCatalogResult({
       seasonYear,
       perPage: Math.min(perPage, 50),
     });
-    const anime = await enrichAnimeListWithLocalizedTitles(deduplicate(
-      remote.map(mapAniListAnime).map(applyCanonicalTitleLocalization),
-    ));
+    const anime = await enrichAnimeListWithLocalizedTitles(
+      deduplicate(
+        remote.map(mapAniListAnime).map(applyCanonicalTitleLocalization),
+      ),
+    );
     await writeCatalogSnapshot(key, anime);
     return { anime, source: "live" };
   } catch (error) {
@@ -94,9 +96,11 @@ export async function getPublicCatalogResult({
       perPage,
     });
     if (backup.ok) {
-      const anime = await enrichAnimeListWithLocalizedTitles(deduplicate(
-        backup.data.map(mapJikanAnime).map(applyCanonicalTitleLocalization),
-      ));
+      const anime = await enrichAnimeListWithLocalizedTitles(
+        deduplicate(
+          backup.data.map(mapJikanAnime).map(applyCanonicalTitleLocalization),
+        ),
+      );
       if (anime.length) {
         await writeCatalogSnapshot(key, anime);
         return { anime, source: "backup", errorStatus: error.status };

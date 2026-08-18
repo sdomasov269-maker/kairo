@@ -6,10 +6,13 @@ import {
 } from "./kodik-player-events.ts";
 
 test("parses supported scalar and nested Kodik messages", () => {
-  assert.deepEqual(parseKodikMessage({ key: "kodik_player_time_update", value: 12.5 }), {
-    key: "kodik_player_time_update",
-    value: 12.5,
-  });
+  assert.deepEqual(
+    parseKodikMessage({ key: "kodik_player_time_update", value: 12.5 }),
+    {
+      key: "kodik_player_time_update",
+      value: 12.5,
+    },
+  );
   assert.deepEqual(
     parseKodikMessage({
       key: "kodik_player_current_episode",
@@ -40,7 +43,11 @@ test("rejects unknown and malformed Kodik messages", () => {
   assert.equal(
     parseKodikMessage({
       key: "kodik_player_current_episode",
-      value: { episode: 1, season: 1, translation: { id: "42", title: "Studio" } },
+      value: {
+        episode: 1,
+        season: 1,
+        translation: { id: "42", title: "Studio" },
+      },
     }),
     null,
   );

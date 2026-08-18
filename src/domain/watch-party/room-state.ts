@@ -9,9 +9,11 @@ export function acceptNewerState(
 
 export function expectedPlaybackTime(state: WatchPartyState, now: number) {
   if (!state.playback.playing) return state.playback.currentTime;
-  return state.playback.currentTime +
-    Math.max(0, now - state.playback.updatedAtServerTime) / 1_000 *
-      state.playback.playbackRate;
+  return (
+    state.playback.currentTime +
+    (Math.max(0, now - state.playback.updatedAtServerTime) / 1_000) *
+      state.playback.playbackRate
+  );
 }
 
 export function driftAction(driftSeconds: number) {

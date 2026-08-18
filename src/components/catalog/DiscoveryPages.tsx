@@ -22,6 +22,8 @@ import {
   BrowseFilters,
   useBrowseFilterState,
 } from "@/components/catalog/BrowseFilters";
+import { KairoWebGLSurface } from "@/components/effects/KairoWebGLSurface";
+import { KairoDomCurlTarget } from "@/components/effects/KairoDomCurlTarget";
 
 export function NewReleasesContent({
   anime,
@@ -165,11 +167,11 @@ export function NewReleasesContent({
           onReset={() => router.refresh()}
         />
       ) : visibleAnime.length ? (
-        <div className="anime-grid">
+        <KairoWebGLSurface className="anime-grid">
           {visibleAnime.map((item, index) => (
             <AnimeCard anime={item} index={index} key={item.slug} />
           ))}
-        </div>
+        </KairoWebGLSurface>
       ) : (
         <BrowseEmptyState
           title={t.catalog.empty}
@@ -273,7 +275,7 @@ export function CollectionsContent({
       }
     >
       {visibleCollections.length ? (
-        <div className="system-collection-grid">
+        <KairoWebGLSurface className="system-collection-grid">
           {visibleCollections.map((collection) => {
             const preview = collection.anime.slice(0, 4);
             return (
@@ -294,14 +296,14 @@ export function CollectionsContent({
                     ) : null;
                   })}
                 </div>
-                <div>
+                <KairoDomCurlTarget kind="text">
                   <h2>{t.discovery[collection.titleKey]}</h2>
                   <p>{collection.count}</p>
-                </div>
+                </KairoDomCurlTarget>
               </Link>
             );
           })}
-        </div>
+        </KairoWebGLSurface>
       ) : (
         <BrowseEmptyState
           title={t.catalog.empty}
@@ -337,11 +339,11 @@ export function CollectionDetailContent({
       search={<DiscoverySearch />}
     >
       {anime.length ? (
-        <div className="anime-grid">
+        <KairoWebGLSurface className="anime-grid">
           {anime.map((item, index) => (
             <AnimeCard anime={item} index={index} key={item.slug} />
           ))}
-        </div>
+        </KairoWebGLSurface>
       ) : (
         <EmptyState title={t.discovery.emptyCollection} />
       )}

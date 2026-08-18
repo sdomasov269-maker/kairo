@@ -48,12 +48,15 @@ export function parseKodikMessage(data: unknown): KodikMessage | null {
     case "kodik_player_exit_pip":
       return { key: data.key };
     case "kodik_player_seek":
-      if (!isRecord(data.value) || !isFiniteNumber(data.value.time)) return null;
+      if (!isRecord(data.value) || !isFiniteNumber(data.value.time))
+        return null;
       return { key: data.key, value: { time: data.value.time } };
     case "kodik_player_time_update":
     case "kodik_player_duration_update":
     case "kodik_player_time":
-      return isFiniteNumber(data.value) ? { key: data.key, value: data.value } : null;
+      return isFiniteNumber(data.value)
+        ? { key: data.key, value: data.value }
+        : null;
     case "kodik_player_volume_change":
       if (
         !isRecord(data.value) ||
@@ -70,10 +73,12 @@ export function parseKodikMessage(data: unknown): KodikMessage | null {
       return value ? { key: data.key, value } : null;
     }
     case "kodik_player_speed_change":
-      if (!isRecord(data.value) || !isFiniteNumber(data.value.speed)) return null;
+      if (!isRecord(data.value) || !isFiniteNumber(data.value.speed))
+        return null;
       return { key: data.key, value: { speed: data.value.speed } };
     case "kodik_player_skip_button":
-      if (!isRecord(data.value) || typeof data.value.title !== "string") return null;
+      if (!isRecord(data.value) || typeof data.value.title !== "string")
+        return null;
       return { key: data.key, value: { title: data.value.title } };
     default:
       return null;

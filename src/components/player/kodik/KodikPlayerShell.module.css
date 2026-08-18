@@ -1,26 +1,198 @@
-.shell { position: relative; isolation: isolate; display: grid; grid-template-rows: minmax(0, 1fr) auto; width: 100%; height: 100%; overflow: hidden; border-radius: clamp(18px, 1.55vw, 26px); background: color-mix(in srgb, var(--surface) 72%, #020405); color: #f4f7f5; outline: none; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 10%, rgba(255,255,255,.1)), 0 18px 48px rgba(0,0,0,.2); transform: translateZ(0); }
-.native { grid-template-rows: minmax(0, 1fr); }
-.frame { display: block; min-width: 0; min-height: 0; overflow: hidden; border-radius: inherit; background: color-mix(in srgb, var(--surface) 64%, #020405); }
-.loading { position: absolute; inset: 0 0 58px; display: grid; place-content: center; gap: 10px; text-align: center; color: rgba(244,247,245,.72); pointer-events: none; background: radial-gradient(circle at center, rgba(26,42,40,.72), #050708 72%); transition: opacity 180ms ease; }
-.loading[data-ready="true"] { opacity: 0; visibility: hidden; }
-.spinner { width: 28px; height: 28px; margin: auto; border: 2px solid rgba(255,255,255,.16); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
-.controls { position: relative; z-index: 2; display: grid; gap: 7px; padding: 9px 14px 11px; background: linear-gradient(180deg, rgba(5,7,8,.74), rgba(5,7,8,.98)); transition: opacity 220ms ease, transform 220ms ease; }
-.hidden { opacity: 0; }
-.timeline { width: 100%; height: 16px; margin: 0; accent-color: var(--accent); cursor: pointer; }
-.row { display: flex; min-width: 0; align-items: center; gap: 8px; }
-.button { display: inline-grid; width: 36px; height: 36px; flex: 0 0 auto; place-items: center; border: 0; border-radius: 10px; color: inherit; background: transparent; cursor: pointer; }
-.button:hover, .button:focus-visible { color: var(--accent); background: rgba(255,255,255,.09); outline: 2px solid transparent; }
-.button svg { width: 19px; height: 19px; }
-.time { min-width: 92px; color: rgba(244,247,245,.72); font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.volume { width: 76px; accent-color: var(--accent); }
-.spacer { flex: 1; }
-.speed { min-width: 42px; width: auto; padding-inline: 8px; font-size: 12px; font-weight: 700; }
-.menuWrap { position: relative; }
-.menu { position: absolute; right: 0; bottom: calc(100% + 10px); display: grid; min-width: 150px; padding: 6px; border: 1px solid rgba(255,255,255,.12); border-radius: 12px; background: rgba(10,14,15,.98); box-shadow: 0 18px 50px rgba(0,0,0,.4); }
-.menu button { padding: 9px 12px; border: 0; border-radius: 8px; color: inherit; text-align: left; background: transparent; cursor: pointer; }
-.menu button:hover, .menu button:focus-visible, .menu .active { color: var(--accent); background: rgba(255,255,255,.08); outline: none; }
-.shell:fullscreen { width: 100vw; height: 100vh; border-radius: 0; box-shadow: none; }
-.shell:fullscreen .frame { height: 100%; }
-@keyframes spin { to { transform: rotate(360deg); } }
-@media (max-width: 640px) { .controls { padding-inline: 8px; } .button { width: 40px; height: 40px; } .volume { display: none; } .time { min-width: 74px; font-size: 11px; } }
-@media (prefers-reduced-motion: reduce) { .controls, .loading { transition: none; } .spinner { animation: none; } }
+.shell {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: clamp(18px, 1.55vw, 26px);
+  background: color-mix(in srgb, var(--surface) 72%, #020405);
+  color: #f4f7f5;
+  outline: none;
+  box-shadow:
+    inset 0 0 0 1px
+      color-mix(in srgb, var(--accent) 10%, rgba(255, 255, 255, 0.1)),
+    0 18px 48px rgba(0, 0, 0, 0.2);
+  transform: translateZ(0);
+}
+.native {
+  grid-template-rows: minmax(0, 1fr);
+}
+.frame {
+  display: block;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--surface) 64%, #020405);
+}
+.loading {
+  position: absolute;
+  inset: 0 0 58px;
+  display: grid;
+  place-content: center;
+  gap: 10px;
+  text-align: center;
+  color: rgba(244, 247, 245, 0.72);
+  pointer-events: none;
+  background: radial-gradient(
+    circle at center,
+    rgba(26, 42, 40, 0.72),
+    #050708 72%
+  );
+  transition: opacity 180ms ease;
+}
+.loading[data-ready="true"] {
+  opacity: 0;
+  visibility: hidden;
+}
+.spinner {
+  width: 28px;
+  height: 28px;
+  margin: auto;
+  border: 2px solid rgba(255, 255, 255, 0.16);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+.controls {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: 7px;
+  padding: 9px 14px 11px;
+  background: linear-gradient(180deg, rgba(5, 7, 8, 0.74), rgba(5, 7, 8, 0.98));
+  transition:
+    opacity 220ms ease,
+    transform 220ms ease;
+}
+.hidden {
+  opacity: 0;
+}
+.timeline {
+  width: 100%;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+}
+.button {
+  display: inline-grid;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  border-radius: 10px;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+.button:hover,
+.button:focus-visible {
+  color: var(--accent);
+  background: rgba(255, 255, 255, 0.09);
+  outline: 2px solid transparent;
+}
+.button svg {
+  width: 19px;
+  height: 19px;
+}
+.time {
+  min-width: 92px;
+  color: rgba(244, 247, 245, 0.72);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.volume {
+  width: 76px;
+  accent-color: var(--accent);
+}
+.spacer {
+  flex: 1;
+}
+.speed {
+  min-width: 42px;
+  width: auto;
+  padding-inline: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.menuWrap {
+  position: relative;
+}
+.menu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 10px);
+  display: grid;
+  min-width: 150px;
+  padding: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: rgba(10, 14, 15, 0.98);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4);
+}
+.menu button {
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 8px;
+  color: inherit;
+  text-align: left;
+  background: transparent;
+  cursor: pointer;
+}
+.menu button:hover,
+.menu button:focus-visible,
+.menu .active {
+  color: var(--accent);
+  background: rgba(255, 255, 255, 0.08);
+  outline: none;
+}
+.shell:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  border-radius: 0;
+  box-shadow: none;
+}
+.shell:fullscreen .frame {
+  height: 100%;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (max-width: 640px) {
+  .controls {
+    padding-inline: 8px;
+  }
+  .button {
+    width: 40px;
+    height: 40px;
+  }
+  .volume {
+    display: none;
+  }
+  .time {
+    min-width: 74px;
+    font-size: 11px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .controls,
+  .loading {
+    transition: none;
+  }
+  .spinner {
+    animation: none;
+  }
+}

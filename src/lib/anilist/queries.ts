@@ -33,3 +33,28 @@ export const DISCOVERY_PAGE = `query (
       season: $season, seasonYear: $seasonYear) { ${MEDIA_FIELDS} }
   }
 }`;
+
+const AIRING_MEDIA_FIELDS = `
+  id idMal type isAdult title { romaji english native } description
+  coverImage { extraLarge large medium color } bannerImage genres
+  averageScore meanScore popularity trending episodes duration season seasonYear
+  format status countryOfOrigin source synonyms
+  studios(isMain: true) { nodes { name isAnimationStudio } }
+  nextAiringEpisode { airingAt episode }
+  trailer { id site thumbnail }
+`;
+
+export const AIRING_SCHEDULE_PAGE = `query (
+  $page: Int, $perPage: Int, $airingAtGreater: Int, $airingAtLesser: Int
+) {
+  Page(page: $page, perPage: $perPage) {
+    pageInfo { hasNextPage }
+    airingSchedules(
+      airingAt_greater: $airingAtGreater,
+      airingAt_lesser: $airingAtLesser
+    ) {
+      id airingAt episode
+      media { ${AIRING_MEDIA_FIELDS} }
+    }
+  }
+}`;

@@ -2,7 +2,11 @@ export type AnimeIndexRecord = {
   anilistId: number;
   malId: number | null;
   slug: string;
-  titles: { romaji: string | null; english: string | null; native: string | null };
+  titles: {
+    romaji: string | null;
+    english: string | null;
+    native: string | null;
+  };
   synonyms: string[];
   format: string | null;
   status: string | null;

@@ -22,9 +22,16 @@ import {
 } from "@/lib/jikan";
 import { applyCanonicalTitleLocalization } from "@/lib/media-localization";
 import type { Anime } from "@/types/media";
-import { enrichAnimeListWithLocalizedTitles, enrichAnimeWithLocalizedTitles } from "@/server/services/anime-title-enrichment.service";
+import {
+  enrichAnimeListWithLocalizedTitles,
+  enrichAnimeWithLocalizedTitles,
+} from "@/server/services/anime-title-enrichment.service";
 import { getRuntimeAnime, getRuntimeMalAnime } from "./runtime-catalog";
-import { findAnimeByAniListId, findAnimeBySlug, findRelatedAnime } from "@/server/repositories/anime.repository";
+import {
+  findAnimeByAniListId,
+  findAnimeBySlug,
+  findRelatedAnime,
+} from "@/server/repositories/anime.repository";
 import { findDatabaseAnimeForRoute } from "./local-first";
 
 const titleFromSlug = (slug: string) =>
@@ -236,10 +243,12 @@ export async function resolveRelatedAnime(anime: Anime): Promise<Anime[]> {
   if (!anime.anilistId) return [];
   try {
     const related = await getRelatedAnime(anime.anilistId);
-    return enrichAnimeListWithLocalizedTitles(related
-      .slice(0, 6)
-      .map(mapAniListAnime)
-      .map(applyCanonicalTitleLocalization));
+    return enrichAnimeListWithLocalizedTitles(
+      related
+        .slice(0, 6)
+        .map(mapAniListAnime)
+        .map(applyCanonicalTitleLocalization),
+    );
   } catch (error) {
     if (error instanceof AniListRequestError) return [];
     throw error;

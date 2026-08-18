@@ -9,7 +9,10 @@ export function validateServerEnv(): void {
   if (!(process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET)) {
     required.push("NEXTAUTH_SECRET (or AUTH_SECRET)");
   }
-  if (process.env.KODIK_PROVIDER_ENABLED === "true" && !process.env.KODIK_API_TOKEN) {
+  if (
+    process.env.KODIK_PROVIDER_ENABLED === "true" &&
+    !process.env.KODIK_API_TOKEN
+  ) {
     required.push("KODIK_API_TOKEN");
   }
   if (
@@ -23,7 +26,9 @@ export function validateServerEnv(): void {
     name.includes("(") ? true : !process.env[name]?.trim(),
   );
   if (missing.length) {
-    throw new Error(`Missing required production environment variables: ${missing.join(", ")}`);
+    throw new Error(
+      `Missing required production environment variables: ${missing.join(", ")}`,
+    );
   }
   validated = true;
 }
