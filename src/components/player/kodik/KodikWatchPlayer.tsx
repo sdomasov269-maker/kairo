@@ -1,15 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useAccountData } from "@/components/data/AccountDataProvider";
+import { useLocale } from "@/i18n";
 import { PlayerLoader } from "../PlayerLoader";
-import { KodikPlayerShell } from "./KodikPlayerShell";
 import type { KodikPlayerHandle } from "./kodik-player.types";
 import type { KodikWatchPlaybackDto } from "./kodik-watch.types";
-import {
-  getKodikResumePosition,
-  shouldPersistKodikProgress,
-} from "./kodik-watch-progress";
 
 export type DirectPlayback = {
   sources: { quality: number; url: string; mimeType: string }[];
@@ -64,24 +59,8 @@ export function KodikWatchPlayer({
     playback: DirectPlayback;
   } | null;
 }) {
-  const { progress, upsertProgress } = useAccountData();
-  const playerRef = useRef<KodikPlayerHandle>(null);
+  const { dictionary: t } = useLocale();
   const currentTimeRef = useRef(0);
-  const durationRef = useRef(0);
-  const lastSavedAtRef = useRef(0);
-  const resumedRef = useRef(false);
-  const reportedEpisodeRef = useRef(playback.episode);
-  useEffect(() => {
-    lastSavedAtRef.current = Date.now();
-  }, []);
-  const saved = progress.find(
-    (entry) =>
-      entry.animeSlug === animeSlug &&
-      entry.seasonNumber === seasonNumber &&
-      entry.episodeNumber === episodeNumber,
-  );
-  const resumePositionRef = useRef<number | null>(null);
-  const resumePosition = getKodikResumePosition(saved);
   const matchingInitialPlayback =
     initialDirectPlayback?.playerLink === playback.playerLink
       ? initialDirectPlayback.playback
@@ -91,6 +70,7 @@ export function KodikWatchPlayer({
   );
   const [directUnavailable, setDirectUnavailable] = useState(false);
   const [loadingDirect, setLoadingDirect] = useState(!matchingInitialPlayback);
+  const [automaticRetryCount, setAutomaticRetryCount] = useState(0);
   const refreshAttemptedRef = useRef(false);
   const requestRef = useRef<AbortController | null>(null);
   const [manifestUrl, setManifestUrl] = useState<string | null>(null);
@@ -101,6 +81,7 @@ export function KodikWatchPlayer({
       const controller = new AbortController();
       requestRef.current = controller;
       setLoadingDirect(true);
+      setDirectUnavailable(false);
       try {
         const attempts = forceRefresh ? [true] : [false, true];
         let lastError: unknown;
@@ -123,6 +104,7 @@ export function KodikWatchPlayer({
               throw new Error("Kodik streams: empty response");
             setDirectPlayback(payload);
             setDirectUnavailable(false);
+            setAutomaticRetryCount(0);
             return;
           } catch (error) {
             if (controller.signal.aborted) return;
@@ -146,6 +128,7 @@ export function KodikWatchPlayer({
     refreshAttemptedRef.current = false;
     if (matchingInitialPlayback) return;
     const frame = window.requestAnimationFrame(() => {
+      setAutomaticRetryCount(0);
       void loadDirectPlayback();
     });
     return () => {
@@ -153,6 +136,18 @@ export function KodikWatchPlayer({
       requestRef.current?.abort();
     };
   }, [loadDirectPlayback, matchingInitialPlayback]);
+
+  useEffect(() => {
+    if (!directUnavailable || automaticRetryCount >= 3) return;
+    const timeout = window.setTimeout(
+      () => {
+        setAutomaticRetryCount((count) => count + 1);
+        void loadDirectPlayback(true);
+      },
+      1_500 * 2 ** automaticRetryCount,
+    );
+    return () => window.clearTimeout(timeout);
+  }, [automaticRetryCount, directUnavailable, loadDirectPlayback]);
 
   useEffect(() => {
     if (!directPlayback) return;
@@ -212,40 +207,6 @@ export function KodikWatchPlayer({
     ],
   );
 
-  useEffect(() => {
-    resumePositionRef.current = resumePosition;
-  }, [resumePosition]);
-
-  const saveProgress = useCallback(
-    (completed = false) => {
-      const duration = durationRef.current;
-      if (!Number.isFinite(duration) || duration <= 0) return;
-      const currentTime = currentTimeRef.current;
-      upsertProgress({
-        animeSlug,
-        seasonNumber,
-        episodeNumber,
-        currentTime,
-        duration,
-        updatedAt: new Date().toISOString(),
-        completed: completed || currentTime / duration >= 0.93,
-      });
-      lastSavedAtRef.current = Date.now();
-    },
-    [animeSlug, episodeNumber, seasonNumber, upsertProgress],
-  );
-  const saveProgressRef = useRef(saveProgress);
-  useEffect(() => {
-    saveProgressRef.current = saveProgress;
-  }, [saveProgress]);
-
-  const resumeWhenReady = useCallback(() => {
-    if (resumedRef.current) return;
-    const position = resumePositionRef.current;
-    if (position === null) return;
-    if (playerRef.current?.seek(position)) resumedRef.current = true;
-  }, []);
-
   const directPartyEvents = useMemo(
     () => ({
       ...partyEvents,
@@ -257,25 +218,6 @@ export function KodikWatchPlayer({
     [partyEvents],
   );
 
-  useEffect(() => {
-    onHandle?.(playerRef.current);
-    return () => onHandle?.(null);
-  }, [onHandle]);
-
-  useEffect(() => {
-    const onPageHide = () => saveProgressRef.current();
-    const onVisibility = () => {
-      if (document.visibilityState === "hidden") saveProgressRef.current();
-    };
-    window.addEventListener("pagehide", onPageHide);
-    document.addEventListener("visibilitychange", onVisibility);
-    return () => {
-      saveProgressRef.current();
-      window.removeEventListener("pagehide", onPageHide);
-      document.removeEventListener("visibilitychange", onVisibility);
-    };
-  }, []);
-
   if (directEpisode && !directUnavailable) {
     return (
       <PlayerLoader
@@ -284,13 +226,7 @@ export function KodikWatchPlayer({
         seasonNumber={seasonNumber}
         onHandle={onHandle}
         partyEvents={directPartyEvents}
-        onPlaybackError={(reason) => {
-          resumePositionRef.current = currentTimeRef.current;
-          resumedRef.current = false;
-          if (reason === "stall") {
-            setDirectUnavailable(true);
-            return;
-          }
+        onPlaybackError={() => {
           if (refreshAttemptedRef.current) {
             setDirectUnavailable(true);
             return;
@@ -306,40 +242,27 @@ export function KodikWatchPlayer({
     return (
       <div className="kairo-player kodik-embed-player player-loading">
         <i />
-        <p>Подготовка видео…</p>
+        <p>{t.player.preparing}…</p>
       </div>
     );
   }
 
   return (
-    <div className="kairo-player kodik-embed-player">
-      <KodikPlayerShell
-        ref={playerRef}
-        src={playback.playerLink}
-        title={title}
-        onPlay={partyEvents?.onPlay}
-        onPause={() => {
-          saveProgress();
-          partyEvents?.onPause?.();
-        }}
-        onSeek={partyEvents?.onSeek}
-        onTimeUpdate={(time) => {
-          currentTimeRef.current = time;
-          partyEvents?.onTimeUpdate?.(time);
-          if (shouldPersistKodikProgress(lastSavedAtRef.current, Date.now()))
-            saveProgress();
-        }}
-        onDurationUpdate={(duration) => {
-          durationRef.current = duration;
-          resumeWhenReady();
-        }}
-        onVideoStarted={resumeWhenReady}
-        onEnded={() => saveProgress(true)}
-        onSpeedChange={partyEvents?.onSpeedChange}
-        onEpisodeChange={(episode) => {
-          reportedEpisodeRef.current = episode.episode;
-        }}
-      />
+    <div className="kairo-player kodik-embed-player player-error" role="alert">
+      <p>{t.player.loadError}</p>
+      <div>
+        <button
+          className="button button-primary"
+          type="button"
+          onClick={() => {
+            refreshAttemptedRef.current = false;
+            setAutomaticRetryCount(0);
+            void loadDirectPlayback(true);
+          }}
+        >
+          {t.player.retry}
+        </button>
+      </div>
     </div>
   );
 }
