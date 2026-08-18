@@ -24,7 +24,11 @@ export type DirectPlayback = {
 };
 
 function buildMasterPlaylist(sources: DirectPlayback["sources"]) {
-  const lines = ["#EXTM3U", "#EXT-X-VERSION:3"];
+  const lines = [
+    "#EXTM3U",
+    "#EXT-X-VERSION:3",
+    "#EXT-X-INDEPENDENT-SEGMENTS",
+  ];
   for (const source of sources) {
     const width = Math.round((source.quality * 16) / 9 / 2) * 2;
     const bandwidth = Math.max(350_000, source.quality * source.quality * 5);
