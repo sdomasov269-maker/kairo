@@ -106,28 +106,36 @@ export function KodikWatchPlayer({
       requestRef.current = controller;
       setLoadingDirect(true);
       try {
-        const response = await fetch("/api/kodik/streams", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            playerLink: playback.playerLink,
-            forceRefresh,
-          }),
-          cache: "no-store",
-          signal: controller.signal,
-        });
-        if (!response.ok) throw new Error(`Kodik streams: ${response.status}`);
-        const payload = (await response.json()) as DirectPlayback;
-        if (!Array.isArray(payload.sources) || !payload.sources.length)
-          throw new Error("Kodik streams: empty response");
-        setDirectPlayback(payload);
-        setDirectUnavailable(false);
+        const attempts = forceRefresh ? [true] : [false, true];
+        let lastError: unknown;
+        for (const refresh of attempts) {
+          try {
+            const response = await fetch("/api/kodik/streams", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({
+                playerLink: playback.playerLink,
+                forceRefresh: refresh,
+              }),
+              cache: "no-store",
+              signal: controller.signal,
+            });
+            if (!response.ok)
+              throw new Error(`Kodik streams: ${response.status}`);
+            const payload = (await response.json()) as DirectPlayback;
+            if (!Array.isArray(payload.sources) || !payload.sources.length)
+              throw new Error("Kodik streams: empty response");
+            setDirectPlayback(payload);
+            setDirectUnavailable(false);
+            return;
+          } catch (error) {
+            if (controller.signal.aborted) return;
+            lastError = error;
+          }
+        }
+        throw lastError;
       } catch (error) {
         if (controller.signal.aborted) return;
-        if (!forceRefresh) {
-          void loadDirectPlayback(true);
-          return;
-        }
         if (process.env.NODE_ENV === "development")
           console.warn("[Kairo player] Direct Kodik playback unavailable", error);
         setDirectUnavailable(true);
