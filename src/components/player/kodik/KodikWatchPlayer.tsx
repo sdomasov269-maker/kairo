@@ -11,7 +11,7 @@ import {
   shouldPersistKodikProgress,
 } from "./kodik-watch-progress";
 
-type DirectPlayback = {
+export type DirectPlayback = {
   sources: { quality: number; url: string; mimeType: string }[];
   chapters: {
     id: string;
@@ -44,6 +44,7 @@ export function KodikWatchPlayer({
   title,
   onHandle,
   partyEvents,
+  initialDirectPlayback,
 }: {
   playback: KodikWatchPlaybackDto;
   animeSlug: string;
@@ -58,6 +59,10 @@ export function KodikWatchPlayer({
     onTimeUpdate?: (time: number) => void;
     onSpeedChange?: (speed: number) => void;
   };
+  initialDirectPlayback?: {
+    playerLink: string;
+    playback: DirectPlayback;
+  } | null;
 }) {
   const { progress, upsertProgress } = useAccountData();
   const playerRef = useRef<KodikPlayerHandle>(null);
@@ -77,10 +82,15 @@ export function KodikWatchPlayer({
   );
   const resumePositionRef = useRef<number | null>(null);
   const resumePosition = getKodikResumePosition(saved);
-  const [directPlayback, setDirectPlayback] =
-    useState<DirectPlayback | null>(null);
+  const matchingInitialPlayback =
+    initialDirectPlayback?.playerLink === playback.playerLink
+      ? initialDirectPlayback.playback
+      : null;
+  const [directPlayback, setDirectPlayback] = useState<DirectPlayback | null>(
+    matchingInitialPlayback,
+  );
   const [directUnavailable, setDirectUnavailable] = useState(false);
-  const [loadingDirect, setLoadingDirect] = useState(true);
+  const [loadingDirect, setLoadingDirect] = useState(!matchingInitialPlayback);
   const refreshAttemptedRef = useRef(false);
   const requestRef = useRef<AbortController | null>(null);
   const [manifestUrl, setManifestUrl] = useState<string | null>(null);
@@ -122,6 +132,7 @@ export function KodikWatchPlayer({
 
   useEffect(() => {
     refreshAttemptedRef.current = false;
+    if (matchingInitialPlayback) return;
     const frame = window.requestAnimationFrame(() => {
       void loadDirectPlayback();
     });
@@ -129,7 +140,7 @@ export function KodikWatchPlayer({
       window.cancelAnimationFrame(frame);
       requestRef.current?.abort();
     };
-  }, [loadDirectPlayback]);
+  }, [loadDirectPlayback, matchingInitialPlayback]);
 
   useEffect(() => {
     if (!directPlayback) return;
