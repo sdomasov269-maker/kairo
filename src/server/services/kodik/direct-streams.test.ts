@@ -60,10 +60,18 @@ test("resolveKodikDirectPlayback discovers endpoint, decodes sources, chapters, 
     <script src="/assets/js/app.player_single.abc123.js"></script>
   `;
   const calls: string[] = [];
-  const fetcher = (async (input: string | URL | Request) => {
+  const requestInits: (RequestInit | undefined)[] = [];
+  const fetcher = (async (
+    input: string | URL | Request,
+    init?: RequestInit,
+  ) => {
     const url = input.toString();
     calls.push(url);
-    if (url === playerLink) return new Response(page);
+    requestInits.push(init);
+    if (url === playerLink)
+      return new Response(page, {
+        headers: { "set-cookie": "kodik_session=session-value; Path=/; HttpOnly" },
+      });
     if (url.endsWith("app.player_single.abc123.js"))
       return new Response(`$.ajax({type:"POST",url:atob("L2Z0b3I=")})`);
     if (url.includes("/ftor?"))
@@ -108,6 +116,11 @@ test("resolveKodikDirectPlayback discovers endpoint, decodes sources, chapters, 
     },
   ]);
   assert.equal(calls.length, 3);
+  assert.equal(requestInits[2]?.method, "POST");
+  const infoHeaders = new Headers(requestInits[2]?.headers);
+  assert.equal(infoHeaders.get("cookie"), "kodik_session=session-value");
+  assert.equal(infoHeaders.get("origin"), "https://kodikplayer.com");
+  assert.equal(infoHeaders.get("referer"), playerLink);
 
   const cached = await resolveKodikDirectPlayback(playerLink, {
     fetcher,
