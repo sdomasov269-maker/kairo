@@ -134,5 +134,5 @@ test("resolveKodikDirectPlayback discovers endpoint, decodes sources, chapters, 
     forceRefresh: true,
     now: () => 3_000,
   });
-  assert.equal(calls.length, 5);
+  assert.equal(calls.length, 6);
 });

@@ -9,7 +9,7 @@ const SKIP_RE =
   /parseSkipButtons?\(["']([^"']+)["']\s*,\s*["']([^"']+)["']\)/i;
 
 const SOURCE_CACHE_MS = 5 * 60_000;
-const ENDPOINT_CACHE_MS = 6 * 60 * 60_000;
+const ENDPOINT_CACHE_MS = 2 * 60_000;
 const REQUEST_TIMEOUT_MS = 8_000;
 const DEFAULT_ENDPOINT = "/ftor";
 
@@ -212,11 +212,12 @@ async function discoverEndpoint(
   now: number,
   cookieJar: Map<string, string>,
   playerUrl: string,
+  forceRefresh: boolean,
 ) {
   const scriptPath = page.match(PLAYER_SCRIPT_RE)?.[1];
   if (!scriptPath) return DEFAULT_ENDPOINT;
   const scriptUrl = new URL(scriptPath, playerOrigin).toString();
-  const cached = endpointCache.get(scriptUrl);
+  const cached = forceRefresh ? undefined : endpointCache.get(scriptUrl);
   if (cached && cached.expiresAt > now) return cached.value;
   const response = await request(
     fetcher,
@@ -311,6 +312,7 @@ export async function resolveKodikDirectPlayback(
     now,
     cookieJar,
     parsed.url,
+    options.forceRefresh === true,
   );
   const infoUrl = new URL(endpoint, parsed.origin);
   infoUrl.search = new URLSearchParams({
