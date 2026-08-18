@@ -117,20 +117,48 @@ async function request(
   fetcher: typeof fetch,
   input: string | URL,
   init?: RequestInit,
+  cookieJar?: Map<string, string>,
 ) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   try {
-    return await fetcher(input, {
+    const response = await fetcher(input, {
       ...init,
       cache: "no-store",
       signal: controller.signal,
       headers: {
         accept: "text/html,application/json;q=0.9,*/*;q=0.8",
-        "user-agent": "Kairo/1.0 Kodik stream resolver",
+        "accept-language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7",
+        "user-agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
+          "(KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+        ...(cookieJar?.size
+          ? { cookie: [...cookieJar].map(([key, value]) => `${key}=${value}`).join("; ") }
+          : {}),
         ...init?.headers,
       },
     });
+    if (cookieJar) {
+      const headers = response.headers as Headers & {
+        getSetCookie?: () => string[];
+      };
+      const setCookies =
+        headers.getSetCookie?.() ??
+        (headers.get("set-cookie")
+          ?.split(/,(?=\s*[^;,=\s]+=[^;,]*)/g)
+          .map((value) => value.trim()) ??
+          []);
+      for (const setCookie of setCookies) {
+        const pair = setCookie.split(";", 1)[0];
+        const separator = pair.indexOf("=");
+        if (separator <= 0) continue;
+        const key = pair.slice(0, separator).trim();
+        const value = pair.slice(separator + 1).trim();
+        if (value) cookieJar.set(key, value);
+        else cookieJar.delete(key);
+      }
+    }
+    return response;
   } finally {
     clearTimeout(timer);
   }
@@ -182,13 +210,20 @@ async function discoverEndpoint(
   page: string,
   fetcher: typeof fetch,
   now: number,
+  cookieJar: Map<string, string>,
+  playerUrl: string,
 ) {
   const scriptPath = page.match(PLAYER_SCRIPT_RE)?.[1];
   if (!scriptPath) return DEFAULT_ENDPOINT;
   const scriptUrl = new URL(scriptPath, playerOrigin).toString();
   const cached = endpointCache.get(scriptUrl);
   if (cached && cached.expiresAt > now) return cached.value;
-  const response = await request(fetcher, scriptUrl);
+  const response = await request(
+    fetcher,
+    scriptUrl,
+    { headers: { referer: playerUrl } },
+    cookieJar,
+  );
   if (!response.ok)
     throw new KodikDirectStreamError(
       "PLAYER_UNAVAILABLE",
@@ -256,7 +291,8 @@ export async function resolveKodikDirectPlayback(
     if (cached && cached.expiresAt > now) return cached.value;
   }
   const fetcher = options.fetcher ?? fetch;
-  const pageResponse = await request(fetcher, parsed.url);
+  const cookieJar = new Map<string, string>();
+  const pageResponse = await request(fetcher, parsed.url, undefined, cookieJar);
   if (!pageResponse.ok)
     throw new KodikDirectStreamError(
       "PLAYER_UNAVAILABLE",
@@ -273,6 +309,8 @@ export async function resolveKodikDirectPlayback(
     page,
     fetcher,
     now,
+    cookieJar,
+    parsed.url,
   );
   const infoUrl = new URL(endpoint, parsed.origin);
   infoUrl.search = new URLSearchParams({
@@ -280,9 +318,20 @@ export async function resolveKodikDirectPlayback(
     id: parsed.id,
     hash: parsed.hash,
   }).toString();
-  const infoResponse = await request(fetcher, infoUrl, {
-    headers: { accept: "application/json" },
-  });
+  const infoResponse = await request(
+    fetcher,
+    infoUrl,
+    {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        origin: parsed.origin,
+        referer: parsed.url,
+        "x-requested-with": "XMLHttpRequest",
+      },
+    },
+    cookieJar,
+  );
   if (!infoResponse.ok)
     throw new KodikDirectStreamError(
       "VIDEO_INFO_UNAVAILABLE",
