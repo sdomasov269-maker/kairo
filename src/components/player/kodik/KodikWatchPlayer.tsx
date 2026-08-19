@@ -24,6 +24,7 @@ export type DirectPlayback = {
     type: "intro" | "credits";
   }[];
   expiresAt: string;
+  iframeFallbackUrl?: string;
 };
 
 export function KodikWatchPlayer({
@@ -70,6 +71,8 @@ export function KodikWatchPlayer({
   );
   const refreshAttemptedRef = useRef(false);
   const requestGenerationRef = useRef(0);
+  const manualSelectionRef = useRef(false);
+  const playbackIdentity = `${animeSlug}|${seasonNumber}|${episodeNumber}|${playback.translation.id}|${playback.kodikId}`;
 
   const loadDirectPlayback = useCallback(
     async (reason: PlaybackRequestReason) => {
@@ -110,9 +113,10 @@ export function KodikWatchPlayer({
             type: segment.type === "ending" ? "credits" : "intro",
           })),
           expiresAt: new Date(Date.now() + 60_000).toISOString(),
+          iframeFallbackUrl: payload.iframeFallbackUrl,
         });
         setDirectUnavailable(false);
-        if (reason === "initial-load" || reason === "manual-retry")
+        if (reason === "initial-load" && !manualSelectionRef.current)
           setSelectedPlayer("kairo");
       } catch (error) {
         if (process.env.NODE_ENV === "development")
@@ -128,16 +132,20 @@ export function KodikWatchPlayer({
   useEffect(() => {
     refreshAttemptedRef.current = false;
     const frame = window.requestAnimationFrame(() => {
+      manualSelectionRef.current = false;
       setSelectedPlayer(matchingInitialPlayback ? "kairo" : "kodik");
       if (!matchingInitialPlayback) void loadDirectPlayback("initial-load");
     });
     return () => {
       window.cancelAnimationFrame(frame);
     };
-  }, [loadDirectPlayback, matchingInitialPlayback]);
+  // Selection resets only when the playback identity changes, never when the
+  // resolver merely updates the descriptor for the same episode.
+  }, [playbackIdentity]);
 
   const selectPlayer = useCallback((next: PlayerMode) => {
     if (next === selectedPlayer) return;
+    manualSelectionRef.current = true;
     if (process.env.NEXT_PUBLIC_KAIRO_PLAYBACK_DEBUG === "true")
       console.info("[KairoPlayerSelector] SELECT", { from: selectedPlayer, to: next, reason: "user" });
     if (next === "kairo" && !directPlayback) {
@@ -208,10 +216,25 @@ export function KodikWatchPlayer({
     </div>
   );
 
-  if (selectedPlayer === "kairo" && directEpisode && !directUnavailable) {
+  const iframeFallbackUrl = directPlayback?.iframeFallbackUrl ?? playback.playerLink;
+  const canUseKairo = Boolean(directEpisode && !directUnavailable);
+  const canUseKodik = Boolean(iframeFallbackUrl);
+
+  useEffect(() => {
+    if (process.env.NEXT_PUBLIC_KAIRO_PLAYBACK_DEBUG !== "true") return;
+    const renderer = selectedPlayer === "kairo" && canUseKairo ? "hls-kairo" : "kodik-iframe";
+    console.info("[KairoRenderer] MOUNT", {
+      renderer,
+      selectedPlayer,
+      ...(renderer === "hls-kairo" ? { sourcesCount: directPlayback?.sources.length ?? 0 } : { iframeUrlPresent: canUseKodik }),
+    });
+    return () => console.info("[KairoRenderer] UNMOUNT", { renderer });
+  }, [canUseKairo, canUseKodik, directPlayback?.sources.length, selectedPlayer]);
+
+  if (selectedPlayer === "kairo" && canUseKairo) {
     return (
       <div className={styles.root}>{selector}<PlayerLoader
-        episode={directEpisode}
+        episode={directEpisode!}
         directSources={directPlayback?.sources}
         debug={false}
         animeTitle={title}
@@ -230,7 +253,7 @@ export function KodikWatchPlayer({
     );
   }
 
-  if (loadingDirect && !directUnavailable) {
+  if (selectedPlayer === "kairo" && loadingDirect && !directUnavailable) {
     return (
       <div className={styles.root}>{selector}<div className="kairo-player kodik-embed-player player-loading">
         <i />
@@ -239,9 +262,9 @@ export function KodikWatchPlayer({
     );
   }
 
-  return (<div className={styles.root}>{selector}<KodikPlayerShell
+  if (selectedPlayer === "kodik" && canUseKodik) return (<div className={styles.root}>{selector}<KodikPlayerShell
       ref={(handle) => onHandle?.(handle)}
-      src={playback.playerLink}
+      src={iframeFallbackUrl}
       title={title}
       onPlay={partyEvents?.onPlay}
       onPause={partyEvents?.onPause}
@@ -249,4 +272,6 @@ export function KodikWatchPlayer({
       onTimeUpdate={partyEvents?.onTimeUpdate}
       onSpeedChange={partyEvents?.onSpeedChange}
     /></div>);
+
+  return <div className={styles.root}>{selector}<p className="player-loading">{t.player.preparing}…</p></div>;
 }
