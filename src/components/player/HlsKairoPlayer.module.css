@@ -59,6 +59,19 @@
 
 .centerPlay svg { width: 25px; height: 25px; margin-left: 3px; }
 
+.skip {
+  position: absolute;
+  right: 18px;
+  bottom: 74px;
+  z-index: 5;
+  padding: 9px 12px;
+  color: #07110e;
+  background: #d7fff4;
+  border: 0;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
 .controls {
   position: absolute;
   inset: auto 0 0;
@@ -148,6 +161,7 @@
   .controlRow { gap: 3px; }
   .time { margin-right: auto; font-size: 10px; }
   .centerPlay { width: 54px; height: 54px; }
+  .skip { right: 10px; bottom: 58px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

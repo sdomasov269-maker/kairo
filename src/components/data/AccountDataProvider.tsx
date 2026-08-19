@@ -246,6 +246,36 @@ export function AccountDataProvider({
     },
     [userId],
   );
+  const upsertProgress = useCallback(
+    (entry: Omit<WatchProgressEntry, "percent">) => {
+      const percent = entry.duration
+        ? Math.min(100, (entry.currentTime / entry.duration) * 100)
+        : 0;
+      const next = { ...entry, percent };
+      if (!userId) {
+        saveWatchProgress(entry);
+        setProgress(getProgressSnapshot().entries);
+        return;
+      }
+      setProgress((old) => [
+        next,
+        ...old.filter(
+          (x) =>
+            !(
+              x.animeSlug === next.animeSlug &&
+              x.seasonNumber === next.seasonNumber &&
+              x.episodeNumber === next.episodeNumber
+            ),
+        ),
+      ]);
+      queue(
+        "progress-upsert",
+        `${entry.animeSlug}:${entry.seasonNumber}:${entry.episodeNumber}`,
+        { ...entry, animeKey: entry.animeSlug },
+      );
+    },
+    [queue, userId],
+  );
   const value = useMemo<ContextValue>(
     () => ({
       mode,
@@ -260,33 +290,7 @@ export function AccountDataProvider({
       pendingCount,
       lastSyncedAt,
       refresh,
-      upsertProgress: (entry) => {
-        const percent = entry.duration
-          ? Math.min(100, (entry.currentTime / entry.duration) * 100)
-          : 0;
-        const next = { ...entry, percent };
-        if (!userId) {
-          saveWatchProgress(entry);
-          setProgress(getProgressSnapshot().entries);
-          return;
-        }
-        setProgress((old) => [
-          next,
-          ...old.filter(
-            (x) =>
-              !(
-                x.animeSlug === next.animeSlug &&
-                x.seasonNumber === next.seasonNumber &&
-                x.episodeNumber === next.episodeNumber
-              ),
-          ),
-        ]);
-        queue(
-          "progress-upsert",
-          `${entry.animeSlug}:${entry.seasonNumber}:${entry.episodeNumber}`,
-          { ...entry, animeKey: entry.animeSlug },
-        );
-      },
+      upsertProgress,
       deleteProgress: (slug, season, episode) => {
         if (!userId) {
           removeWatchProgress(slug, season, episode);
@@ -363,6 +367,7 @@ export function AccountDataProvider({
       syncStatus,
       userId,
       loadedUserId,
+      upsertProgress,
     ],
   );
   return <Context.Provider value={value}>{children}</Context.Provider>;

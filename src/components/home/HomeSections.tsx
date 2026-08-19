@@ -15,7 +15,6 @@ import {
 } from "@/lib/media-localization";
 import { formatReleaseSectionTitle } from "@/lib/release-schedule/labels";
 import { selectContinueWatching } from "@/lib/watch-progress";
-import { mergeSeasonAnimePages } from "@/lib/anime-season/current";
 import { unifiedWatchUrl } from "@/lib/watch-route";
 import type { Anime } from "@/types/media";
 import type { CurrentSeasonResult } from "@/server/services/current-season.service";
@@ -347,33 +346,6 @@ function HomeCurrentSeasonSection({
   currentSeason: CurrentSeasonResult;
 }) {
   const { locale, dictionary: t } = useLocale();
-  const [items, setItems] = useState(currentSeason.anime);
-  const [hasMore, setHasMore] = useState(currentSeason.hasMore);
-  const [nextOffset, setNextOffset] = useState(
-    currentSeason.offset + currentSeason.anime.length,
-  );
-  const [loadStatus, setLoadStatus] = useState<"idle" | "loading" | "error">(
-    "idle",
-  );
-  const loadMore = async () => {
-    if (!hasMore || loadStatus === "loading") return;
-    setLoadStatus("loading");
-    try {
-      const response = await fetch(
-        `/api/current-season?season=${currentSeason.season}&year=${currentSeason.year}&offset=${nextOffset}&limit=24`,
-      );
-      if (!response.ok) throw new Error("Current season request failed");
-      const next = (await response.json()) as CurrentSeasonResult;
-      if (next.status === "error")
-        throw new Error("Current season unavailable");
-      setItems((existing) => mergeSeasonAnimePages(existing, next.anime));
-      setNextOffset(next.offset + next.anime.length);
-      setHasMore(next.hasMore);
-      setLoadStatus("idle");
-    } catch {
-      setLoadStatus("error");
-    }
-  };
   const catalogHref = `/catalog?season=${currentSeason.season}&year=${currentSeason.year}`;
   return (
     <section
@@ -410,27 +382,11 @@ function HomeCurrentSeasonSection({
         <KairoWebGLSurface
           className={`${styles.posterGrid} ${styles.currentSeasonGrid}`}
         >
-          {items.map((item, index) => (
+          {currentSeason.anime.map((item, index) => (
             <AnimeCard anime={item} index={index} compactHover key={item.id} />
           ))}
         </KairoWebGLSurface>
       )}
-      {currentSeason.status === "success" &&
-        (hasMore || loadStatus === "error") && (
-          <div className={styles.loadMoreArea} aria-live="polite">
-            {loadStatus === "error" && (
-              <p>{t.sections.currentSeasonMoreError}</p>
-            )}
-            <button
-              type="button"
-              onClick={() => void loadMore()}
-              disabled={loadStatus === "loading"}
-            >
-              {loadStatus === "loading" ? t.player.loading : t.catalog.showMore}
-              <ArrowRight aria-hidden="true" size={15} />
-            </button>
-          </div>
-        )}
     </section>
   );
 }

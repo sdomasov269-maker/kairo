@@ -1,5 +1,8 @@
 /* Desktop extensions. Wide remains a desktop sub-mode. */
 @media (min-width: 1024px) {
+  .catalog-page .catalog-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
   .watch-workspace-grid {
     grid-template-columns: minmax(0, 73fr) minmax(280px, 27fr);
   }
@@ -12,6 +15,11 @@
   }
   .header-actions {
     justify-self: end;
+  }
+
+  .site-header .header-inner {
+    display: flex;
+    justify-content: space-between;
   }
 }
 
@@ -32,8 +40,7 @@
   .header-inner {
     max-width: var(--content-max-width);
   }
-  .anime-grid,
-  .catalog-grid {
+  .anime-grid {
     grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
   }
   .watch-stage {

@@ -86,7 +86,7 @@ export const en: Dictionary = {
     yesterdayReleases: "Aired yesterday",
     airedOn: "Aired",
     chooseAnotherDay: "Try selecting another day.",
-    currentSeasonAnime: "Anime this season",
+    currentSeasonAnime: "Now and next",
     currentSeasonEmpty: "No titles from this season are available yet.",
     currentSeasonError: "Could not load this season's titles.",
     currentSeasonMoreError: "Could not load more titles.",

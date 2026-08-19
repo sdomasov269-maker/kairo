@@ -1,6 +1,9 @@
 import {
+  belongsToHomeSeasonWindow,
   hasMoreSeasonAnime,
+  selectHomeSeasonWindow,
   resolveCurrentAnimeSeason,
+  resolveNextAnimeSeason,
   type AnimeSeasonSnapshot,
 } from "@/lib/anime-season/current";
 import {
@@ -133,5 +136,50 @@ export async function getSeasonAnimePage(
 }
 
 export function getCurrentSeasonAnime(date: Date = new Date()) {
-  return getSeasonAnimePage(resolveCurrentAnimeSeason(date));
+  const current = resolveCurrentAnimeSeason(date);
+  const next = resolveNextAnimeSeason(date);
+  return getHomeSeasonWindow(current, next);
+}
+
+async function getHomeSeasonWindow(
+  current: AnimeSeasonSnapshot,
+  next: AnimeSeasonSnapshot,
+): Promise<CurrentSeasonResult> {
+  const [currentResult, nextResult] = await Promise.all([
+    getPublicCatalogResult({
+      season: current.season,
+      seasonYear: current.year,
+      sort: "TRENDING_DESC",
+      perPage: 50,
+    }),
+    getPublicCatalogResult({
+      season: next.season,
+      seasonYear: next.year,
+      sort: "TRENDING_DESC",
+      perPage: 50,
+    }),
+  ]);
+  const source = [currentResult.source, nextResult.source].includes("live")
+    ? "live"
+    : [currentResult.source, nextResult.source].includes("snapshot")
+      ? "snapshot"
+      : [currentResult.source, nextResult.source].includes("backup")
+        ? "backup"
+        : "unavailable";
+  const anime = selectHomeSeasonWindow(
+    [...currentResult.anime, ...nextResult.anime].filter((item) =>
+      belongsToHomeSeasonWindow(item, current, next),
+    ),
+    CURRENT_SEASON_PAGE_SIZE,
+  );
+  return {
+    ...current,
+    anime,
+    total: anime.length,
+    offset: 0,
+    limit: CURRENT_SEASON_PAGE_SIZE,
+    hasMore: false,
+    source,
+    status: source === "unavailable" ? "error" : anime.length ? "success" : "empty",
+  };
 }

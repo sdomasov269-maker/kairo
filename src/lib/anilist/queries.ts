@@ -1,7 +1,7 @@
 export const MEDIA_FIELDS = `
   id idMal type title { romaji english native } description
   coverImage { extraLarge large medium color } bannerImage genres
-  averageScore meanScore popularity trending episodes duration season seasonYear
+  averageScore meanScore popularity trending episodes duration season seasonYear endDate { year month day }
   format status countryOfOrigin source synonyms
   studios(isMain: true) { nodes { name isAnimationStudio } }
   nextAiringEpisode { airingAt episode }

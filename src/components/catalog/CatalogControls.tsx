@@ -1,228 +1,189 @@
 "use client";
 
-import { ArrowUpRight, SlidersHorizontal, X } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
-import type { CSSProperties } from "react";
-import { useLocale } from "@/i18n";
-import { updateCatalogParam, type CatalogFilters } from "@/lib/catalog";
-import {
-  localizeFormat,
-  localizeGenre,
-  localizeSeason,
-  localizeStatus,
-} from "@/lib/media-localization";
-import {
-  BrowseFilterPanel,
-  BrowseSearch,
-} from "@/components/catalog/BrowseFilters";
+import { Check, Plus, ChevronDown, X } from "lucide-react";
+import { useEffect, useState, type CSSProperties } from "react";
+import { BrowseSearch } from "@/components/catalog/BrowseFilters";
 import { KairoWebGLSurface } from "@/components/effects/KairoWebGLSurface";
 import { WebGLImageTarget } from "@/components/effects/WebGLImageTarget";
+import { KairoDropdown } from "@/components/ui/KairoDropdown";
+import { useLocale } from "@/i18n";
+import { currentCatalogSeason, type CatalogFilters, type CatalogView } from "@/lib/catalog";
+import { localizeGenre } from "@/lib/media-localization";
 
-const genreOptions = [
-  ["Action", "Боевик"],
-  ["Adventure", "Приключения"],
-  ["Comedy", "Комедия"],
-  ["Drama", "Драма"],
-  ["Fantasy", "Фэнтези"],
-  ["Sci-Fi", "Фантастика"],
-  ["Romance", "Романтика"],
-  ["Mystery", "Мистика"],
-  ["Psychological", "Психологическое"],
-  ["Slice of Life", "Повседневность"],
-  ["Sports", "Спорт"],
-  ["Thriller", "Триллер"],
+const genres = [
+  "Action",
+  "Adventure",
+  "Comedy",
+  "Drama",
+  "Fantasy",
+  "Sci-Fi",
+  "Romance",
+  "Mystery",
+  "Psychological",
+  "Slice of Life",
+  "Sports",
+  "Thriller",
 ] as const;
-const sortOptions = [
-  ["POPULARITY_DESC", "Популярное", "Популярне", "Popular"],
-  ["TRENDING_DESC", "В тренде", "У тренді", "Trending"],
-  ["SCORE_DESC", "По рейтингу", "За рейтингом", "Rating"],
-  ["START_DATE_DESC", "Новые", "Нові", "Newest"],
-  ["START_DATE", "Старые", "Старі", "Oldest"],
-  ["TITLE_ROMAJI", "По названию", "За назвою", "Title"],
-] as const;
-const selectOptions = {
+const options = {
   season: [
-    ["WINTER", "Зима", "Зима", "Winter"],
-    ["SPRING", "Весна", "Весна", "Spring"],
-    ["SUMMER", "Лето", "Літо", "Summer"],
-    ["FALL", "Осень", "Осінь", "Fall"],
+    ["WINTER", "Зима"],
+    ["SPRING", "Весна"],
+    ["SUMMER", "Лето"],
+    ["FALL", "Осень"],
   ],
   format: [
-    ["TV", "Сериал", "Серіал", "TV"],
-    ["MOVIE", "Фильм", "Фільм", "Movie"],
-    ["OVA", "OVA", "OVA", "OVA"],
-    ["ONA", "ONA", "ONA", "ONA"],
-    ["SPECIAL", "Спешл", "Спецвипуск", "Special"],
-    ["TV_SHORT", "Короткометражное", "Короткометражне", "Short"],
+    ["TV", "TV"],
+    ["MOVIE", "Фильм"],
+    ["OVA", "OVA"],
+    ["ONA", "ONA"],
+    ["SPECIAL", "Спешл"],
   ],
   status: [
-    ["RELEASING", "Онгоинг", "Виходить", "Ongoing"],
-    ["FINISHED", "Завершено", "Завершено", "Finished"],
-    ["NOT_YET_RELEASED", "Ещё не вышло", "Ще не вийшло", "Not released"],
-    ["HIATUS", "Приостановлено", "Призупинено", "Hiatus"],
-    ["CANCELLED", "Отменено", "Скасовано", "Cancelled"],
+    ["RELEASING", "Онгоинг"],
+    ["FINISHED", "Завершено"],
+    ["NOT_YET_RELEASED", "Ещё не вышло"],
   ],
 } as const;
+const sorts = [
+  ["POPULARITY_DESC", "Популярное"],
+  ["TRENDING_DESC", "В тренде"],
+  ["SCORE_DESC", "По рейтингу"],
+  ["START_DATE_DESC", "Новые"],
+  ["START_DATE", "Старые"],
+  ["TITLE_ROMAJI", "По названию"],
+] as const;
 
 export function CatalogControls({
   filters,
-  resultCount,
+  view,
+  onChange,
+  onViewChange,
 }: {
   filters: CatalogFilters;
-  resultCount: number;
+  view: CatalogView;
+  onChange: (next: CatalogFilters) => void;
+  onViewChange: (next: CatalogView) => void;
 }) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const { locale, dictionary: t } = useLocale();
   const [query, setQuery] = useState(filters.search ?? "");
-  const [drawer, setDrawer] = useState(false);
-  const queryString = searchParams.toString();
-  const navigate = useCallback(
-    (key: string, value?: string) =>
-      router.push(
-        `${pathname}?${updateCatalogParam(new URLSearchParams(queryString), key, value)}`,
-      ),
-    [pathname, queryString, router],
+  const [advanced, setAdvanced] = useState(
+    Boolean(
+      filters.year ||
+      filters.season ||
+      filters.format ||
+      filters.status ||
+      filters.minimumScore,
+    ),
   );
-
   useEffect(() => {
-    if (query.trim() === (filters.search ?? "")) return;
-    const timer = window.setTimeout(
-      () => navigate("search", query.trim().slice(0, 100) || undefined),
-      220,
-    );
+    const timer = window.setTimeout(() => {
+      if (query.trim() !== (filters.search ?? ""))
+        onChange({ ...filters, search: query.trim() || undefined, page: 1 });
+    }, 300);
     return () => window.clearTimeout(timer);
-  }, [query, filters.search, navigate]);
-
-  const toggleGenre = (genre: string) => {
+  }, [filters, onChange, query]);
+  const update = <K extends keyof CatalogFilters>(
+    key: K,
+    value: CatalogFilters[K],
+  ) => {
+    setAdvanced(true);
+    onChange({ ...filters, [key]: value, page: 1 });
+  };
+  const toggle = (genre: string) => {
     const next = filters.genres.includes(genre)
       ? filters.genres.filter((item) => item !== genre)
       : [...filters.genres, genre];
-    navigate("genres", next.join(",") || undefined);
+    setAdvanced(true);
+    onChange({ ...filters, genres: next, page: 1 });
   };
-  const active = [
-    ...filters.genres.map((value) => ({
-      key: "genres",
-      value,
-      label: localizeGenre(value, locale),
-    })),
-    ...(filters.year
-      ? [
-          {
-            key: "year",
-            value: String(filters.year),
-            label: String(filters.year),
-          },
-        ]
-      : []),
-    ...(filters.season
-      ? [
-          {
-            key: "season",
-            value: filters.season,
-            label: localizeSeason(filters.season, locale),
-          },
-        ]
-      : []),
-    ...(filters.format
-      ? [
-          {
-            key: "format",
-            value: filters.format,
-            label: localizeFormat(filters.format, locale),
-          },
-        ]
-      : []),
-    ...(filters.status
-      ? [
-          {
-            key: "status",
-            value: filters.status,
-            label: localizeStatus(filters.status, locale),
-          },
-        ]
-      : []),
-    ...(filters.minimumScore
-      ? [
-          {
-            key: "score",
-            value: String(filters.minimumScore),
-            label: `${filters.minimumScore / 10}+`,
-          },
-        ]
-      : []),
-  ];
-  const removeChip = (key: string, value: string) =>
-    key === "genres" ? toggleGenre(value) : navigate(key);
-
+  const reset = () => {
+    setQuery("");
+    onViewChange(view);
+  };
+  const current = currentCatalogSeason();
+  const seasons = [0, 1, 2, 3].map((offset) => {
+    const date = new Date(current.year, new Date().getMonth() - offset * 3, 1);
+    return currentCatalogSeason(date);
+  });
+  const labels = {
+    ru: { genres: "По жанру", season: "Этот сезон", episodes: "Новые эпизоды", all: "Все аниме", seasons: "Сезоны", allSeasons: "Все сезоны" },
+    uk: { genres: "За жанром", season: "Цей сезон", episodes: "Нові епізоди", all: "Усе аніме", seasons: "Сезони", allSeasons: "Усі сезони" },
+    en: { genres: "By genre", season: "This season", episodes: "New episodes", all: "All anime", seasons: "Seasons", allSeasons: "All seasons" },
+  }[locale];
+  const seasonName = (season: string) => ({ WINTER: locale === "en" ? "Winter" : locale === "uk" ? "Зима" : "Зима", SPRING: locale === "en" ? "Spring" : locale === "uk" ? "Весна" : "Весна", SUMMER: locale === "en" ? "Summer" : locale === "uk" ? "Літо" : "Лето", FALL: locale === "en" ? "Fall" : locale === "uk" ? "Осінь" : "Осень" })[season] ?? season;
   return (
-    <div className="catalog-controls">
-      <section
-        className="category-navigation"
-        aria-labelledby="category-navigation-title"
-      >
-        <div className="category-navigation-head">
-          <div>
-            <p className="eyebrow">{t.catalog.genres}</p>
-            <h2 id="category-navigation-title">
-              {locale === "ru"
-                ? "Выберите направление"
-                : locale === "uk"
-                  ? "Оберіть напрям"
-                  : "Choose a direction"}
-            </h2>
-          </div>
-          {filters.genres.length > 0 && (
-            <button
-              type="button"
-              className="category-clear"
-              onClick={() => navigate("genres")}
-            >
-              {t.catalog.resetAll}
-            </button>
-          )}
-        </div>
-        <KairoWebGLSurface className="category-tile-grid">
-          {genreOptions.map(([value]) => {
-            const selected = filters.genres.includes(value);
-            const artwork = value.toLowerCase().replaceAll(" ", "-");
-            return (
-              <WebGLImageTarget
-                src={`/images/categories/${artwork}.webp`}
-                key={value}
-              >
-                <button
-                  type="button"
-                  className={`category-tile${selected ? " is-selected" : ""}`}
-                  onClick={() => toggleGenre(value)}
-                  aria-pressed={selected}
-                  style={
-                    {
-                      "--category-art": `url(/images/categories/${artwork}.webp)`,
-                    } as CSSProperties
-                  }
-                >
-                  <span>{localizeGenre(value, locale)}</span>
-                  <ArrowUpRight size={17} aria-hidden="true" />
-                </button>
-              </WebGLImageTarget>
-            );
-          })}
-        </KairoWebGLSurface>
-      </section>
-      <div className="catalog-refine">
-        <div className="catalog-refine-heading">
+    <section
+      className="catalog-discovery-panel category-navigation"
+      aria-labelledby="category-navigation-title"
+    >
+      <div className="category-navigation-head">
+        <div>
           <p className="eyebrow">Kairo index</p>
-          <h2>
-            {locale === "ru"
-              ? "Уточнить выбор"
-              : locale === "uk"
-                ? "Уточнити вибір"
-                : "Refine your selection"}
+          <h2 id="category-navigation-title">
+            {locale === "ru" ? "Выберите направление" : "Choose a direction"}
           </h2>
         </div>
+        {filters.genres.length ||
+        filters.search ||
+        filters.year ||
+        filters.season ||
+        filters.format ||
+        filters.status ||
+        filters.minimumScore ||
+        filters.sort !== "POPULARITY_DESC" ? (
+          <button type="button" className="category-clear" onClick={reset}>
+            {t.catalog.resetAll}
+          </button>
+        ) : null}
+      </div>
+      <div className="catalog-view-switcher" role="group" aria-label={locale === "ru" ? "Режим каталога" : "Catalog view"}>
+        {(["genres", "season", "episodes", "all"] as const).map((item) => (
+          <button key={item} type="button" aria-pressed={view === item} onClick={() => onViewChange(item)}>{labels[item]}</button>
+        ))}
+      </div>
+      <div className="catalog-index-content">
+      <KairoWebGLSurface className="category-tile-grid">
+        {genres.map((genre) => {
+          const selected = filters.genres.includes(genre);
+          const art = genre.toLowerCase().replaceAll(" ", "-");
+          const label = localizeGenre(genre, locale);
+          return (
+            <WebGLImageTarget
+              src={`/images/categories/${art}.webp`}
+              key={genre}
+            >
+              <button
+                type="button"
+                className={
+                  selected ? "category-tile is-selected" : "category-tile"
+                }
+                onClick={() => toggle(genre)}
+                aria-pressed={selected}
+                aria-label={`${selected ? "Убрать" : "Добавить"} жанр ${label}`}
+                style={
+                  {
+                    "--category-art": `url(/images/categories/${art}.webp)`,
+                  } as CSSProperties
+                }
+              >
+                <span>{label}</span>
+                <i className="category-tile-action" aria-hidden="true">
+                  {selected ? <Check size={15} /> : <Plus size={16} />}
+                </i>
+              </button>
+            </WebGLImageTarget>
+          );
+        })}
+      </KairoWebGLSurface>
+      <aside className="catalog-season-rail" aria-label={labels.seasons}>
+        <p>{labels.seasons}</p>
+        {seasons.map(({ season, year }) => (
+          <button key={`${season}-${year}`} type="button" className={filters.season === season && filters.year === year ? "is-selected" : ""} onClick={() => onChange({ ...filters, season, year, status: undefined, sort: "TRENDING_DESC", page: 1 })}>{seasonName(season)} {year}</button>
+        ))}
+        <button type="button" onClick={() => setAdvanced(true)}>{labels.allSeasons} <span aria-hidden="true">→</span></button>
+      </aside>
+      </div>
+      <div className="catalog-discovery-search">
         <BrowseSearch
           id="catalog-search"
           value={query}
@@ -230,150 +191,91 @@ export function CatalogControls({
           placeholder={t.catalog.placeholder}
           clearLabel={t.catalog.clear}
         />
-        <div className="catalog-toolbar">
-          <div className="catalog-filter-summary">
-            <strong>{resultCount}</strong>
-            {active.length > 0 && <span>{active.length}</span>}
-            {active.length > 0 && (
-              <button type="button" onClick={() => router.push("/catalog")}>
-                {t.catalog.resetAll}
-              </button>
-            )}
-          </div>
-          <button className="filter-toggle" onClick={() => setDrawer(true)}>
-            <SlidersHorizontal size={16} />
-            {t.catalog.filters}
-            {active.length > 0 && <span>{active.length}</span>}
-          </button>
+        <button
+          className="catalog-advanced-toggle"
+          type="button"
+          aria-expanded={advanced}
+          onClick={() => setAdvanced((value) => !value)}
+        >
+          <span>{t.catalog.filters}</span>
+          <ChevronDown size={16} aria-hidden="true" />
+        </button>
+      </div>
+      <div
+        className={advanced ? "catalog-advanced is-open" : "catalog-advanced"}
+      >
+        <div className="catalog-advanced-inner filter-selects">
           <label>
-            {t.catalog.sort}
-            <select
-              value={filters.sort}
-              onChange={(event) => navigate("sort", event.target.value)}
-            >
-              {sortOptions.map(([value, ru, uk, en]) => (
-                <option value={value} key={value}>
-                  {locale === "ru" ? ru : locale === "uk" ? uk : en}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-        <BrowseFilterPanel open={drawer}>
-          <div className="filter-panel-head">
-            <strong>{t.catalog.filters}</strong>
-            <button
-              onClick={() => setDrawer(false)}
-              aria-label={t.nav.closeMenu}
-            >
-              <X size={19} />
-            </button>
-          </div>
-          <fieldset>
-            <legend>{t.catalog.genres}</legend>
-            <div className="genre-options">
-              {genreOptions.map(([value]) => (
-                <label key={value}>
-                  <input
-                    type="checkbox"
-                    checked={filters.genres.includes(value)}
-                    onChange={() => toggleGenre(value)}
-                  />
-                  <span>{localizeGenre(value, locale)}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-          <div className="filter-selects">
-            <label>
-              {t.catalog.year}
+            {t.catalog.year}
+            <div className="catalog-year-control">
               <input
-                type="number"
-                min="1940"
-                max={new Date().getFullYear() + 2}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={filters.year ?? ""}
                 onChange={(event) =>
-                  navigate("year", event.target.value || undefined)
+                  update(
+                    "year",
+                    event.target.value ? Number(event.target.value) : undefined,
+                  )
                 }
                 placeholder="2024"
               />
-            </label>
-            {(["season", "format", "status"] as const).map((key) => (
-              <label key={key}>
-                {t.catalog[key]}
-                <select
-                  value={filters[key] ?? ""}
-                  onChange={(event) =>
-                    navigate(key, event.target.value || undefined)
-                  }
+              {filters.year && (
+                <button
+                  type="button"
+                  onClick={() => update("year", undefined)}
+                  aria-label={`${t.catalog.reset} ${t.catalog.year}`}
                 >
-                  <option value="">—</option>
-                  {selectOptions[key].map(([value, ru, uk, en]) => (
-                    <option value={value} key={value}>
-                      {locale === "ru" ? ru : locale === "uk" ? uk : en}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ))}
-            <label>
-              {t.catalog.minimumScore}
-              <select
-                value={filters.minimumScore ?? ""}
-                onChange={(event) =>
-                  navigate("score", event.target.value || undefined)
-                }
-              >
-                {[0, 60, 70, 80, 90].map((score) => (
-                  <option value={score || ""} key={score}>
-                    {score ? `${score / 10}+` : "0+"}
-                  </option>
-                ))}
-              </select>
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+          </label>
+          {(["season", "format", "status"] as const).map((key) => (
+            <label key={key}>
+              {t.catalog[key]}
+              <KairoDropdown
+                ariaLabel={t.catalog[key]}
+                menuMinWidth={key === "status" ? "11rem" : "10.5rem"}
+                value={filters[key] ?? ""}
+                onChange={(value) => update(key, (value || undefined) as never)}
+                options={[
+                  { value: "", label: "—" },
+                  ...options[key].map(([value, label]) => ({ value, label })),
+                ]}
+              />
             </label>
-          </div>
-          <div className="filter-mobile-actions">
-            <button
-              className="button button-secondary"
-              onClick={() => router.push("/catalog")}
-            >
-              {t.catalog.reset}
-            </button>
-            <button
-              className="button button-primary"
-              onClick={() => setDrawer(false)}
-            >
-              {t.catalog.apply}
-            </button>
-          </div>
-        </BrowseFilterPanel>
-        {drawer && (
-          <button
-            className="filter-overlay"
-            aria-label={t.nav.closeMenu}
-            onClick={() => setDrawer(false)}
-          />
-        )}
-        {active.length > 0 && (
-          <div className="active-filters">
-            {active.map((chip) => (
-              <button
-                key={`${chip.key}-${chip.value}`}
-                onClick={() => removeChip(chip.key, chip.value)}
-              >
-                {chip.label}
-                <X size={12} />
-              </button>
-            ))}
-            <button
-              className="reset-filters"
-              onClick={() => router.push("/catalog")}
-            >
-              {t.catalog.resetAll}
-            </button>
-          </div>
-        )}
+          ))}
+          <label>
+            {t.catalog.minimumScore}
+            <KairoDropdown
+              ariaLabel={t.catalog.minimumScore}
+              menuMinWidth="10.5rem"
+              value={String(filters.minimumScore ?? "")}
+              onChange={(value) =>
+                update("minimumScore", value ? Number(value) : undefined)
+              }
+              options={[0, 60, 70, 80, 90].map((value) => ({
+                value: String(value || ""),
+                label: value ? `${value / 10}+` : "0+",
+              }))}
+            />
+          </label>
+          <label>
+            {t.catalog.sort}
+            <KairoDropdown
+              ariaLabel={t.catalog.sort}
+              menuMinWidth="11rem"
+              value={filters.sort}
+              onChange={(value) =>
+                update("sort", value as CatalogFilters["sort"])
+              }
+              options={sorts.map(([value, label]) => ({ value, label }))}
+            />
+          </label>
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

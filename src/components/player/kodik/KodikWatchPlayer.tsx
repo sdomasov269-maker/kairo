@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale } from "@/i18n";
 import { PlayerLoader } from "../PlayerLoader";
+import { KodikPlayerShell } from "./KodikPlayerShell";
 import type { KodikPlayerHandle } from "./kodik-player.types";
 import type { KodikWatchPlaybackDto } from "./kodik-watch.types";
 
@@ -18,18 +19,14 @@ export type DirectPlayback = {
   expiresAt: string;
 };
 
-function buildMasterPlaylist(sources: DirectPlayback["sources"]) {
-  const lines = ["#EXTM3U", "#EXT-X-VERSION:3"];
-  for (const source of sources) {
-    const width = Math.round((source.quality * 16) / 9 / 2) * 2;
-    const bandwidth = Math.max(350_000, source.quality * source.quality * 5);
-    lines.push(
-      `#EXT-X-STREAM-INF:BANDWIDTH=${bandwidth},RESOLUTION=${width}x${source.quality},NAME="${source.quality}p"`,
-      source.url,
-    );
-  }
-  return `${lines.join("\n")}\n`;
-}
+type PlaybackDescriptor =
+  | ({
+      mode: "direct";
+      provider: string;
+      sources: { quality: string; url: string; mimeType: string }[];
+      skipSegments?: { type: "opening" | "ending" | "unknown"; from: number; to: number }[];
+    })
+  | { mode: "kodik-iframe"; provider: "kodik-iframe"; iframeUrl: string };
 
 export function KodikWatchPlayer({
   playback,
@@ -69,15 +66,17 @@ export function KodikWatchPlayer({
     matchingInitialPlayback,
   );
   const [directUnavailable, setDirectUnavailable] = useState(false);
+  const [playbackDebug, setPlaybackDebug] = useState(false);
   const [loadingDirect, setLoadingDirect] = useState(!matchingInitialPlayback);
   const [automaticRetryCount, setAutomaticRetryCount] = useState(0);
   const refreshAttemptedRef = useRef(false);
   const requestRef = useRef<AbortController | null>(null);
-  const [manifestUrl, setManifestUrl] = useState<string | null>(null);
+  const requestGenerationRef = useRef(0);
 
   const loadDirectPlayback = useCallback(
     async (forceRefresh = false) => {
       requestRef.current?.abort();
+      const generation = ++requestGenerationRef.current;
       const controller = new AbortController();
       requestRef.current = controller;
       setLoadingDirect(true);
@@ -99,10 +98,30 @@ export function KodikWatchPlayer({
             });
             if (!response.ok)
               throw new Error(`Kodik streams: ${response.status}`);
-            const payload = (await response.json()) as DirectPlayback;
+            setPlaybackDebug(
+              response.headers.get("x-kairo-playback-debug") === "1",
+            );
+            const payload = (await response.json()) as PlaybackDescriptor;
+            if (controller.signal.aborted || generation !== requestGenerationRef.current)
+              return;
+            if (payload.mode === "kodik-iframe") {
+              setDirectPlayback(null);
+              setDirectUnavailable(true);
+              return;
+            }
             if (!Array.isArray(payload.sources) || !payload.sources.length)
               throw new Error("Kodik streams: empty response");
-            setDirectPlayback(payload);
+            setDirectPlayback({
+              sources: payload.sources.map((source) => ({ ...source, quality: Number(source.quality) })),
+              chapters: (payload.skipSegments ?? []).map((segment, index) => ({
+                id: `kodik-${segment.type}-${index}`,
+                title: segment.type === "ending" ? "Титры" : segment.type === "opening" ? "Заставка" : "Пропустить",
+                startTime: segment.from,
+                endTime: segment.to,
+                type: segment.type === "ending" ? "credits" : "intro",
+              })),
+              expiresAt: new Date(Date.now() + 60_000).toISOString(),
+            });
             setDirectUnavailable(false);
             setAutomaticRetryCount(0);
             return;
@@ -149,23 +168,9 @@ export function KodikWatchPlayer({
     return () => window.clearTimeout(timeout);
   }, [automaticRetryCount, directUnavailable, loadDirectPlayback]);
 
-  useEffect(() => {
-    if (!directPlayback) return;
-    const url = URL.createObjectURL(
-      new Blob([buildMasterPlaylist(directPlayback.sources)], {
-        type: "application/vnd.apple.mpegurl",
-      }),
-    );
-    const frame = window.requestAnimationFrame(() => setManifestUrl(url));
-    return () => {
-      window.cancelAnimationFrame(frame);
-      URL.revokeObjectURL(url);
-    };
-  }, [directPlayback]);
-
   const directEpisode = useMemo(
     () =>
-      manifestUrl && directPlayback
+      directPlayback
         ? {
             animeSlug,
             episodeNumber,
@@ -173,15 +178,13 @@ export function KodikWatchPlayer({
             titleEn: title,
             descriptionRu: "",
             descriptionEn: "",
-            sources: [
-              {
-                id: `kodik-${playback.kodikId}-${episodeNumber}`,
+            sources: directPlayback.sources.map((source) => ({
+                id: `kodik-${playback.kodikId}-${episodeNumber}-${source.quality}`,
                 type: "hls" as const,
-                url: manifestUrl,
-                label: "Kodik HLS",
+                url: source.url,
+                label: `Kodik ${source.quality}p`,
                 isDemo: false,
-              },
-            ],
+              })),
             subtitles: [],
             audioTracks: [
               {
@@ -198,7 +201,6 @@ export function KodikWatchPlayer({
       animeSlug,
       directPlayback,
       episodeNumber,
-      manifestUrl,
       playback.kodikId,
       playback.translation.id,
       playback.translation.title,
@@ -222,6 +224,8 @@ export function KodikWatchPlayer({
     return (
       <PlayerLoader
         episode={directEpisode}
+        directSources={directPlayback?.sources}
+        debug={playbackDebug}
         animeTitle={title}
         seasonNumber={seasonNumber}
         onHandle={onHandle}
@@ -248,21 +252,15 @@ export function KodikWatchPlayer({
   }
 
   return (
-    <div className="kairo-player kodik-embed-player player-error" role="alert">
-      <p>{t.player.loadError}</p>
-      <div>
-        <button
-          className="button button-primary"
-          type="button"
-          onClick={() => {
-            refreshAttemptedRef.current = false;
-            setAutomaticRetryCount(0);
-            void loadDirectPlayback(true);
-          }}
-        >
-          {t.player.retry}
-        </button>
-      </div>
-    </div>
+    <KodikPlayerShell
+      ref={(handle) => onHandle?.(handle)}
+      src={playback.playerLink}
+      title={title}
+      onPlay={partyEvents?.onPlay}
+      onPause={partyEvents?.onPause}
+      onSeek={partyEvents?.onSeek}
+      onTimeUpdate={partyEvents?.onTimeUpdate}
+      onSpeedChange={partyEvents?.onSpeedChange}
+    />
   );
 }

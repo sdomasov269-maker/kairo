@@ -4,6 +4,7 @@ import { Check, SlidersHorizontal, X } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { useLocale } from "@/i18n";
 import { localizeGenre } from "@/lib/media-localization";
+import { KairoDropdown } from "@/components/ui/KairoDropdown";
 
 export type BrowseFilterValues = {
   search: string;
@@ -218,12 +219,25 @@ export function BrowseFilters({
             <>
               <label>
                 {t.catalog.year}
-                <input
-                  type="number"
-                  value={value.year}
-                  onChange={(e) => set("year", e.target.value)}
-                  placeholder="2026"
-                />
+              <div className="browse-year-control">
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={value.year}
+                onChange={(e) => set("year", e.target.value)}
+                placeholder="2026"
+              />
+              {value.year && (
+                <button
+                  type="button"
+                  onClick={() => set("year", "")}
+                  aria-label={`${t.catalog.reset} ${t.catalog.year}`}
+                >
+                  <X size={14} />
+                </button>
+              )}
+              </div>
               </label>
               <FilterSelect
                 label={t.catalog.season}
@@ -369,14 +383,16 @@ function FilterSelect({
   return (
     <label>
       {label}
-      <select value={value} onChange={(event) => onChange(event.target.value)}>
-        <option value="">—</option>
-        {options.map(([key, text]) => (
-          <option value={key} key={key}>
-            {text}
-          </option>
-        ))}
-      </select>
+      <KairoDropdown
+        ariaLabel={label}
+        menuMinWidth="10.5rem"
+        value={value}
+        onChange={onChange}
+        options={[
+          { value: "", label: "—" },
+          ...options.map(([value, label]) => ({ value, label })),
+        ]}
+      />
     </label>
   );
 }

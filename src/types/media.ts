@@ -34,6 +34,7 @@ export interface Anime {
   genres: string[];
   year?: number;
   season?: string;
+  endDate?: string;
   format?: string;
   status: string;
   episodes?: number;

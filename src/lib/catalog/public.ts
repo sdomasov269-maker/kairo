@@ -18,6 +18,7 @@ interface PublicCatalogOptions {
   season?: string;
   seasonYear?: number;
   perPage?: number;
+  page?: number;
 }
 
 export type PublicCatalogSource =
@@ -37,6 +38,7 @@ function snapshotKey(options: PublicCatalogOptions): string {
     season: options.season ?? null,
     seasonYear: options.seasonYear ?? null,
     perPage: Math.min(options.perPage ?? 50, 50),
+    page: Math.max(options.page ?? 1, 1),
   });
 }
 
@@ -61,8 +63,9 @@ export async function getPublicCatalogResult({
   season,
   seasonYear,
   perPage = 50,
+  page = 1,
 }: PublicCatalogOptions = {}): Promise<PublicCatalogResult> {
-  const key = snapshotKey({ sort, status, season, seasonYear, perPage });
+  const key = snapshotKey({ sort, status, season, seasonYear, perPage, page });
   try {
     const remote = await getAnimeDiscovery({
       sort,
@@ -70,6 +73,7 @@ export async function getPublicCatalogResult({
       season,
       seasonYear,
       perPage: Math.min(perPage, 50),
+      page,
     });
     const anime = await enrichAnimeListWithLocalizedTitles(
       deduplicate(
@@ -115,10 +119,10 @@ export async function getPublicCatalog(
 ): Promise<Anime[]> {
   const result = await getPublicCatalogResult(options);
   if (result.source !== "unavailable") return result.anime;
-  const { status, season, seasonYear, perPage = 50 } = options;
+  const { status, season, seasonYear, perPage = 50, page = 1 } = options;
   return realAnimeCatalog
     .filter((anime) => !status || anime.status === status)
     .filter((anime) => !season || anime.season === season)
     .filter((anime) => !seasonYear || anime.year === seasonYear)
-    .slice(0, perPage);
+    .slice((Math.max(page, 1) - 1) * perPage, Math.max(page, 1) * perPage);
 }

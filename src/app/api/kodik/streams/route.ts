@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import {
-  KodikDirectStreamError,
-  resolveKodikDirectPlayback,
-} from "@/server/services/kodik/direct-streams";
+import { playbackResolverService } from "@/server/playback/playback-resolver.service";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -55,23 +52,19 @@ export async function POST(request: Request) {
     );
 
   try {
-    const playback = await resolveKodikDirectPlayback(playerLink, {
-      forceRefresh: forceRefresh === true,
-    });
+    // A force refresh is intentionally accepted for backwards-compatible
+    // clients. Endpoint invalidation/retry belongs to the server resolver.
+    void forceRefresh;
+    const playback = await playbackResolverService.resolve(playerLink);
     return NextResponse.json(playback, {
       headers: {
         "cache-control": "private, no-store",
         "x-content-type-options": "nosniff",
+        "x-kairo-playback-debug":
+          process.env.KAIRO_PLAYBACK_DEBUG === "true" ? "1" : "0",
       },
     });
-  } catch (error) {
-    if (error instanceof KodikDirectStreamError) {
-      const status = error.code === "INVALID_PLAYER_LINK" ? 400 : 502;
-      return NextResponse.json(
-        { error: error.code },
-        { status, headers: { "cache-control": "no-store" } },
-      );
-    }
+  } catch {
     return NextResponse.json(
       { error: "DIRECT_STREAM_UNAVAILABLE" },
       { status: 502, headers: { "cache-control": "no-store" } },

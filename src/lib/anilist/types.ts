@@ -35,6 +35,7 @@ export interface AniListMedia {
   duration: number | null;
   season: string | null;
   seasonYear: number | null;
+  endDate?: { year: number | null; month: number | null; day: number | null } | null;
   format: string | null;
   status: string | null;
   countryOfOrigin: string | null;

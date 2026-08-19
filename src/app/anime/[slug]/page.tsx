@@ -20,13 +20,6 @@ import { resolveAnimeBySlug, resolveRelatedAnime } from "@/lib/anime/resolve";
 import { AniListRequestError } from "@/lib/anilist";
 import type { Anime } from "@/types/media";
 import { getKodikAnimeWorkspace } from "@/server/services/kodik-detail.service";
-import { resolveKodikDirectPlayback } from "@/server/services/kodik/direct-streams";
-import {
-  createWorkspacePlayback,
-  resolveSeasonEpisode,
-  seasonDropdownModel,
-  selectWorkspaceTranslation,
-} from "@/components/anime/workspace-selection";
 import styles from "@/components/anime/AnimeDetailsLayout.module.css";
 
 export const dynamic = "force-dynamic";
@@ -113,30 +106,6 @@ export default async function AnimePage({ params, searchParams }: PageProps) {
   const initialEpisode = /^\d{1,5}$/.test(query?.episode ?? "")
     ? Number(query?.episode)
     : undefined;
-  const initialCoordinates = resolveSeasonEpisode(
-    seasonDropdownModel(workspace, false).seasons,
-    initialSeason,
-    initialEpisode,
-  );
-  const initialTranslation = selectWorkspaceTranslation(
-    workspace,
-    initialCoordinates.season,
-    initialCoordinates.episode,
-  );
-  const initialPlayback = createWorkspacePlayback(
-    workspace,
-    initialTranslation?.id ?? 0,
-    initialCoordinates.season,
-    initialCoordinates.episode,
-  );
-  const initialDirectPlayback = initialPlayback
-    ? await resolveKodikDirectPlayback(initialPlayback.playerLink)
-        .then((playback) => ({
-          playerLink: initialPlayback.playerLink,
-          playback,
-        }))
-        .catch(() => null)
-    : null;
   const episodes = seasonDetails.flatMap((season) =>
     season.episodes.map((episode) => episode.metadata),
   );
@@ -174,7 +143,6 @@ export default async function AnimePage({ params, searchParams }: PageProps) {
             ? query!.room!.toUpperCase()
             : undefined
         }
-        initialDirectPlayback={initialDirectPlayback}
       />
       <AnimeDetailsContent
         anime={anime}

@@ -208,6 +208,16 @@
   gap: 0.75rem;
   margin-top: clamp(2rem, 4vw, 3.5rem);
 }
+
+.loadMoreSentinel {
+  min-height: 1px;
+}
+
+.loadMoreError {
+  margin: 1rem 0 0;
+  color: #b79f80;
+  font-size: 0.7rem;
+}
 .loadMoreArea p {
   margin: 0;
   color: #78908e;

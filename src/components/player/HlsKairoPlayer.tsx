@@ -13,6 +13,10 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAccountData } from "@/components/data/AccountDataProvider";
+import {
+  orderDirectHlsSources,
+  selectDirectHlsSource,
+} from "./direct-source";
 import type { WatchEpisode } from "@/data/watch/types";
 import { useLocale } from "@/i18n";
 import type { KodikPlayerHandle } from "./kodik/kodik-player.types";
@@ -20,6 +24,8 @@ import styles from "./HlsKairoPlayer.module.css";
 
 type PlayerProps = {
   episode: WatchEpisode;
+  directSources?: { quality: number; url: string; mimeType: string }[];
+  debug?: boolean;
   animeTitle: string;
   seasonNumber?: number;
   onHandle?: (handle: KodikPlayerHandle | null) => void;
@@ -33,7 +39,8 @@ type PlayerProps = {
   onPlaybackError?: (reason?: "fatal" | "stall") => void;
 };
 
-const SPEEDS = [0.75, 1, 1.25, 1.5, 2];
+const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
+type ProgressSaveReason = "interval" | "pause" | "ended" | "pagehide" | "unmount";
 
 function formatTime(value: number) {
   if (!Number.isFinite(value) || value < 0) return "0:00";
@@ -46,6 +53,8 @@ function formatTime(value: number) {
 
 export function HlsKairoPlayer({
   episode,
+  directSources,
+  debug = false,
   animeTitle,
   seasonNumber = 1,
   onHandle,
@@ -59,8 +68,35 @@ export function HlsKairoPlayer({
   const hlsRef = useRef<Hls | null>(null);
   const hideTimerRef = useRef<number | null>(null);
   const lastSavedAtRef = useRef(0);
-  const errorRecoveriesRef = useRef(0);
-  const source = episode.sources.find((item) => item.type === "hls");
+  const errorRecoveryUsedRef = useRef(false);
+  const stallTimerRef = useRef<number | null>(null);
+  const hlsGenerationRef = useRef(0);
+  const lifecycleSourceRef = useRef<string | null>(null);
+  const onPlaybackErrorRef = useRef(onPlaybackError);
+  const telemetryRef = useRef<(
+    channel: "KairoHLS" | "KairoVideo" | "KairoPlayback",
+    event: string,
+    detail?: Record<string, unknown>,
+  ) => void>(() => {});
+  const debugRef = useRef(debug);
+  const selectedQualityRef = useRef<number | null>(null);
+  const saveProgressRef = useRef<
+    (reason: ProgressSaveReason, completed?: boolean) => void
+  >(() => {});
+  const restoreRef = useRef<{
+    currentTime: number;
+    playing: boolean;
+    volume: number;
+    muted: boolean;
+    playbackRate: number;
+  } | null>(null);
+  const fixedSources = useMemo(() => orderDirectHlsSources(directSources ?? []), [directSources]);
+  const [selectedQuality, setSelectedQuality] = useState<number | null>(null);
+  const selectedDirectSource = selectDirectHlsSource(fixedSources, selectedQuality);
+  const source = selectedDirectSource
+    ? { url: selectedDirectSource.url, quality: selectedDirectSource.quality }
+    : episode.sources.find((item) => item.type === "hls");
+  const sourceUrl = source?.url;
   const saved = progress.find(
     (item) =>
       item.animeSlug === episode.animeSlug &&
@@ -78,9 +114,32 @@ export function HlsKairoPlayer({
   const [muted, setMuted] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [quality, setQuality] = useState(-1);
-  const [levels, setLevels] = useState<{ index: number; height: number }[]>([]);
   const [speed, setSpeed] = useState(1);
+
+  const telemetry = useCallback(
+    (channel: "KairoHLS" | "KairoVideo" | "KairoPlayback", event: string, detail: Record<string, unknown> = {}) => {
+      const video = videoRef.current;
+      if (!debug || !video) return;
+      let bufferAhead = 0;
+      for (let index = 0; index < video.buffered.length; index += 1) {
+        if (video.currentTime >= video.buffered.start(index) && video.currentTime <= video.buffered.end(index)) {
+          bufferAhead = video.buffered.end(index) - video.currentTime;
+          break;
+        }
+      }
+      console.info(`[${channel}] ${event}`, { currentTime: video.currentTime, paused: video.paused, readyState: video.readyState, networkState: video.networkState, bufferAhead, ...detail });
+    },
+    [debug],
+  );
+
+  // These values intentionally stay outside the Hls lifecycle effect: callers
+  // re-render with new callback identities during normal playback.
+  useEffect(() => {
+    onPlaybackErrorRef.current = onPlaybackError;
+    telemetryRef.current = telemetry;
+    debugRef.current = debug;
+    selectedQualityRef.current = selectedDirectSource?.quality ?? null;
+  }, [debug, onPlaybackError, selectedDirectSource?.quality, telemetry]);
 
   const clearHideTimer = useCallback(() => {
     if (hideTimerRef.current !== null)
@@ -99,10 +158,16 @@ export function HlsKairoPlayer({
   }, [clearHideTimer, menuOpen, playing]);
 
   const saveProgress = useCallback(
-    (completed = false) => {
+    (reason: ProgressSaveReason, completed = false) => {
       const video = videoRef.current;
       if (!video || !Number.isFinite(video.duration) || video.duration <= 0)
         return;
+      if (debugRef.current) {
+        console.info("[KairoProgress] SAVE", {
+          reason,
+          time: video.currentTime,
+        });
+      }
       upsertProgress({
         animeSlug: episode.animeSlug,
         seasonNumber,
@@ -118,23 +183,46 @@ export function HlsKairoPlayer({
   );
 
   useEffect(() => {
+    saveProgressRef.current = saveProgress;
+  }, [saveProgress]);
+
+  useEffect(() => {
     const video = videoRef.current;
-    if (!video || !source) {
-      onPlaybackError?.("fatal");
+    if (!video || !sourceUrl) {
+      onPlaybackErrorRef.current?.("fatal");
       return;
     }
     setLoading(true);
-    errorRecoveriesRef.current = 0;
+    errorRecoveryUsedRef.current = false;
+    const generation = hlsGenerationRef.current + 1;
+    hlsGenerationRef.current = generation;
+    const previousSource = lifecycleSourceRef.current;
+    const lifecycleDetail = {
+      generation,
+      source: sourceUrl,
+      quality: selectedQualityRef.current,
+    };
+    if (debugRef.current) {
+      if (previousSource === sourceUrl) {
+        console.warn("[KairoHLSLifecycle] UNEXPECTED_RECREATE", lifecycleDetail);
+      }
+      console.info("[KairoHLSLifecycle] CREATE", {
+        ...lifecycleDetail,
+        reason: previousSource ? "source-url-changed" : "initial-source",
+      });
+    }
+    lifecycleSourceRef.current = sourceUrl;
 
     if (Hls.isSupported()) {
+      telemetryRef.current("KairoPlayback", "engine=hls.js");
       const hls = new Hls({
         enableWorker: true,
         lowLatencyMode: false,
-        startLevel: -1,
+        startLevel: 0,
         capLevelToPlayerSize: true,
         backBufferLength: 30,
-        maxBufferLength: 60,
-        maxMaxBufferLength: 120,
+        maxBufferLength: 30,
+        maxMaxBufferLength: 60,
         maxBufferHole: 0.8,
         highBufferWatchdogPeriod: 2,
         nudgeOffset: 0.1,
@@ -143,46 +231,53 @@ export function HlsKairoPlayer({
         manifestLoadingMaxRetry: 4,
         levelLoadingMaxRetry: 4,
       });
+      hlsRef.current?.destroy();
       hlsRef.current = hls;
       hls.attachMedia(video);
-      hls.on(Hls.Events.MEDIA_ATTACHED, () => hls.loadSource(source.url));
+      hls.on(Hls.Events.MEDIA_ATTACHED, () => {
+        if (generation === hlsGenerationRef.current) hls.loadSource(sourceUrl);
+      });
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        setLevels(
-          hls.levels
-            .map((level, index) => ({ index, height: level.height || 0 }))
-            .filter((level) => level.height > 0)
-            .sort((a, b) => b.height - a.height),
-        );
+        if (generation !== hlsGenerationRef.current) return;
         setLoading(false);
+        telemetryRef.current("KairoHLS", "MANIFEST_PARSED", { manifestAttached: true });
       });
-      hls.on(Hls.Events.LEVEL_SWITCHED, (_, data) => {
-        if (hls.autoLevelEnabled) setQuality(-1);
-        else setQuality(data.level);
-      });
+      for (const event of [Hls.Events.FRAG_LOADING, Hls.Events.FRAG_LOADED, Hls.Events.FRAG_BUFFERED, Hls.Events.FRAG_LOAD_EMERGENCY_ABORTED, Hls.Events.BUFFER_APPENDING, Hls.Events.BUFFER_APPENDED, Hls.Events.LEVEL_SWITCHING, Hls.Events.LEVEL_SWITCHED])
+        hls.on(event, (_: unknown, data: { frag?: { sn?: number; start?: number; duration?: number }; level?: number }) => telemetryRef.current("KairoHLS", event, { sn: data?.frag?.sn, fragmentStart: data?.frag?.start, fragmentDuration: data?.frag?.duration, level: data?.level }));
       hls.on(Hls.Events.ERROR, (_, data) => {
+        if (generation !== hlsGenerationRef.current) return;
+        telemetryRef.current("KairoHLS", "ERROR", { type: data.type, details: data.details, fatal: data.fatal, status: data.response?.code, sn: data.frag?.sn, fragmentStart: data.frag?.start, fragmentDuration: data.frag?.duration });
         if (!data.fatal) return;
-        errorRecoveriesRef.current += 1;
-        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-          if (errorRecoveriesRef.current <= 3) {
-            hls.startLoad();
-            return;
-          }
-        } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
-          if (errorRecoveriesRef.current <= 3) {
-            hls.recoverMediaError();
-            return;
-          }
+        if (errorRecoveryUsedRef.current) {
+          onPlaybackErrorRef.current?.("fatal");
+          return;
         }
-        onPlaybackError?.("fatal");
+        errorRecoveryUsedRef.current = true;
+        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+          hls.startLoad();
+          return;
+        } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+          hls.recoverMediaError();
+          return;
+        }
+        onPlaybackErrorRef.current?.("fatal");
       });
       return () => {
+        if (debugRef.current) {
+          console.info("[KairoHLSLifecycle] DESTROY", {
+            ...lifecycleDetail,
+            currentTime: video.currentTime,
+            reason: "source-url-changed-or-unmount",
+          });
+        }
         hls.destroy();
-        hlsRef.current = null;
+        if (hlsRef.current === hls) hlsRef.current = null;
       };
     }
 
     if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      video.src = source.url;
+      telemetryRef.current("KairoPlayback", "engine=native-hls");
+      video.src = sourceUrl;
       setLoading(false);
       return () => {
         video.removeAttribute("src");
@@ -190,8 +285,8 @@ export function HlsKairoPlayer({
       };
     }
 
-    onPlaybackError?.("fatal");
-  }, [onPlaybackError, source]);
+    onPlaybackErrorRef.current?.("fatal");
+  }, [sourceUrl]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -256,13 +351,13 @@ export function HlsKairoPlayer({
   }, [clearHideTimer, revealControls]);
 
   useEffect(() => {
-    const save = () => saveProgress();
+    const save = () => saveProgressRef.current("pagehide");
     window.addEventListener("pagehide", save);
     return () => {
-      save();
+      saveProgressRef.current("unmount");
       window.removeEventListener("pagehide", save);
     };
-  }, [saveProgress]);
+  }, []);
 
   const togglePlay = useCallback(() => {
     const video = videoRef.current;
@@ -271,22 +366,56 @@ export function HlsKairoPlayer({
     else video.pause();
   }, []);
 
+  const startStallWatchdog = useCallback((reason: string) => {
+    const video = videoRef.current;
+    if (!video || video.paused || stallTimerRef.current !== null) return;
+    const startedAt = video.currentTime;
+    telemetryRef.current("KairoVideo", "stall started", { reason });
+    stallTimerRef.current = window.setTimeout(() => {
+      stallTimerRef.current = null;
+      const current = videoRef.current;
+      if (!current || current.paused || current.currentTime > startedAt + 0.1) {
+        telemetryRef.current("KairoVideo", "stall recovered without reload", { reason });
+        return;
+      }
+      if (!errorRecoveryUsedRef.current && hlsRef.current) {
+        errorRecoveryUsedRef.current = true;
+        telemetryRef.current("KairoHLS", "controlled stall recovery", { reason });
+        hlsRef.current.startLoad();
+        return;
+      }
+      telemetryRef.current("KairoHLS", "stall recovery exhausted", { reason });
+      onPlaybackErrorRef.current?.("stall");
+    }, 6_000);
+  }, []);
+
   const toggleFullscreen = useCallback(async () => {
     if (document.fullscreenElement) await document.exitFullscreen();
     else await rootRef.current?.requestFullscreen();
   }, []);
 
-  const setLevel = useCallback((index: number) => {
-    const hls = hlsRef.current;
-    if (!hls) return;
-    hls.currentLevel = index;
-    setQuality(index);
-  }, []);
+  const switchQuality = useCallback((quality: number) => {
+    const video = videoRef.current;
+    if (!video || quality === selectedDirectSource?.quality) return;
+    restoreRef.current = {
+      currentTime: video.currentTime,
+      playing: !video.paused,
+      volume: video.volume,
+      muted: video.muted,
+      playbackRate: video.playbackRate,
+    };
+    setSelectedQuality(quality);
+  }, [selectedDirectSource?.quality]);
 
-  const qualityLabel = useMemo(() => {
-    if (quality < 0) return t.player.auto;
-    return `${levels.find((level) => level.index === quality)?.height ?? ""}p`;
-  }, [levels, quality, t.player.auto]);
+  const qualityLabel = selectedDirectSource
+    ? `${selectedDirectSource.quality}p`
+    : "HLS";
+  const skippableChapter = episode.chapters.find(
+    (chapter) =>
+      (chapter.type === "intro" || chapter.type === "credits") &&
+      currentTime >= chapter.startTime &&
+      currentTime < chapter.endTime,
+  );
 
   return (
     <div
@@ -308,15 +437,22 @@ export function HlsKairoPlayer({
           revealControls();
         }}
         onPlay={() => {
+          if (stallTimerRef.current !== null) window.clearTimeout(stallTimerRef.current);
+          stallTimerRef.current = null;
+          telemetry("KairoVideo", "playing");
           setPlaying(true);
           partyEvents?.onPlay?.();
         }}
         onPause={() => {
+          telemetry("KairoVideo", "pause");
           setPlaying(false);
-          saveProgress();
+          saveProgress("pause");
           partyEvents?.onPause?.();
         }}
-        onWaiting={() => setBuffering(true)}
+        onWaiting={() => { telemetry("KairoVideo", "waiting"); setBuffering(true); startStallWatchdog("waiting"); }}
+        onStalled={() => { telemetry("KairoVideo", "stalled"); startStallWatchdog("stalled"); }}
+        onSuspend={() => telemetry("KairoVideo", "suspend")}
+        onCanPlay={() => telemetry("KairoVideo", "canplay")}
         onPlaying={() => {
           setBuffering(false);
           setLoading(false);
@@ -324,6 +460,16 @@ export function HlsKairoPlayer({
         onLoadedMetadata={(event) => {
           const video = event.currentTarget;
           setDuration(video.duration);
+          const restore = restoreRef.current;
+          if (restore) {
+            video.volume = restore.volume;
+            video.muted = restore.muted;
+            video.playbackRate = restore.playbackRate;
+            video.currentTime = Math.min(restore.currentTime, video.duration || restore.currentTime);
+            restoreRef.current = null;
+            if (restore.playing) void video.play();
+            return;
+          }
           if (
             saved &&
             saved.currentTime > 5 &&
@@ -331,11 +477,15 @@ export function HlsKairoPlayer({
           )
             video.currentTime = saved.currentTime;
         }}
+        onDurationChange={(event) => setDuration(event.currentTarget.duration)}
+        onSeeking={() => { telemetry("KairoVideo", "seeking"); setBuffering(true); }}
+        onSeeked={() => { telemetry("KairoVideo", "seeked"); setBuffering(false); }}
+        onError={() => telemetry("KairoVideo", "error")}
         onTimeUpdate={(event) => {
           const time = event.currentTarget.currentTime;
           setCurrentTime(time);
           partyEvents?.onTimeUpdate?.(time);
-          if (Date.now() - lastSavedAtRef.current >= 20_000) saveProgress();
+          if (Date.now() - lastSavedAtRef.current >= 20_000) saveProgress("interval");
         }}
         onVolumeChange={(event) => {
           setVolume(event.currentTarget.volume);
@@ -345,7 +495,7 @@ export function HlsKairoPlayer({
           setSpeed(event.currentTarget.playbackRate);
           partyEvents?.onSpeedChange?.(event.currentTarget.playbackRate);
         }}
-        onEnded={() => saveProgress(true)}
+        onEnded={() => saveProgress("ended", true)}
       />
 
       {(loading || buffering) && (
@@ -417,9 +567,8 @@ export function HlsKairoPlayer({
             {menuOpen && (
               <div className={styles.menu}>
                 <strong>{t.player.quality}</strong>
-                <button className={quality < 0 ? styles.active : ""} onClick={() => setLevel(-1)} type="button">{t.player.auto}</button>
-                {levels.map((level) => (
-                  <button className={quality === level.index ? styles.active : ""} key={level.index} onClick={() => setLevel(level.index)} type="button">{level.height}p</button>
+                {fixedSources.map((candidate) => (
+                  <button className={selectedDirectSource?.quality === candidate.quality ? styles.active : ""} key={candidate.quality} onClick={() => switchQuality(candidate.quality)} type="button">{candidate.quality}p</button>
                 ))}
                 <strong>{t.player.speed}</strong>
                 <div className={styles.speeds}>
@@ -432,12 +581,17 @@ export function HlsKairoPlayer({
               </div>
             )}
           </div>
-          <button aria-label={t.player.pip} onClick={() => void videoRef.current?.requestPictureInPicture?.()} type="button"><PictureInPicture /></button>
+          {document.pictureInPictureEnabled && <button aria-label={t.player.pip} onClick={() => void videoRef.current?.requestPictureInPicture?.()} type="button"><PictureInPicture /></button>}
           <button aria-label={fullscreen ? t.player.exitFullscreen : t.player.fullscreen} onClick={() => void toggleFullscreen()} type="button">
             {fullscreen ? <Minimize /> : <Maximize />}
           </button>
         </div>
       </div>
+      {skippableChapter && (
+        <button className={styles.skip} onClick={() => { if (videoRef.current) videoRef.current.currentTime = skippableChapter.endTime; }} type="button">
+          {skippableChapter.type === "credits" ? "Пропустить титры" : t.player.skipIntro}
+        </button>
+      )}
     </div>
   );
 }

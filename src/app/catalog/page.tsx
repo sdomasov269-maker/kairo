@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
-import { CatalogControls } from "@/components/catalog/CatalogControls";
-import { CatalogHero } from "@/components/catalog/CatalogHero";
-import { CatalogResults } from "@/components/catalog/CatalogResults";
+import { CatalogClient } from "@/components/catalog/CatalogClient";
 import { AppShell } from "@/components/layout/AppShell";
-import { DiscoveryPageShell } from "@/components/layout/DiscoveryPageShell";
-import { parseCatalogParams } from "@/lib/catalog";
+import { filtersForCatalogView, parseCatalogParams, parseCatalogView } from "@/lib/catalog";
 import { normalizeAnimeTitle } from "@/lib/catalog/identity";
 import { getPublicCatalog } from "@/lib/catalog/public";
 import {
@@ -39,7 +36,8 @@ export async function generateMetadata({
 }
 export default async function CatalogPage({ searchParams }: CatalogPageProps) {
   const raw = await searchParams;
-  const filters = parseCatalogParams(raw);
+  const view = parseCatalogView(raw.view);
+  const filters = filtersForCatalogView(view, parseCatalogParams(raw));
   let remotePage: {
     media: AniListMedia[];
     pageInfo: CatalogPageInfo;
@@ -106,28 +104,12 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
   };
   return (
     <AppShell className="app-shell-discovery app-shell-catalog">
-      <DiscoveryPageShell
-        className="catalog-page"
-        hero={<CatalogHero />}
-        controls={
-          <CatalogControls filters={filters} resultCount={pageInfo.total} />
-        }
-      >
-        <CatalogResults
-          anime={anime}
-          pageInfo={pageInfo}
-          fallback={!remotePage}
-          query={new URLSearchParams(
-            Object.entries(raw).flatMap(([key, value]) =>
-              Array.isArray(value)
-                ? value.map((item) => [key, item])
-                : value
-                  ? [[key, value]]
-                  : [],
-            ),
-          ).toString()}
-        />
-      </DiscoveryPageShell>
+      <CatalogClient
+        initialFilters={filters}
+        initialView={view}
+        initialAnime={anime}
+        initialPageInfo={pageInfo}
+      />
     </AppShell>
   );
 }

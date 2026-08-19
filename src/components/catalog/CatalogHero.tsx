@@ -30,6 +30,8 @@ export function CatalogHero() {
       eyebrow={copy.eyebrow}
       title={copy.title || t.catalog.title}
       description={copy.description || t.catalog.description}
-    />
+    >
+      <p className="catalog-page-index">02 KAIRO / CATALOG</p>
+    </DiscoveryPageHero>
   );
 }

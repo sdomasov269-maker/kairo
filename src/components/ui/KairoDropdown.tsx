@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, ChevronDown } from "lucide-react";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import styles from "./KairoDropdown.module.css";
 import {
   dropdownShouldClose,
@@ -12,12 +12,14 @@ import {
 export function KairoDropdown({
   ariaLabel,
   disabled = false,
+  menuMinWidth,
   onChange,
   options,
   value,
 }: {
   ariaLabel: string;
   disabled?: boolean;
+  menuMinWidth?: string;
   onChange: (value: string) => void;
   options: DropdownOption[];
   value: string;
@@ -63,7 +65,15 @@ export function KairoDropdown({
   };
 
   return (
-    <div className={styles.root} ref={rootRef}>
+    <div
+      className={styles.root}
+      ref={rootRef}
+      style={
+        menuMinWidth
+          ? ({ "--dropdown-menu-min-width": menuMinWidth } as CSSProperties)
+          : undefined
+      }
+    >
       <button
         aria-activedescendant={
           open && activeIndex >= 0 ? `${id}-option-${activeIndex}` : undefined
@@ -87,6 +97,18 @@ export function KairoDropdown({
             event.preventDefault();
             if (!open) setOpen(true);
             move(event.key === "ArrowDown" ? 1 : -1);
+            return;
+          }
+          if (event.key === "Home" || event.key === "End") {
+            event.preventDefault();
+            const enabled = options
+              .map((option, index) => ({ option, index }))
+              .filter(({ option }) => !option.disabled);
+            setActiveIndex(
+              enabled[event.key === "Home" ? 0 : enabled.length - 1]?.index ??
+                -1,
+            );
+            if (!open) setOpen(true);
             return;
           }
           if ((event.key === "Enter" || event.key === " ") && open) {

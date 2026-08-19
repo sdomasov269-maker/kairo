@@ -86,7 +86,7 @@ export const uk: Dictionary = {
     yesterdayReleases: "Учора вийшли",
     airedOn: "Вийшли",
     chooseAnotherDay: "Спробуй вибрати інший день.",
-    currentSeasonAnime: "Аніме цього сезону",
+    currentSeasonAnime: "Зараз і незабаром",
     currentSeasonEmpty: "Тайтли цього сезону поки недоступні.",
     currentSeasonError: "Не вдалося завантажити тайтли сезону.",
     currentSeasonMoreError: "Не вдалося завантажити більше тайтлів.",

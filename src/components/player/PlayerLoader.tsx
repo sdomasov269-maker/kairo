@@ -11,6 +11,8 @@ const HlsKairoPlayer = dynamic(
 
 export function PlayerLoader(props: {
   episode: WatchEpisode;
+  directSources?: { quality: number; url: string; mimeType: string }[];
+  debug?: boolean;
   animeTitle: string;
   animePoster?: string;
   previousHref?: string;

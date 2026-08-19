@@ -47,6 +47,10 @@ export function mergeAniListAnime(
     genres: remote.genres.length ? remote.genres : local.genres,
     year: remote.seasonYear ?? local.year,
     season: remote.season ?? undefined,
+    endDate:
+      remote.endDate?.year && remote.endDate.month && remote.endDate.day
+        ? `${remote.endDate.year}-${String(remote.endDate.month).padStart(2, "0")}-${String(remote.endDate.day).padStart(2, "0")}`
+        : local.endDate,
     format: remote.format ?? undefined,
     status: remote.status ?? local.status,
     episodes: remote.episodes ?? local.episodes,

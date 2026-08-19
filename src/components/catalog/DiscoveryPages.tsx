@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimeCard } from "@/components/anime/Cards";
 import { AnimePoster } from "@/components/anime/AnimePoster";
 import { useLocale } from "@/i18n";
@@ -22,6 +22,7 @@ import {
   BrowseFilters,
   useBrowseFilterState,
 } from "@/components/catalog/BrowseFilters";
+import { ReleaseDiscoveryControls } from "@/components/catalog/ReleaseDiscoveryControls";
 import { KairoWebGLSurface } from "@/components/effects/KairoWebGLSurface";
 import { KairoDomCurlTarget } from "@/components/effects/KairoDomCurlTarget";
 
@@ -38,14 +39,12 @@ export function NewReleasesContent({
   const { locale, dictionary: t } = useLocale();
   const { quick, setQuick, filterValues, setFilterValues, resetAll } =
     useBrowseFilterState(filter);
-  const quickOptions: Array<[string, string]> = [
-    ["all", t.discovery.all],
-    ["ongoing", t.discovery.releasing],
-    ["finished", t.discovery.finished],
-    ["announced", t.discovery.announced],
-    ["season", t.discovery.thisSeason],
-    ["year", t.discovery.thisYear],
-  ];
+  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+  const [loadedAnime, setLoadedAnime] = useState(anime);
+  const [nextPage, setNextPage] = useState(2);
+  const [hasMore, setHasMore] = useState(anime.length === 36);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const sentinel = useRef<HTMLDivElement | null>(null);
   const visibleAnime = useMemo(() => {
     const score = Number(filterValues.score || 0);
     const year = Number(filterValues.year || 0);
@@ -61,7 +60,7 @@ export function NewReleasesContent({
           : month <= 9
             ? "SUMMER"
             : "FALL";
-    const result = anime.filter((item) => {
+    const result = loadedAnime.filter((item) => {
       const quickMatch =
         quick === "all" ||
         ((quick === "ongoing" || quick === "releasing") &&
@@ -78,7 +77,8 @@ export function NewReleasesContent({
           [item.title, item.titleRu, item.titleUk, item.titleEnglish].some(
             (title) => title?.toLowerCase().includes(query),
           )) &&
-        (!filterValues.genre || item.genres.includes(filterValues.genre)) &&
+        (!selectedGenres.length ||
+          selectedGenres.some((genre) => item.genres.includes(genre))) &&
         (!year || item.year === year) &&
         (!filterValues.season || item.season === filterValues.season) &&
         (!filterValues.format || item.format === filterValues.format) &&
@@ -97,11 +97,38 @@ export function NewReleasesContent({
               ? (b.year ?? 0) - (a.year ?? 0)
               : 0,
     );
-  }, [anime, filterValues, quick]);
-  const genres = useMemo(
-    () => [...new Set(anime.flatMap((item) => item.genres))].sort(),
-    [anime],
-  );
+  }, [filterValues, loadedAnime, quick, selectedGenres]);
+  const loadMore = useCallback(async () => {
+    if (!hasMore || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const response = await fetch(`/api/new?filter=${encodeURIComponent(filter)}&page=${nextPage}`);
+      if (!response.ok) throw new Error("New releases request failed");
+      const next = (await response.json()) as { anime: Anime[]; hasMore: boolean };
+      setLoadedAnime((current) => [
+        ...current,
+        ...next.anime.filter((item) => !current.some((known) => known.id === item.id)),
+      ]);
+      setNextPage((page) => page + 1);
+      setHasMore(next.hasMore);
+    } catch {
+      setHasMore(false);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [filter, hasMore, loadingMore, nextPage]);
+  useEffect(() => {
+    const node = sentinel.current;
+    if (!node || !hasMore || loadingMore) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) void loadMore();
+      },
+      { rootMargin: "800px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [hasMore, loadMore, loadingMore]);
   const sourceText = {
     ru: {
       live: "Данные AniList загружены",
@@ -133,6 +160,7 @@ export function NewReleasesContent({
   }[locale];
   return (
     <DiscoveryPageShell
+      className="catalog-page new-page"
       hero={
         <DiscoveryPageHero
           eyebrow={t.discovery.latestAdditions}
@@ -141,15 +169,11 @@ export function NewReleasesContent({
         />
       }
       controls={
-        <BrowseFilters
+        <ReleaseDiscoveryControls
           value={filterValues}
           onChange={setFilterValues}
-          genres={genres}
-          quickFilters={quickOptions}
-          quickValue={quick}
-          onQuickChange={setQuick}
-          resultCount={visibleAnime.length}
-          mode="releases"
+          selectedGenres={selectedGenres}
+          onSelectedGenresChange={setSelectedGenres}
           onResetAll={() => setQuick("all")}
         />
       }
@@ -167,7 +191,7 @@ export function NewReleasesContent({
           onReset={() => router.refresh()}
         />
       ) : visibleAnime.length ? (
-        <KairoWebGLSurface className="anime-grid">
+        <KairoWebGLSurface className="anime-grid catalog-grid">
           {visibleAnime.map((item, index) => (
             <AnimeCard anime={item} index={index} key={item.slug} />
           ))}
@@ -177,8 +201,14 @@ export function NewReleasesContent({
           title={t.catalog.empty}
           description={t.catalog.emptyHint}
           resetLabel={t.catalog.resetAll}
-          onReset={resetAll}
+          onReset={() => {
+            resetAll();
+            setSelectedGenres([]);
+          }}
         />
+      )}
+      {dataSource !== "unavailable" && hasMore && (
+        <div className="catalog-sentinel" ref={sentinel} aria-hidden="true" />
       )}
     </DiscoveryPageShell>
   );
