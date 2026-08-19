@@ -13,6 +13,7 @@ export type PlaybackDescriptor =
   | {
       mode: "direct";
       provider: string;
+      iframeFallbackUrl: string;
       sources: { quality: string; url: string; mimeType: string }[];
       skipSegments?: {
         type: "opening" | "ending" | "unknown";

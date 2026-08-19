@@ -114,7 +114,7 @@ export class PlaybackResolverService {
         debug("resolver execution", { key, resolver: resolver.name, attempt: 1 });
         const result = await resolver.resolve({ link });
         if (result.sources.length) {
-          const playback: PlaybackDescriptor = { mode: "direct", provider: resolver.name, ...result };
+          const playback: PlaybackDescriptor = { mode: "direct", provider: resolver.name, iframeFallbackUrl: link, ...result };
           this.directCache.set(key, { playback, cachedAt: Date.now() });
           if (isDebug()) console.info("[KairoPlayback]", { resolver: resolver.name, qualities: result.sources.map((source) => source.quality), mode: "direct" });
           return playback;

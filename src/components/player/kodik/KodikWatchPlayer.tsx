@@ -10,6 +10,9 @@ import {
   resolveDirectPlayback,
   type PlaybackRequestReason,
 } from "./direct-playback-resolver";
+import styles from "./KodikWatchPlayer.module.css";
+
+type PlayerMode = "kairo" | "kodik";
 
 export type DirectPlayback = {
   sources: { quality: number; url: string; mimeType: string }[];
@@ -62,6 +65,9 @@ export function KodikWatchPlayer({
   );
   const [directUnavailable, setDirectUnavailable] = useState(false);
   const [loadingDirect, setLoadingDirect] = useState(!matchingInitialPlayback);
+  const [selectedPlayer, setSelectedPlayer] = useState<PlayerMode>(
+    matchingInitialPlayback ? "kairo" : "kodik",
+  );
   const refreshAttemptedRef = useRef(false);
   const requestGenerationRef = useRef(0);
 
@@ -106,6 +112,8 @@ export function KodikWatchPlayer({
           expiresAt: new Date(Date.now() + 60_000).toISOString(),
         });
         setDirectUnavailable(false);
+        if (reason === "initial-load" || reason === "manual-retry")
+          setSelectedPlayer("kairo");
       } catch (error) {
         if (process.env.NODE_ENV === "development")
           console.warn("[Kairo player] Direct Kodik playback unavailable", error);
@@ -119,14 +127,26 @@ export function KodikWatchPlayer({
 
   useEffect(() => {
     refreshAttemptedRef.current = false;
-    if (matchingInitialPlayback) return;
     const frame = window.requestAnimationFrame(() => {
-      void loadDirectPlayback("initial-load");
+      setSelectedPlayer(matchingInitialPlayback ? "kairo" : "kodik");
+      if (!matchingInitialPlayback) void loadDirectPlayback("initial-load");
     });
     return () => {
       window.cancelAnimationFrame(frame);
     };
   }, [loadDirectPlayback, matchingInitialPlayback]);
+
+  const selectPlayer = useCallback((next: PlayerMode) => {
+    if (next === selectedPlayer) return;
+    if (process.env.NEXT_PUBLIC_KAIRO_PLAYBACK_DEBUG === "true")
+      console.info("[KairoPlayerSelector] SELECT", { from: selectedPlayer, to: next, reason: "user" });
+    if (next === "kairo" && !directPlayback) {
+      setSelectedPlayer("kairo");
+      void loadDirectPlayback("manual-retry");
+      return;
+    }
+    setSelectedPlayer(next);
+  }, [directPlayback, loadDirectPlayback, selectedPlayer]);
 
   const directEpisode = useMemo(
     () =>
@@ -180,9 +200,17 @@ export function KodikWatchPlayer({
     [partyEvents],
   );
 
-  if (directEpisode && !directUnavailable) {
+  const selector = (
+    <div className={styles.selector} aria-label="Плеер">
+      <span>Плеер:</span>
+      <button type="button" className={selectedPlayer === "kairo" ? styles.active : ""} onClick={() => selectPlayer("kairo")} aria-pressed={selectedPlayer === "kairo"}>Kairo</button>
+      <button type="button" className={selectedPlayer === "kodik" ? styles.active : ""} onClick={() => selectPlayer("kodik")} aria-pressed={selectedPlayer === "kodik"}>Kodik</button>
+    </div>
+  );
+
+  if (selectedPlayer === "kairo" && directEpisode && !directUnavailable) {
     return (
-      <PlayerLoader
+      <div className={styles.root}>{selector}<PlayerLoader
         episode={directEpisode}
         directSources={directPlayback?.sources}
         debug={false}
@@ -198,21 +226,20 @@ export function KodikWatchPlayer({
           refreshAttemptedRef.current = true;
           void loadDirectPlayback("fatal-playback-recovery");
         }}
-      />
+      /></div>
     );
   }
 
   if (loadingDirect && !directUnavailable) {
     return (
-      <div className="kairo-player kodik-embed-player player-loading">
+      <div className={styles.root}>{selector}<div className="kairo-player kodik-embed-player player-loading">
         <i />
         <p>{t.player.preparing}…</p>
-      </div>
+      </div></div>
     );
   }
 
-  return (
-    <KodikPlayerShell
+  return (<div className={styles.root}>{selector}<KodikPlayerShell
       ref={(handle) => onHandle?.(handle)}
       src={playback.playerLink}
       title={title}
@@ -221,6 +248,5 @@ export function KodikWatchPlayer({
       onSeek={partyEvents?.onSeek}
       onTimeUpdate={partyEvents?.onTimeUpdate}
       onSpeedChange={partyEvents?.onSpeedChange}
-    />
-  );
+    /></div>);
 }

@@ -22,5 +22,5 @@ export interface DirectPlaybackResolver {
 }
 
 export type PlaybackDescriptor =
-  | ({ mode: "direct"; provider: string } & DirectPlaybackResult)
+  | ({ mode: "direct"; provider: string; iframeFallbackUrl: string } & DirectPlaybackResult)
   | { mode: "kodik-iframe"; provider: "kodik-iframe"; iframeUrl: string };
