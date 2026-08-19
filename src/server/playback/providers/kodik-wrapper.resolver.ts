@@ -3,6 +3,7 @@ import { VideoLinks, type KodikVideoLinks } from "kodikwrapper";
 import { KodikWrapperResolverError } from "../errors";
 import { canonicalizeKodikPlayerLink } from "./kodik-link";
 import { createDiagnosticFetcher } from "./kodik-video-info-fetcher";
+import { retryInvalidHtmlResponse } from "./kodik-video-info-retry";
 import type {
   DirectPlaybackResolver,
   DirectPlaybackResult,
@@ -122,14 +123,10 @@ export class KodikWrapperResolver implements DirectPlaybackResolver {
           }),
         });
       };
-      let links: KodikVideoLinks;
-      try {
-        links = await load();
-      } catch (error) {
-        debug("getLinks failed; rediscovering endpoint", errorDetails(error));
-        endpointCache.delete(key);
-        links = await load(true);
-      }
+      const links = await retryInvalidHtmlResponse(
+        () => load(),
+        () => debug("retry video-info", { attempt: 2, reason: "invalid-html-response" }),
+      );
       debug("returned qualities", { qualities: Object.keys(links).filter((quality) => links[quality]?.length) });
       const sources = normalizeSources(links);
       if (!sources.length) throw new Error("Kodik returned no HLS sources");

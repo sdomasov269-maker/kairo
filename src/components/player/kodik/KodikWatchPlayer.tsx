@@ -6,6 +6,10 @@ import { PlayerLoader } from "../PlayerLoader";
 import { KodikPlayerShell } from "./KodikPlayerShell";
 import type { KodikPlayerHandle } from "./kodik-player.types";
 import type { KodikWatchPlaybackDto } from "./kodik-watch.types";
+import {
+  resolveDirectPlayback,
+  type PlaybackRequestReason,
+} from "./direct-playback-resolver";
 
 export type DirectPlayback = {
   sources: { quality: number; url: string; mimeType: string }[];
@@ -18,15 +22,6 @@ export type DirectPlayback = {
   }[];
   expiresAt: string;
 };
-
-type PlaybackDescriptor =
-  | ({
-      mode: "direct";
-      provider: string;
-      sources: { quality: string; url: string; mimeType: string }[];
-      skipSegments?: { type: "opening" | "ending" | "unknown"; from: number; to: number }[];
-    })
-  | { mode: "kodik-iframe"; provider: "kodik-iframe"; iframeUrl: string };
 
 export function KodikWatchPlayer({
   playback,
@@ -66,107 +61,71 @@ export function KodikWatchPlayer({
     matchingInitialPlayback,
   );
   const [directUnavailable, setDirectUnavailable] = useState(false);
-  const [playbackDebug, setPlaybackDebug] = useState(false);
   const [loadingDirect, setLoadingDirect] = useState(!matchingInitialPlayback);
-  const [automaticRetryCount, setAutomaticRetryCount] = useState(0);
   const refreshAttemptedRef = useRef(false);
-  const requestRef = useRef<AbortController | null>(null);
   const requestGenerationRef = useRef(0);
 
   const loadDirectPlayback = useCallback(
-    async (forceRefresh = false) => {
-      requestRef.current?.abort();
+    async (reason: PlaybackRequestReason) => {
       const generation = ++requestGenerationRef.current;
-      const controller = new AbortController();
-      requestRef.current = controller;
       setLoadingDirect(true);
       setDirectUnavailable(false);
       try {
-        const attempts = forceRefresh ? [true] : [false, true];
-        let lastError: unknown;
-        for (const refresh of attempts) {
-          try {
-            const response = await fetch("/api/kodik/streams", {
-              method: "POST",
-              headers: { "content-type": "application/json" },
-              body: JSON.stringify({
-                playerLink: playback.playerLink,
-                forceRefresh: refresh,
-              }),
-              cache: "no-store",
-              signal: controller.signal,
-            });
-            if (!response.ok)
-              throw new Error(`Kodik streams: ${response.status}`);
-            setPlaybackDebug(
-              response.headers.get("x-kairo-playback-debug") === "1",
-            );
-            const payload = (await response.json()) as PlaybackDescriptor;
-            if (controller.signal.aborted || generation !== requestGenerationRef.current)
-              return;
-            if (payload.mode === "kodik-iframe") {
-              setDirectPlayback(null);
-              setDirectUnavailable(true);
-              return;
-            }
-            if (!Array.isArray(payload.sources) || !payload.sources.length)
-              throw new Error("Kodik streams: empty response");
-            setDirectPlayback({
-              sources: payload.sources.map((source) => ({ ...source, quality: Number(source.quality) })),
-              chapters: (payload.skipSegments ?? []).map((segment, index) => ({
-                id: `kodik-${segment.type}-${index}`,
-                title: segment.type === "ending" ? "Титры" : segment.type === "opening" ? "Заставка" : "Пропустить",
-                startTime: segment.from,
-                endTime: segment.to,
-                type: segment.type === "ending" ? "credits" : "intro",
-              })),
-              expiresAt: new Date(Date.now() + 60_000).toISOString(),
-            });
-            setDirectUnavailable(false);
-            setAutomaticRetryCount(0);
-            return;
-          } catch (error) {
-            if (controller.signal.aborted) return;
-            lastError = error;
-          }
+        const payload = await resolveDirectPlayback(
+          {
+            animeSlug,
+            seasonNumber,
+            episodeNumber,
+            translationId: playback.translation.id,
+            sourceId: playback.kodikId,
+          },
+          playback.playerLink,
+          reason,
+          fetch,
+          reason === "fatal-playback-recovery",
+        );
+        if (generation !== requestGenerationRef.current) return;
+        if (payload.mode === "kodik-iframe") {
+          // A transient resolver fallback must never displace an already
+          // working direct player. Only the initial resolve may enter iframe.
+          if (!directPlayback) setDirectUnavailable(true);
+          return;
         }
-        throw lastError;
+        if (!Array.isArray(payload.sources) || !payload.sources.length)
+          throw new Error("Kodik streams: empty response");
+        setDirectPlayback({
+          sources: payload.sources.map((source) => ({ ...source, quality: Number(source.quality) })),
+          chapters: (payload.skipSegments ?? []).map((segment, index) => ({
+            id: `kodik-${segment.type}-${index}`,
+            title: segment.type === "ending" ? "Титры" : segment.type === "opening" ? "Заставка" : "Пропустить",
+            startTime: segment.from,
+            endTime: segment.to,
+            type: segment.type === "ending" ? "credits" : "intro",
+          })),
+          expiresAt: new Date(Date.now() + 60_000).toISOString(),
+        });
+        setDirectUnavailable(false);
       } catch (error) {
-        if (controller.signal.aborted) return;
         if (process.env.NODE_ENV === "development")
           console.warn("[Kairo player] Direct Kodik playback unavailable", error);
-        setDirectUnavailable(true);
+        if (!directPlayback) setDirectUnavailable(true);
       } finally {
-        if (!controller.signal.aborted) setLoadingDirect(false);
+        if (generation === requestGenerationRef.current) setLoadingDirect(false);
       }
     },
-    [playback.playerLink],
+    [animeSlug, directPlayback, episodeNumber, playback.kodikId, playback.playerLink, playback.translation.id, seasonNumber],
   );
 
   useEffect(() => {
     refreshAttemptedRef.current = false;
     if (matchingInitialPlayback) return;
     const frame = window.requestAnimationFrame(() => {
-      setAutomaticRetryCount(0);
-      void loadDirectPlayback();
+      void loadDirectPlayback("initial-load");
     });
     return () => {
       window.cancelAnimationFrame(frame);
-      requestRef.current?.abort();
     };
   }, [loadDirectPlayback, matchingInitialPlayback]);
-
-  useEffect(() => {
-    if (!directUnavailable || automaticRetryCount >= 3) return;
-    const timeout = window.setTimeout(
-      () => {
-        setAutomaticRetryCount((count) => count + 1);
-        void loadDirectPlayback(true);
-      },
-      1_500 * 2 ** automaticRetryCount,
-    );
-    return () => window.clearTimeout(timeout);
-  }, [automaticRetryCount, directUnavailable, loadDirectPlayback]);
 
   const directEpisode = useMemo(
     () =>
@@ -225,7 +184,7 @@ export function KodikWatchPlayer({
       <PlayerLoader
         episode={directEpisode}
         directSources={directPlayback?.sources}
-        debug={playbackDebug}
+        debug={false}
         animeTitle={title}
         seasonNumber={seasonNumber}
         onHandle={onHandle}
@@ -236,7 +195,7 @@ export function KodikWatchPlayer({
             return;
           }
           refreshAttemptedRef.current = true;
-          void loadDirectPlayback(true);
+          void loadDirectPlayback("fatal-playback-recovery");
         }}
       />
     );
