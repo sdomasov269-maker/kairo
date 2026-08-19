@@ -2,6 +2,7 @@ import "server-only";
 import { VideoLinks, type KodikVideoLinks } from "kodikwrapper";
 import { KodikWrapperResolverError } from "../errors";
 import { canonicalizeKodikPlayerLink } from "./kodik-link";
+import { createDiagnosticFetcher } from "./kodik-video-info-fetcher";
 import type {
   DirectPlaybackResolver,
   DirectPlaybackResult,
@@ -10,7 +11,6 @@ import type {
 } from "../types";
 
 const ENDPOINT_CACHE_TTL_MS = 15 * 60_000;
-const REQUEST_TIMEOUT_MS = 8_000;
 const endpointCache = new Map<string, { endpoint: string; expiresAt: number }>();
 
 const isDebug = () => process.env.KAIRO_PLAYBACK_DEBUG === "true";
@@ -53,28 +53,6 @@ function errorDetails(error: unknown) {
 
 function cacheKey(playerSingleUrl: string) {
   return new URL(playerSingleUrl).origin + new URL(playerSingleUrl).pathname;
-}
-
-function createDiagnosticFetcher() {
-  return async (input: RequestInfo | URL, init?: RequestInit) => {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-    const abort = () => controller.abort();
-    init?.signal?.addEventListener("abort", abort, { once: true });
-    try {
-      const response = await fetch(input, { ...init, signal: controller.signal });
-      debug("HTTP response", {
-        url: maskUrl(input instanceof Request ? input.url : input),
-        status: response.status,
-        contentType: response.headers.get("content-type"),
-        redirected: response.redirected,
-      });
-      return response;
-    } finally {
-      clearTimeout(timeout);
-      init?.signal?.removeEventListener("abort", abort);
-    }
-  };
 }
 
 function normalizeSources(links: KodikVideoLinks): DirectPlaybackSource[] {
@@ -135,7 +113,14 @@ export class KodikWrapperResolver implements DirectPlaybackResolver {
           debug("detected endpoint", { endpoint: cached.endpoint, cache: "hit" });
         }
         debug("getLinks", { endpoint: cached.endpoint });
-        return VideoLinks.getLinks({ link: canonicalPlayerUrl, videoInfoEndpoint: cached.endpoint, fetcher });
+        return VideoLinks.getLinks({
+          link: canonicalPlayerUrl,
+          videoInfoEndpoint: cached.endpoint,
+          fetcher: createDiagnosticFetcher({
+            canonicalPlayerUrl,
+            videoInfoEndpoint: cached.endpoint,
+          }),
+        });
       };
       let links: KodikVideoLinks;
       try {
