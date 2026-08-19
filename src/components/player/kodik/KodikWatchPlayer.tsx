@@ -88,7 +88,8 @@ export function KodikWatchPlayer({
         if (payload.mode === "kodik-iframe") {
           // A transient resolver fallback must never displace an already
           // working direct player. Only the initial resolve may enter iframe.
-          if (!directPlayback) setDirectUnavailable(true);
+          if (!directPlayback || reason === "fatal-playback-recovery")
+            setDirectUnavailable(true);
           return;
         }
         if (!Array.isArray(payload.sources) || !payload.sources.length)
