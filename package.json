@@ -12,26 +12,31 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "node --experimental-strip-types --test --test-isolation=none src/lib/catalog/catalog.test.ts src/lib/anime/local-first.test.ts src/lib/anime-titles/anime-titles.test.ts src/lib/anime-titles/public-list.test.ts src/lib/anime-titles/retry.test.ts src/lib/anime-index/anime-index.test.ts src/lib/db/prisma-diagnostics.test.ts src/lib/anilist/index-retry.test.ts src/lib/watch-route.test.ts src/domain/watch/episodes.test.ts src/server/validation/comment.test.ts src/server/services/kodik.service.test.ts src/server/services/kodik/provider.test.ts src/server/services/kodik/watch.test.ts src/server/services/kodik/detail-episodes.test.ts src/server/media-providers/providers.test.ts src/server/media-providers/manifest-sync.test.ts src/server/media-providers/verifier.test.ts src/server/media-providers/adapters/aniliberty/client.test.ts src/server/media-providers/adapters/aniliberty/mapper.test.ts src/server/media-providers/adapters/aniliberty/adapter.test.ts src/server/media-providers/adapters/aniliberty/extra.test.ts src/server/media-providers/adapters/kodik/client.test.ts src/server/media-providers/adapters/kodik/mapper.test.ts src/server/media-providers/adapters/kodik/adapter.test.ts src/server/playback/providers/kodik-link.test.ts src/server/playback/core/SourceAggregator.test.ts src/server/playback/core/SourceScorer.test.ts src/server/playback/providers/kodik/KodikProvider.test.ts src/server/playback/session/InMemoryPlaybackSessionStore.test.ts src/server/playback/session/PlaybackSessionManager.test.ts src/server/playback/session/session-api.test.ts src/server/playback/streaming/InMemoryStreamResourceStore.test.ts src/server/playback/streaming/ManifestRewriter.test.ts src/server/playback/streaming/stream-security.test.ts src/server/playback/streaming/stream-route.test.ts src/server/playback/streaming/StreamProxy.test.ts",
+
     "titles:sync": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/sync-anime-localized-titles.ts",
     "anime:index:sync": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/sync-anime-index.ts",
     "titles:trace": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/trace-anime-title.ts",
     "titles:stats": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/anime-title-stats.ts",
+
     "episodes:sync": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/episodes-sync.ts",
     "episodes:generate-missing": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/generate-missing-episodes.ts",
     "episodes:stats": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/episodes-stats.ts",
     "episodes:check": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/episodes-check.ts",
     "episodes:seed-demo": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/episodes-seed-demo.ts",
+
     "providers:manifest:validate": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/provider-manifest-validate.ts",
     "providers:manifest:sync": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/provider-manifest-sync.ts",
     "providers:probe": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/provider-probe.ts",
     "providers:catalog:validate": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/provider-catalog-validate.ts",
     "providers:catalog:report": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/provider-catalog-report.ts",
+
     "providers:aniliberty:inspect": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/provider-aniliberty-inspect.ts",
     "providers:aniliberty:inspect-search": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/provider-aniliberty-inspect-search.ts",
     "providers:aniliberty:search": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/provider-aniliberty-search.ts",
     "providers:aniliberty:show": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/provider-aniliberty-show.ts",
     "providers:aniliberty:sync": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/provider-aniliberty-sync.ts",
     "providers:aniliberty:updates": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/provider-aniliberty-updates.ts",
+
     "providers:kodik:inspect": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/provider-kodik-inspect.ts",
     "providers:kodik:health": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/provider-kodik-health.ts",
     "providers:kodik:diagnose": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/provider-kodik-diagnose.ts",
@@ -40,6 +45,7 @@
     "providers:kodik:show": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/provider-kodik-blocked.ts show",
     "providers:kodik:sync": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/provider-kodik-blocked.ts sync",
     "providers:kodik:updates": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/provider-kodik-blocked.ts updates",
+
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
@@ -47,6 +53,7 @@
     "db:seed": "node prisma/seed.mjs",
     "db:reset:dangerous": "prisma migrate reset"
   },
+
   "dependencies": {
     "@next-auth/prisma-adapter": "^1.0.7",
     "@prisma/client": "^6.19.2",
@@ -65,6 +72,7 @@
     "three": "^0.185.1",
     "zod": "^4.4.3"
   },
+
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.17",
     "@types/node": "^24.10.1",
@@ -79,7 +87,8 @@
     "tsx": "^4.23.12",
     "typescript": "^5.9.3"
   },
+
   "engines": {
-    "node": ">=20.9.0"
+    "node": "22.x"
   }
 }
