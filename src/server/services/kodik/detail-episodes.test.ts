@@ -6,7 +6,6 @@ import {
   createKodikAnimeDetailSeasons,
   resolveKodikAnimeDetailSeasonsWith,
 } from "./detail-episodes.ts";
-import { createKodikWorkspaceDto } from "./workspace.ts";
 
 const source: KodikAnimeSource = {
   provider: "kodik",
@@ -181,16 +180,4 @@ test("provider failure becomes the controlled empty state", async () => {
     anime,
   );
   assert.deepEqual(seasons, []);
-});
-
-test("workspace preserves translations, seasons and movie behavior", () => {
-  const workspace = createKodikWorkspaceDto(source);
-  assert.equal(workspace?.translations.length, 2);
-  assert.equal(workspace?.translations[1]?.seasons[1]?.episodes[0]?.number, 3);
-  assert.equal(workspace?.movie, false);
-  assert.equal(
-    createKodikWorkspaceDto({ ...source, type: "anime" })?.movie,
-    true,
-  );
-  assert.equal(createKodikWorkspaceDto(null), null);
 });

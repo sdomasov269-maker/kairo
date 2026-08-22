@@ -1,0 +1,6 @@
+.page { min-height: 100vh; background: radial-gradient(circle at 70% 0%, rgba(39, 118, 111, 0.12), transparent 38rem), var(--color-bg-root); }
+.main { width: min(calc(100% - (var(--page-gutter) * 2)), var(--content-max-width)); margin-inline: auto; padding-block: clamp(7rem, 12vw, 10rem) clamp(4rem, 8vw, 7rem); }
+.heading { margin-bottom: clamp(1.5rem, 3vw, 2.5rem); }
+.eyebrow { margin: 0 0 0.65rem; color: var(--color-accent); font-size: 0.75rem; font-weight: 650; letter-spacing: 0.16em; text-transform: uppercase; }
+.title { margin: 0; color: var(--color-text-primary); font-size: clamp(2rem, 5vw, 4.5rem); line-height: 0.96; text-wrap: balance; }
+.secondary { margin: 0.8rem 0 0; color: var(--color-text-muted); font-size: clamp(0.9rem, 1.5vw, 1.05rem); }

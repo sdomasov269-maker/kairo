@@ -1,5 +1,0 @@
-.root { width: 100%; }
-.selector { display: inline-flex; align-items: center; gap: 3px; margin: 0 0 8px; padding: 3px; border: 1px solid rgba(255,255,255,.14); border-radius: 999px; background: rgba(9,11,20,.7); font-size: 12px; }
-.selector span { padding: 0 6px; color: rgba(255,255,255,.65); }
-.selector button { border: 0; border-radius: 999px; padding: 5px 10px; color: rgba(255,255,255,.7); background: transparent; cursor: pointer; }
-.selector button.active { color: #081019; background: #d9f7ff; }

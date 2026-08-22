@@ -21,6 +21,7 @@ reports/media-provider-probes/
 reports/anime-index-sync/
 .data/anime-index-checkpoints/
 .data/anime-title-checkpoints/
+.cache/playback/
 
 # Local/generated files
 tmp/

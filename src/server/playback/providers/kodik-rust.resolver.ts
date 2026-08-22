@@ -15,7 +15,8 @@ export class KodikRustResolver implements DirectPlaybackResolver {
       const value: unknown = await response.json();
       if (!value || typeof value !== "object" || !Array.isArray((value as { sources?: unknown }).sources)) throw new Error("Rust resolver returned an invalid payload");
       return value as DirectPlaybackResult;
-    } catch (error) { throw new RustResolverError("Rust resolver could not resolve direct playback", error); }
-    finally { clearTimeout(timeout); }
+    } catch (error) {
+      throw new RustResolverError("Rust resolver could not resolve direct playback", error);
+    } finally { clearTimeout(timeout); }
   }
 }

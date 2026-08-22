@@ -2,7 +2,7 @@ import type { KodikAnimeSource, KodikResolverInput } from "./types.ts";
 import type {
   KodikWatchPlaybackDto,
   KodikWatchTranslationDto,
-} from "@/components/player/kodik/kodik-watch.types";
+} from "./watch-types";
 
 function resolveTranslation(
   source: KodikAnimeSource,

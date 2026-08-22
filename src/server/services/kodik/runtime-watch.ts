@@ -1,6 +1,6 @@
 import type { WatchEpisode } from "@/data/watch/types";
 import type { Anime } from "@/types/media";
-import type { KodikWatchPlaybackDto } from "@/components/player/kodik/kodik-watch.types";
+import type { KodikWatchPlaybackDto } from "./watch-types";
 
 export async function resolveKodikRuntimeWatchEpisode(
   anime: Anime,

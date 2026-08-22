@@ -1,7 +1,7 @@
 import "server-only";
 
 import { kodikService } from "./kodik.service";
-import type { KodikWatchPlaybackDto } from "@/components/player/kodik/kodik-watch.types";
+import type { KodikWatchPlaybackDto } from "./kodik/watch-types";
 import {
   resolveKodikWatchPlaybackWith,
   type KodikWatchResolverInput,
