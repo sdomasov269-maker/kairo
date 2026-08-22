@@ -1,7 +1,7 @@
 import "server-only";
 
 import { cache } from "react";
-import { getLocalAnimeBySlug } from "@/data/catalog";
+import { getLocalAnimeByAniListId, getLocalAnimeBySlug } from "@/data/catalog";
 import {
   AniListRequestError,
   getAnimeByAniListId,
@@ -13,6 +13,7 @@ import { extractAniListId, extractMalId } from "@/lib/catalog";
 import {
   readAnimeSnapshot,
   readMalAnimeSnapshot,
+  findCatalogSnapshotAnime,
   writeAnimeSnapshot,
 } from "@/lib/catalog/snapshot";
 import {
@@ -32,7 +33,13 @@ import {
   findAnimeBySlug,
   findRelatedAnime,
 } from "@/server/repositories/anime.repository";
-import { findDatabaseAnimeForRoute } from "./local-first";
+import {
+  AnimeMetadataUnavailableError,
+  enrichLocalAnimeBestEffort,
+  findDatabaseAnimeForRoute,
+  findLocalAnimeForRoute,
+  resolveRelatedAnimeBestEffort,
+} from "./local-first";
 
 const titleFromSlug = (slug: string) =>
   slug
@@ -50,11 +57,25 @@ async function resolveAnimeBySlugUncached(slug: string): Promise<Anime | null> {
   if (!slug || slug.length > 120) return null;
   const routeAniListId = extractAniListId(slug);
   logAnimeResolution("start", { slug, anilistId: routeAniListId });
-  let databaseAnime: Anime | null;
+  let localResolution;
   try {
-    databaseAnime = await findDatabaseAnimeForRoute(slug, routeAniListId, {
-      bySlug: findAnimeBySlug,
-      byAniListId: findAnimeByAniListId,
+    localResolution = await findLocalAnimeForRoute(slug, routeAniListId, {
+      database: () =>
+        findDatabaseAnimeForRoute(slug, routeAniListId, {
+          bySlug: findAnimeBySlug,
+          byAniListId: findAnimeByAniListId,
+        }),
+      localCatalog: () =>
+        getLocalAnimeBySlug(slug) ??
+        (routeAniListId
+          ? (getLocalAnimeByAniListId(routeAniListId) ?? null)
+          : null),
+      catalogSnapshot: () => findCatalogSnapshotAnime(slug, routeAniListId),
+      runtime: () => (routeAniListId ? getRuntimeAnime(routeAniListId) : null),
+      snapshot: () =>
+        routeAniListId
+          ? readAnimeSnapshot(routeAniListId)
+          : Promise.resolve(null),
     });
   } catch (error) {
     logAnimeResolution("database-error", {
@@ -69,75 +90,32 @@ async function resolveAnimeBySlugUncached(slug: string): Promise<Anime | null> {
     });
     throw error;
   }
-  if (databaseAnime) {
-    logAnimeResolution("resolved", {
-      anilistId: databaseAnime.anilistId,
-      source: "database",
-      snapshotFallback: false,
-    });
-    return enrichAnimeWithLocalizedTitles(
-      applyCanonicalTitleLocalization(databaseAnime),
-    );
-  }
-  const local = getLocalAnimeBySlug(slug);
-  if (local) {
+  if (localResolution) {
+    const { anime: localAnime, source } = localResolution;
     if (
-      local.isDemo &&
+      localAnime.isDemo &&
       process.env.NODE_ENV === "production" &&
       process.env.SHOW_DEMO_CATALOG !== "true"
     )
       return null;
-    if (!local.anilistId) return local;
-    try {
-      const remote = await getAnimeByAniListId(local.anilistId);
-      logAnimeResolution("resolved", {
-        anilistId: local.anilistId,
-        source: "anilist",
-        snapshotFallback: false,
-      });
-      const anime = applyCanonicalTitleLocalization(
-        mergeAniListAnime(local, remote),
-      );
-      await writeAnimeSnapshot(anime);
-      return enrichAnimeWithLocalizedTitles(anime);
-    } catch (error) {
-      if (error instanceof AniListRequestError) {
-        const snapshot = await readAnimeSnapshot(local.anilistId);
-        if (snapshot) {
-          logAnimeResolution("fallback", {
-            anilistId: local.anilistId,
-            source: "snapshot",
-            snapshotFallback: true,
-          });
-          return enrichAnimeWithLocalizedTitles(snapshot);
-        }
-        const backup = await getJikanAnimeBySearch(local.title);
-        if (backup.ok && backup.data) {
-          logAnimeResolution("fallback", {
-            anilistId: local.anilistId,
-            source: "jikan-search",
-            snapshotFallback: false,
-          });
-          const mapped = mapJikanAnime(backup.data);
-          const anime = applyCanonicalTitleLocalization({
-            ...mapped,
-            id: local.id,
-            slug: local.slug,
-            anilistId: local.anilistId,
-            titleRu: local.titleRu,
-          });
-          await writeAnimeSnapshot(anime);
-          return enrichAnimeWithLocalizedTitles(anime);
-        }
-        logAnimeResolution("fallback", {
-          anilistId: local.anilistId,
-          source: "local-catalog",
-          snapshotFallback: false,
-        });
-        return enrichAnimeWithLocalizedTitles(local);
-      }
-      throw error;
-    }
+    const resolvedAnime =
+      source === "local-catalog" && localAnime.anilistId
+        ? await enrichLocalAnimeBestEffort(
+            localAnime,
+            () => getAnimeByAniListId(localAnime.anilistId!),
+            mergeAniListAnime,
+            (error) => error instanceof AniListRequestError,
+          )
+        : localAnime;
+    logAnimeResolution("resolved", {
+      anilistId: resolvedAnime.anilistId,
+      source,
+      snapshotFallback: source === "snapshot",
+    });
+    if (resolvedAnime !== localAnime) await writeAnimeSnapshot(resolvedAnime);
+    return enrichAnimeWithLocalizedTitles(
+      applyCanonicalTitleLocalization(resolvedAnime),
+    );
   }
   const malId = extractMalId(slug);
   if (malId) {
@@ -212,7 +190,7 @@ async function resolveAnimeBySlugUncached(slug: string): Promise<Anime | null> {
         snapshotFallback: false,
         jikanStatus: backup.ok ? null : backup.status,
       });
-      throw error;
+      throw new AnimeMetadataUnavailableError({ cause: error });
     }
     logAnimeResolution("fallback", {
       anilistId,
@@ -234,23 +212,17 @@ async function resolveAnimeBySlugUncached(slug: string): Promise<Anime | null> {
 export const resolveAnimeBySlug = cache(resolveAnimeBySlugUncached);
 
 export async function resolveRelatedAnime(anime: Anime): Promise<Anime[]> {
-  const localRelated = await findRelatedAnime(anime, 6);
-  if (localRelated.length) {
-    return enrichAnimeListWithLocalizedTitles(
-      localRelated.map(applyCanonicalTitleLocalization),
-    );
-  }
-  if (!anime.anilistId) return [];
-  try {
-    const related = await getRelatedAnime(anime.anilistId);
-    return enrichAnimeListWithLocalizedTitles(
-      related
-        .slice(0, 6)
-        .map(mapAniListAnime)
-        .map(applyCanonicalTitleLocalization),
-    );
-  } catch (error) {
-    if (error instanceof AniListRequestError) return [];
-    throw error;
-  }
+  const related = await resolveRelatedAnimeBestEffort(
+    () => findRelatedAnime(anime, 6),
+    async () =>
+      anime.anilistId
+        ? (await getRelatedAnime(anime.anilistId))
+            .slice(0, 6)
+            .map(mapAniListAnime)
+        : [],
+    (error) => error instanceof AniListRequestError,
+  );
+  return enrichAnimeListWithLocalizedTitles(
+    related.map(applyCanonicalTitleLocalization),
+  );
 }

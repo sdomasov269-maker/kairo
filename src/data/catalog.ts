@@ -214,6 +214,8 @@ export const catalogAniListIds = realAnimeCatalog.flatMap((anime) =>
 );
 export const getLocalAnimeBySlug = (slug: string) =>
   localAnimeCatalog.find((anime) => anime.slug === slug);
+export const getLocalAnimeByAniListId = (anilistId: number) =>
+  localAnimeCatalog.find((anime) => anime.anilistId === anilistId);
 
 export const watching: WatchingProgress[] = [
   {

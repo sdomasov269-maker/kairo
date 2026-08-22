@@ -3,7 +3,11 @@ import type {
   AniListMedia,
   AniListResponse,
 } from "./types.ts";
-import { AniListRequestError, isRetryableAniListStatus } from "./errors.ts";
+import {
+  AniListRequestError,
+  isRetryableAniListStatus,
+  isTemporarilyDisabledAniListError,
+} from "./errors.ts";
 import {
   ANIME_BATCH,
   ANIME_BY_ID,
@@ -116,7 +120,12 @@ async function request<T>(
         errorMessage: safeGraphQLErrorMessage(parsedResponseBody),
       });
       if (!response.ok) {
-        const retryable = isRetryableAniListStatus(response.status);
+        const retryable =
+          isRetryableAniListStatus(response.status) &&
+          !isTemporarilyDisabledAniListError(
+            response.status,
+            safeGraphQLErrorMessage(parsedResponseBody),
+          );
         if (attempt === 0 && retryable) {
           await wait(retryDelay(response));
           continue;

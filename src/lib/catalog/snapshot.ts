@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createHash } from "node:crypto";
-import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { Anime } from "@/types/media";
 
@@ -12,6 +12,9 @@ interface CatalogSnapshot {
 
 const MAX_SNAPSHOTS = 12;
 const snapshots = new Map<string, CatalogSnapshot>();
+const catalogBySlug = new Map<string, Anime>();
+const catalogByAniListId = new Map<number, Anime>();
+let persistedCatalogIndexed = false;
 const snapshotRoot = process.env.KAIRO_ANIME_SNAPSHOT_DIR
   ? path.resolve(process.env.KAIRO_ANIME_SNAPSHOT_DIR)
   : path.join(process.cwd(), ".data", "anime-snapshots");
@@ -42,6 +45,13 @@ function normalizeAnime(anime: Anime[]): Anime[] {
   );
 }
 
+function indexCatalogAnime(anime: Anime[]): void {
+  for (const item of anime) {
+    catalogBySlug.set(item.slug, item);
+    if (item.anilistId) catalogByAniListId.set(item.anilistId, item);
+  }
+}
+
 async function persist(key: string, snapshot: CatalogSnapshot): Promise<void> {
   try {
     await mkdir(snapshotRoot, { recursive: true });
@@ -60,6 +70,7 @@ export async function readCatalogSnapshot(
   const memory = snapshots.get(key);
   if (memory) {
     const normalized = { ...memory, anime: normalizeAnime(memory.anime) };
+    indexCatalogAnime(normalized.anime);
     snapshots.set(key, normalized);
     return normalized;
   }
@@ -70,6 +81,7 @@ export async function readCatalogSnapshot(
     if (!Array.isArray(parsed.anime) || !Number.isFinite(parsed.savedAt))
       return null;
     const normalized = { ...parsed, anime: normalizeAnime(parsed.anime) };
+    indexCatalogAnime(normalized.anime);
     snapshots.set(key, normalized);
     if (normalized.anime.length !== parsed.anime.length)
       void persist(key, normalized);
@@ -86,6 +98,7 @@ export async function writeCatalogSnapshot(
   if (!anime.length) return;
   const complete = normalizeAnime(anime);
   if (!complete.length) return;
+  indexCatalogAnime(complete);
   const snapshot = { anime: complete, savedAt: Date.now() };
   snapshots.delete(key);
   snapshots.set(key, snapshot);
@@ -94,6 +107,48 @@ export async function writeCatalogSnapshot(
     if (oldest !== undefined) snapshots.delete(oldest);
   }
   await persist(key, snapshot);
+}
+
+async function indexPersistedCatalogSnapshots(): Promise<void> {
+  if (persistedCatalogIndexed) return;
+  persistedCatalogIndexed = true;
+  try {
+    const entries = await readdir(snapshotRoot, { withFileTypes: true });
+    await Promise.all(
+      entries
+        .filter((entry) => entry.isFile() && entry.name.endsWith(".json"))
+        .map(async (entry) => {
+          try {
+            const parsed = JSON.parse(
+              await readFile(path.join(snapshotRoot, entry.name), "utf8"),
+            ) as CatalogSnapshot;
+            if (Array.isArray(parsed.anime))
+              indexCatalogAnime(normalizeAnime(parsed.anime));
+          } catch {
+            // A corrupt snapshot must not block other local catalog entries.
+          }
+        }),
+    );
+  } catch {
+    // The snapshot directory is optional on read-only or fresh hosts.
+  }
+}
+
+export async function findCatalogSnapshotAnime(
+  slug: string,
+  anilistId: number | null,
+): Promise<Anime | null> {
+  let match =
+    catalogBySlug.get(slug) ??
+    (anilistId ? catalogByAniListId.get(anilistId) : undefined) ??
+    null;
+  if (match) return match;
+  await indexPersistedCatalogSnapshots();
+  match =
+    catalogBySlug.get(slug) ??
+    (anilistId ? catalogByAniListId.get(anilistId) : undefined) ??
+    null;
+  return match;
 }
 
 export const animeSnapshotKey = (anilistId: number) => `anime:${anilistId}`;

@@ -32,3 +32,13 @@ export function isRetryableAniListStatus(status: number): boolean {
     (status >= 500 && status <= 599)
   );
 }
+
+export function isTemporarilyDisabledAniListError(
+  status: number,
+  message: string | undefined,
+): boolean {
+  return (
+    status === 403 &&
+    /temporarily disabled|severe stability issues/i.test(message ?? "")
+  );
+}

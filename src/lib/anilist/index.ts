@@ -14,4 +14,8 @@ export {
   mapAniListAnime,
 } from "./mappers";
 export type { AniListMedia } from "./types";
-export { AniListRequestError, isRetryableAniListStatus } from "./errors";
+export {
+  AniListRequestError,
+  isRetryableAniListStatus,
+  isTemporarilyDisabledAniListError,
+} from "./errors";
