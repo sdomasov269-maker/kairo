@@ -33,3 +33,5 @@ reports/*.html
 # Local dependency backups
 node_modules_backup/
 package-lock.backup.json
+.vercel
+.env*

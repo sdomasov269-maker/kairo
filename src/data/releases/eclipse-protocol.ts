@@ -1,12 +1,5 @@
 import type { AnimeEpisodeCatalog } from "@/domain/watch/types";
 
-const source = {
-  id: "shaka-bbb-dark-truths-dash",
-  kind: "dash" as const,
-  url: "https://storage.googleapis.com/shaka-demo-assets/bbb-dark-truths/dash.mpd",
-  label: "Shaka Demo · DASH",
-  isDemo: true,
-};
 export const eclipseProtocolCatalog: AnimeEpisodeCatalog = {
   animeSlug: "eclipse-protocol",
   episodes: [
@@ -48,7 +41,7 @@ export const eclipseProtocolCatalog: AnimeEpisodeCatalog = {
   releases: [
     {
       episodeId: "eclipse-protocol-s1e1",
-      sources: [source],
+      sources: [],
       subtitles: [
         {
           id: "eclipse-protocol-1-ru",
@@ -86,7 +79,7 @@ export const eclipseProtocolCatalog: AnimeEpisodeCatalog = {
     },
     {
       episodeId: "eclipse-protocol-s1e2",
-      sources: [source],
+      sources: [],
       subtitles: [
         {
           id: "eclipse-protocol-2-ru",

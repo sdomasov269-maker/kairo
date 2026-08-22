@@ -1,4 +1,3 @@
-import { shakaDemoDashSource } from "./demo-sources";
 import type { WatchEpisode } from "./types";
 
 export const demoWatchEpisodes: WatchEpisode[] = [
@@ -11,7 +10,7 @@ export const demoWatchEpisodes: WatchEpisode[] = [
       "Демонстрационная серия для проверки интерфейса Kairo. Видеоматериал не связан с аниме.",
     descriptionEn:
       "A demo episode for testing the Kairo interface. The video is not related to the anime.",
-    sources: [shakaDemoDashSource],
+    sources: [],
     subtitles: [
       {
         id: "demo-en",
@@ -59,9 +58,9 @@ export const demoWatchEpisodes: WatchEpisode[] = [
     titleRu: "Граница памяти",
     titleEn: "Memory Line",
     descriptionRu:
-      "Вторая демонстрационная запись использует тот же разрешённый тестовый поток.",
-    descriptionEn: "The second demo entry uses the same permitted test stream.",
-    sources: [shakaDemoDashSource],
+      "Вторая демонстрационная запись сохранена для проверки интерфейса.",
+    descriptionEn: "The second demo entry is retained for interface testing.",
+    sources: [],
     subtitles: [],
     audioTracks: [
       {

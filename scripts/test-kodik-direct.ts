@@ -1,5 +1,5 @@
 import { VideoLinks, type KodikVideoLinks } from "kodikwrapper";
-import { canonicalizeKodikPlayerLink } from "../src/server/playback/providers/kodik-link";
+import { canonicalizeKodikPlayerLink } from "./playback/archive-support/kodik-resolvers";
 
 const link = process.argv[2];
 if (!link) {

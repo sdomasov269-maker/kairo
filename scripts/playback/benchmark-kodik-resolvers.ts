@@ -1,7 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { KodikWrapperResolver } from "../../src/server/playback/providers/kodik-wrapper.resolver.ts";
-import { KodikRustResolver } from "../../src/server/playback/providers/kodik-rust.resolver.ts";
+import { KodikRustResolver, KodikWrapperResolver } from "./archive-support/kodik-resolvers.ts";
 
 type Fixture = { name: string; url: string };
 type Source = { quality?: string; url: string; mimeType?: string };

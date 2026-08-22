@@ -11,14 +11,11 @@ import {
   getPublishedEpisodeRelease,
 } from "@/domain/watch/resolvers";
 import {
-  adjacentEpisodes,
   getEpisodeAvailability,
   resolveEpisodeTitle,
-  validateMediaUrl,
   type EpisodeAvailability,
   type EpisodeMetadata,
 } from "@/domain/watch";
-import { resolveKodikWatchPlayback } from "@/server/services/kodik-watch.service";
 
 type EpisodeRow = AnimeEpisode & {
   videoSources: AnimeVideoSource[];
@@ -234,134 +231,4 @@ export async function getAnimeSeasonsForDetails(
         };
       }),
   }));
-}
-
-export type WatchResolveErrorCode =
-  | "ANIME_NOT_FOUND"
-  | "SEASON_NOT_FOUND"
-  | "EPISODE_NOT_FOUND"
-  | "EPISODE_UNAVAILABLE"
-  | "VIDEO_SOURCE_MISSING";
-export class WatchResolveError extends Error {
-  constructor(readonly code: WatchResolveErrorCode) {
-    super(code);
-    this.name = "WatchResolveError";
-  }
-}
-
-export async function resolveWatchEpisode(input: {
-  slug: string;
-  seasonNumber: number;
-  episodeNumber: number;
-  userId?: string;
-}) {
-  const anime = await prisma.anime.findUnique({
-    where: { slug: input.slug },
-    include: {
-      localizedTitles: {
-        where: { source: "SHIKIMORI" },
-        select: { externalId: true },
-      },
-      titleAliases: { select: { title: true } },
-      animeSeasons: {
-        where: { number: input.seasonNumber, isPublished: true },
-        include: {
-          episodes: {
-            orderBy: { number: "asc" },
-            include: {
-              videoSources: true,
-              subtitleTracks: { where: { isActive: true } },
-            },
-          },
-        },
-      },
-    },
-  });
-  if (!anime) throw new WatchResolveError("ANIME_NOT_FOUND");
-  const season = anime.animeSeasons[0];
-  if (!season) throw new WatchResolveError("SEASON_NOT_FOUND");
-  const index = season.episodes.findIndex(
-    (candidate) => candidate.number === input.episodeNumber,
-  );
-  if (index < 0) throw new WatchResolveError("EPISODE_NOT_FOUND");
-  const episode = season.episodes[index];
-  const databaseAvailability = getEpisodeAvailability(episode);
-  const shikimoriId = anime.localizedTitles
-    .map((title) => Number(title.externalId))
-    .find((id) => Number.isSafeInteger(id) && id > 0);
-  const kodikPlayback = await resolveKodikWatchPlayback({
-    anilistId: anime.anilistId,
-    ...(anime.malId ? { malId: anime.malId } : {}),
-    ...(shikimoriId ? { shikimoriId } : {}),
-    ...(anime.year ? { year: anime.year } : {}),
-    titles: {
-      ...(anime.titleRussian ? { russian: anime.titleRussian } : {}),
-      ...(anime.titleEnglish ? { english: anime.titleEnglish } : {}),
-      ...(anime.titleRomaji ? { romaji: anime.titleRomaji } : {}),
-      ...(anime.titleNative ? { native: anime.titleNative } : {}),
-      aliases: [
-        ...anime.synonyms,
-        ...anime.synonymsRussian,
-        ...anime.synonymsUkrainian,
-        ...anime.titleAliases.map((alias) => alias.title),
-      ],
-    },
-    seasonNumber: season.number,
-    episodeNumber: episode.number,
-  });
-  const availability: EpisodeAvailability = kodikPlayback
-    ? "AVAILABLE"
-    : databaseAvailability === "COMING_SOON"
-      ? "COMING_SOON"
-      : "NO_VIDEO";
-  const sources =
-    databaseAvailability === "AVAILABLE"
-      ? episode.videoSources
-          .filter((source) => source.isActive)
-          .map((source) => ({
-            id: source.id,
-            type: source.protocol.toLowerCase() as "dash" | "hls" | "mp4",
-            url: validateMediaUrl(source.url).toString(),
-            label: source.label ?? source.quality,
-            isDemo: false,
-          }))
-      : [];
-  const progress = input.userId
-    ? await prisma.watchProgress.findUnique({
-        where: {
-          userId_animeKey_seasonNumber_episodeNumber: {
-            userId: input.userId,
-            animeKey: anime.slug,
-            seasonNumber: season.number,
-            episodeNumber: episode.number,
-          },
-        },
-      })
-    : null;
-  const subtitles = episode.subtitleTracks.map((track) => ({
-    id: track.id,
-    language: track.language,
-    label: track.label,
-    url: validateMediaUrl(track.url).toString(),
-    kind: "subtitles" as const,
-    isDefault: track.isDefault,
-  }));
-  const adjacent = adjacentEpisodes(season.episodes, episode.number);
-  return {
-    anime,
-    season,
-    episode,
-    metadata: toMetadata(anime.slug, season, episode),
-    availability,
-    release: sources.length ? { sources } : null,
-    kodikPlayback,
-    sources,
-    subtitles,
-    progress,
-    previousEpisode: adjacent.previous,
-    nextEpisode: adjacent.next,
-    previous: adjacent.previous,
-    next: adjacent.next,
-    canonicalUrl: `/watch/${anime.slug}/${episode.number}?season=${season.number}`,
-  };
 }

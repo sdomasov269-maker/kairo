@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
-import { avSkew, classifyTimestampDelta, durationError } from "../../src/components/player/diagnostics/timestamp-analysis.ts";
+import { avSkew, classifyTimestampDelta, durationError } from "./archive-support/timestamp-analysis.ts";
 
 type Packet = { stream_index: number; pts_time?: string; dts_time?: string; duration_time?: string; flags?: string };
 type Stream = { index: number; codec_type?: string; codec_name?: string; time_base?: string; avg_frame_rate?: string };

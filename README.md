@@ -93,8 +93,8 @@ The database schema includes Auth.js adapter tables, user roles, watch
 progress, anime-list entries, preferences, verification records and hashed
 password-reset records. Account-bound synchronization must merge data in a
 transaction; it must never erase guest data before the server confirms the
-write. A CSP is intentionally deferred because it needs nonce-aware Next.js
-handling and explicit allowances for the Shaka media host.
+write. A CSP is intentionally deferred until nonce-aware Next.js handling is
+designed for the application as a whole.
 
 ## Guest and account data
 
