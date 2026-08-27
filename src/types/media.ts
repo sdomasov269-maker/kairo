@@ -30,6 +30,15 @@ export interface Anime {
   coverImage?: string;
   coverImageLarge?: string;
   bannerImage?: string;
+  heroImageUrl?: string;
+  heroImageSource?: string;
+  heroImageScore?: number;
+  heroImageUpdatedAt?: Date;
+  heroImageCropFocusX?: number;
+  heroImageCropFocusY?: number;
+  heroImageOverrideUrl?: string;
+  heroImageOverrideSource?: string;
+  heroImageApproved?: boolean;
   dominantColor?: string;
   genres: string[];
   year?: number;

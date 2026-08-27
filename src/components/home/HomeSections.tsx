@@ -111,13 +111,16 @@ function EmptySlot({ loading = false }: { loading?: boolean }) {
 
 function HomeContinueWatchingSection({ anime }: { anime: Anime[] }) {
   const { locale, dictionary: t } = useLocale();
-  const { progress, syncStatus, refresh } = useAccountData();
+  const { mode, progress, syncStatus, refresh } = useAccountData();
   const loading = syncStatus === "idle" || syncStatus === "loading";
   const failed = syncStatus === "error" || syncStatus === "session-expired";
   const [historyOpen, setHistoryOpen] = useState(false);
   const historyButton = useRef<HTMLButtonElement>(null);
   const catalogBySlug = new Map(anime.map((item) => [item.slug, item]));
-  const unfinishedItems = selectContinueWatching(progress, progress.length);
+  const unfinishedItems =
+    mode.kind === "account"
+      ? selectContinueWatching(progress, progress.length)
+      : [];
   const items = unfinishedItems
     .flatMap((entry) => {
       const item = catalogBySlug.get(entry.animeSlug);
@@ -135,6 +138,10 @@ function HomeContinueWatchingSection({ anime }: { anime: Anime[] }) {
     <section
       className={`${styles.section} ${styles.continueSection}`}
       aria-labelledby="home-continue-title"
+      data-testid="continue-watching"
+      data-progress-mode={mode.kind}
+      data-progress-count={progress.length}
+      data-item-count={items.length}
     >
       <SectionHeader
         id="home-continue-title"

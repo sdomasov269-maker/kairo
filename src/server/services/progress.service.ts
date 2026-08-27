@@ -2,6 +2,7 @@ import "server-only";
 import { prisma } from "@/lib/db";
 import type { z } from "zod";
 import { progressInput } from "@/server/validation/data";
+import { WATCH_COMPLETION_PERCENT } from "@/lib/watch-progress/policy";
 type Input = z.infer<typeof progressInput>;
 const dto = (item: {
   animeKey: string;
@@ -32,12 +33,17 @@ export async function upsertProgress(userId: string, input: Input) {
           episodeNumber: input.episodeNumber,
         },
       },
-      create: { userId, ...input, percent, completed: percent >= 95 },
+      create: {
+        userId,
+        ...input,
+        percent,
+        completed: percent >= WATCH_COMPLETION_PERCENT,
+      },
       update: {
         currentTime: input.currentTime,
         duration: input.duration,
         percent,
-        completed: percent >= 95,
+        completed: percent >= WATCH_COMPLETION_PERCENT,
       },
     }),
   );

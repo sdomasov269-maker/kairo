@@ -43,7 +43,7 @@ export async function findLocalAnimeForRoute(
     snapshot: () => Promise<Anime | null>;
   },
 ): Promise<LocalAnimeResolution | null> {
-  const database = await sources.database();
+  const database = await sources.database().catch(() => null);
   if (database) return { anime: database, source: "database" };
   const localCatalog = sources.localCatalog();
   if (localCatalog) return { anime: localCatalog, source: "local-catalog" };
@@ -77,7 +77,7 @@ export async function resolveRelatedAnimeBestEffort(
   loadRemote: () => Promise<Anime[]>,
   isUnavailable: (error: unknown) => boolean,
 ): Promise<Anime[]> {
-  const local = await loadLocal();
+  const local = await loadLocal().catch(() => []);
   if (local.length) return local;
   try {
     return await loadRemote();

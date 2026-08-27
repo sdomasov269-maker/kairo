@@ -135,8 +135,32 @@ shared limiter.
 Development intentionally uses webpack:
 
 ```powershell
-npm.cmd run dev
+cd D:\ANIME
+npm run dev:all
 ```
+
+This recommended command starts both services in one PowerShell window, with
+`[WEB]` and `[PROVIDER]` log prefixes:
+
+- Kairo: `http://localhost:3000`
+- anime-provider: `http://127.0.0.1:8787`
+
+The provider automatically reads `.env.local` and then `.env`; existing
+process/OS environment values retain priority. Check a running provider with
+`npm run provider:health`.
+
+The older two-terminal workflow remains available when separate logs are
+useful:
+
+```text
+Terminal 1:
+npm run provider:dev
+
+Terminal 2:
+npm run dev
+```
+
+Press `Ctrl+C` in the combined terminal to stop both services.
 
 Before a release, test guest mode, two separate accounts, local-data merge,
 offline mutations followed by reconnect, session expiry, keyboard navigation,

@@ -9,8 +9,16 @@ export const progressInput = z.object({
   animeKey,
   seasonNumber: z.number().int().positive(),
   episodeNumber: z.number().int().positive(),
-  currentTime: z.number().finite().nonnegative(),
-  duration: z.number().finite().nonnegative(),
+  currentTime: z
+    .number()
+    .finite()
+    .nonnegative()
+    .max(60 * 60 * 24),
+  duration: z
+    .number()
+    .finite()
+    .positive()
+    .max(60 * 60 * 24),
 });
 export const animeListInput = z.object({
   animeKey,

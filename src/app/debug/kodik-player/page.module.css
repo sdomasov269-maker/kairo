@@ -1,0 +1,66 @@
+.main {
+  width: min(1180px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 7rem 0 4rem;
+  color: #e7f1ef;
+}
+.main header p {
+  margin: 0;
+  color: #7ca39e;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.main h1 {
+  margin: 0.35rem 0 2rem;
+  font-size: clamp(2rem, 5vw, 4.5rem);
+}
+.resolver {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.8rem;
+  align-items: end;
+  margin-bottom: 1.2rem;
+  padding: 1rem;
+  border: 1px solid rgb(132 210 202 / 16%);
+  border-radius: 1rem;
+  background: rgb(6 19 20 / 82%);
+}
+.resolver label {
+  display: grid;
+  gap: 0.35rem;
+  color: #9bb6b1;
+  font-size: 0.8rem;
+}
+.resolver input,
+.resolver select,
+.resolver button {
+  min-height: 2.7rem;
+  border: 1px solid rgb(132 210 202 / 22%);
+  border-radius: 0.65rem;
+  background: #0b1b1c;
+  color: #e7f1ef;
+  padding: 0.6rem 0.7rem;
+}
+.status {
+  grid-column: 1 / -1;
+  color: #8fada8;
+}
+.stalls {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: rgb(6 19 20 / 72%);
+}
+.stalls h2 {
+  margin-top: 0;
+  font-size: 1rem;
+}
+.stalls li {
+  font-family: monospace;
+  font-size: 0.78rem;
+}
+@media (max-width: 900px) {
+  .resolver {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

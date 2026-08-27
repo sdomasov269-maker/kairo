@@ -1,0 +1,2894 @@
+Baseline HEAD: 8574388f6e59f5d90684a14ed7d8bb09fb51c254
+Captured: 2026-08-26T20:47:15.0212760+01:00
+
+=== git status --short ===
+ M .env.example
+ M .env.production.example
+ M README.md
+ M next.config.ts
+ M package-lock.json
+ M package.json
+ M prisma/schema.prisma
+ M src/app/anime/[slug]/page.module.css
+ M src/app/anime/[slug]/page.tsx
+ M src/app/globals.css
+ M src/app/watch/[slug]/[episode]/page.tsx
+ M src/components/home/HomeSections.tsx
+ M src/components/navigation/Header.tsx
+ M src/components/navigation/NavigationDock.tsx
+ M src/lib/anime/local-first.test.ts
+ M src/lib/anime/local-first.ts
+ M src/lib/watch-progress/selectors.ts
+ M src/server/repositories/anime.repository.ts
+ M src/server/services/progress.service.ts
+ M src/server/validation/data.ts
+ M src/styles/responsive/mobile.css
+ M src/types/media.ts
+?? prisma/migrations/20260823010000_add_anime_hero_images/
+?? reports/anime-detail-playback-acceptance.md
+?? reports/animego-cvh-provider-acceptance.md
+?? reports/kodik-player-browser-acceptance.md
+?? reports/manual-quality-baseline-20260826-204714.txt
+?? reports/player-ux-acceptance-latest.json
+?? reports/provider-manager-acceptance.md
+?? reports/translation-matching-acceptance.md
+?? scripts/dev/
+?? scripts/diagnose-anime-parsers-kodik.py
+?? scripts/playback/accept-anime-detail.mjs
+?? scripts/playback/accept-animego-cvh.mjs
+?? scripts/playback/accept-continue-autonext.mjs
+?? scripts/playback/accept-kodik-player.mjs
+?? scripts/playback/accept-player-ux.mjs
+?? scripts/playback/accept-provider-manager.mjs
+?? scripts/playback/accept-skip-segments.mjs
+?? scripts/playback/accept-watch-progress.mjs
+?? scripts/playback/compare-hls-transports.mjs
+?? scripts/playback/inspect-native-hls-cdp.mjs
+?? services/
+?? src/app/anime/[slug]/AnimePlaybackPanel.tsx
+?? src/app/anime/[slug]/WatchControlGrid.tsx
+?? src/app/api/playback/
+?? src/app/api/stream/
+?? src/app/debug/
+?? src/components/player/
+?? src/lib/playback/
+?? src/lib/watch-progress/policy.test.ts
+?? src/lib/watch-progress/policy.ts
+?? src/lib/watch-progress/selectors.test.ts
+?? src/server/playback/
+?? src/server/services/hero-image-scoring.ts
+?? src/server/services/hero-image.service.test.ts
+?? src/server/services/hero-image.service.ts
+
+=== git diff --stat ===
+ .env.example                                 |   6 +
+ .env.production.example                      |   2 +
+ README.md                                    |  26 +-
+ next.config.ts                               |   5 +
+ package-lock.json                            | 247 +++++++++
+ package.json                                 |   8 +-
+ prisma/schema.prisma                         |   9 +
+ src/app/anime/[slug]/page.module.css         | 782 ++++++++++++++++++++++++++-
+ src/app/anime/[slug]/page.tsx                | 238 +++++++-
+ src/app/globals.css                          | 119 ++--
+ src/app/watch/[slug]/[episode]/page.tsx      |  12 +-
+ src/components/home/HomeSections.tsx         |  11 +-
+ src/components/navigation/Header.tsx         |  96 ++--
+ src/components/navigation/NavigationDock.tsx | 194 ++++++-
+ src/lib/anime/local-first.test.ts            |  20 +
+ src/lib/anime/local-first.ts                 |   4 +-
+ src/lib/watch-progress/selectors.ts          |  24 +-
+ src/server/repositories/anime.repository.ts  |  18 +
+ src/server/services/progress.service.ts      |  10 +-
+ src/server/validation/data.ts                |  12 +-
+ src/styles/responsive/mobile.css             | 306 ++++++++++-
+ src/types/media.ts                           |   9 +
+ 22 files changed, 2000 insertions(+), 158 deletions(-)
+
+=== git diff ===
+diff --git a/.env.example b/.env.example
+index 1079120..c2d7ea6 100644
+--- a/.env.example
++++ b/.env.example
+@@ -54,6 +54,11 @@ KODIK_MAX_RETRIES=1
+ KODIK_PLAYBACK_ENABLED=false
+ KODIK_ALLOWED_EMBED_HOSTS=
+ KODIK_ALLOWED_MEDIA_HOSTS=
++ANIME_PROVIDER_URL=http://127.0.0.1:8787
++KODIK_RESOLVE_TIMEOUT_SECONDS=25
++KODIK_RESOLVE_CACHE_SECONDS=300
++# Development-only fallback. Keep false when KODIK_API_TOKEN is configured.
++KODIK_AUTOMATIC_TOKEN_FALLBACK=false
+ ABLY_API_KEY=
+ WATCH_PARTY_MAX_MEMBERS=10
+ WATCH_PARTY_HOST_GRACE_SECONDS=60
+@@ -66,3 +71,4 @@ AUTH_GOOGLE_SECRET=
+ ENABLE_DEV_SEED=false
+ DEV_SEED_EMAIL=
+ DEV_SEED_PASSWORD=
++TMDB_API_KEY=
+diff --git a/.env.production.example b/.env.production.example
+index 32a9cbc..994c6f2 100644
+--- a/.env.production.example
++++ b/.env.production.example
+@@ -8,7 +8,9 @@ DATABASE_URL=
+ KODIK_PROVIDER_ENABLED=false
+ KODIK_API_TOKEN=
+ KODIK_PLAYBACK_ENABLED=false
++ANIME_PROVIDER_URL=http://127.0.0.1:8787
+ 
+ ANILIBERTY_PROVIDER_ENABLED=false
+ ANILIBERTY_API_TOKEN=
+ ANILIBERTY_PLAYBACK_ENABLED=false
++TMDB_API_KEY=
+diff --git a/README.md b/README.md
+index 0091be4..68bdd88 100644
+--- a/README.md
++++ b/README.md
+@@ -135,9 +135,33 @@ shared limiter.
+ Development intentionally uses webpack:
+ 
+ ```powershell
+-npm.cmd run dev
++cd D:\ANIME
++npm run dev:all
+ ```
+ 
++This recommended command starts both services in one PowerShell window, with
++`[WEB]` and `[PROVIDER]` log prefixes:
++
++- Kairo: `http://localhost:3000`
++- anime-provider: `http://127.0.0.1:8787`
++
++The provider automatically reads `.env.local` and then `.env`; existing
++process/OS environment values retain priority. Check a running provider with
++`npm run provider:health`.
++
++The older two-terminal workflow remains available when separate logs are
++useful:
++
++```text
++Terminal 1:
++npm run provider:dev
++
++Terminal 2:
++npm run dev
++```
++
++Press `Ctrl+C` in the combined terminal to stop both services.
++
+ Before a release, test guest mode, two separate accounts, local-data merge,
+ offline mutations followed by reconnect, session expiry, keyboard navigation,
+ and 320 px layouts. Confirm that each account sees only its own progress, list,
+diff --git a/next.config.ts b/next.config.ts
+index 091c389..eaaa076 100644
+--- a/next.config.ts
++++ b/next.config.ts
+@@ -35,6 +35,11 @@ const nextConfig: NextConfig = {
+         hostname: "cdn.myanimelist.net",
+         pathname: "/images/anime/**",
+       },
++      {
++        protocol: "https",
++        hostname: "image.tmdb.org",
++        pathname: "/t/p/**",
++      },
+     ],
+   },
+ };
+diff --git a/package-lock.json b/package-lock.json
+index ea1a29a..6d6fc8e 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -13,6 +13,7 @@
+         "@react-three/drei": "^10.7.8",
+         "@react-three/fiber": "^9.7.0",
+         "bcryptjs": "^3.0.3",
++        "hls.js": "^1.7.1",
+         "lenis": "^1.3.26",
+         "lucide-react": "^0.468.0",
+         "motion": "^12.23.24",
+@@ -28,6 +29,7 @@
+         "@types/node": "^24.10.1",
+         "@types/react": "^19.2.6",
+         "@types/react-dom": "^19.2.3",
++        "concurrently": "^10.0.5",
+         "eslint": "^9.39.1",
+         "eslint-config-next": "^16.0.3",
+         "kodikwrapper": "^3.1.0",
+@@ -3191,6 +3193,19 @@
+         "url": "https://github.com/sponsors/epoberezkin"
+       }
+     },
++    "node_modules/ansi-regex": {
++      "version": "6.3.0",
++      "resolved": "https://registry.npmjs.org/ansi-regex/-/ansi-regex-6.3.0.tgz",
++      "integrity": "sha512-WpDfL7NO6j7tH88IDBNVdUJxDh9nmCteAVW9dsep846XdwF4naCBK+/tGLX3KJgcpgMRXCFlTM2hKGoK9FsdrQ==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": ">=12"
++      },
++      "funding": {
++        "url": "https://github.com/chalk/ansi-regex?sponsor=1"
++      }
++    },
+     "node_modules/ansi-styles": {
+       "version": "4.3.0",
+       "resolved": "https://registry.npmjs.org/ansi-styles/-/ansi-styles-4.3.0.tgz",
+@@ -3747,6 +3762,21 @@
+       "integrity": "sha512-IV3Ou0jSMzZrd3pZ48nLkT9DA7Ag1pnPzaiQhpW7c3RbcqqzvzzVu+L8gfqMp/8IM2MQtSiqaCxrrcfu8I8rMA==",
+       "license": "MIT"
+     },
++    "node_modules/cliui": {
++      "version": "9.0.1",
++      "resolved": "https://registry.npmjs.org/cliui/-/cliui-9.0.1.tgz",
++      "integrity": "sha512-k7ndgKhwoQveBL+/1tqGJYNz097I7WOvwbmmU2AR5+magtbjPWQTS1C5vzGkBC8Ym8UWRzfKUzUUqFLypY4Q+w==",
++      "dev": true,
++      "license": "ISC",
++      "dependencies": {
++        "string-width": "^7.2.0",
++        "strip-ansi": "^7.1.0",
++        "wrap-ansi": "^9.0.0"
++      },
++      "engines": {
++        "node": ">=20"
++      }
++    },
+     "node_modules/color-convert": {
+       "version": "2.0.1",
+       "resolved": "https://registry.npmjs.org/color-convert/-/color-convert-2.0.1.tgz",
+@@ -3774,6 +3804,57 @@
+       "dev": true,
+       "license": "MIT"
+     },
++    "node_modules/concurrently": {
++      "version": "10.0.5",
++      "resolved": "https://registry.npmjs.org/concurrently/-/concurrently-10.0.5.tgz",
++      "integrity": "sha512-JaP/CoftUrCcAFW/g//RbgEGwlelnEae6cfBLgH6ZdO6s8jPkn6p9SB9u6pdVxYXoiSnFqseOlHfrEfF82TVOg==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "chalk": "5.6.2",
++        "rxjs": "7.8.2",
++        "shell-quote": "1.9.0",
++        "supports-color": "10.2.2",
++        "tree-kill": "1.2.2",
++        "yargs": "18.0.0"
++      },
++      "bin": {
++        "conc": "dist/bin/index.js",
++        "concurrently": "dist/bin/index.js"
++      },
++      "engines": {
++        "node": ">=22"
++      },
++      "funding": {
++        "url": "https://github.com/open-cli-tools/concurrently?sponsor=1"
++      }
++    },
++    "node_modules/concurrently/node_modules/chalk": {
++      "version": "5.6.2",
++      "resolved": "https://registry.npmjs.org/chalk/-/chalk-5.6.2.tgz",
++      "integrity": "sha512-7NzBL0rN6fMUW+f7A6Io4h40qQlG+xGmtMxfbnH/K7TAtt8JQWVQK+6g0UXKMeVJoyV5EkkNsErQ8pVD3bLHbA==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": "^12.17.0 || ^14.13 || >=16.0.0"
++      },
++      "funding": {
++        "url": "https://github.com/chalk/chalk?sponsor=1"
++      }
++    },
++    "node_modules/concurrently/node_modules/supports-color": {
++      "version": "10.2.2",
++      "resolved": "https://registry.npmjs.org/supports-color/-/supports-color-10.2.2.tgz",
++      "integrity": "sha512-SS+jx45GF1QjgEXQx4NJZV9ImqmO2NPz5FNsIHrsDjh2YsHnawpan7SNQ1o8NuhrbHZy9AZhIoCUiCeaW/C80g==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": ">=18"
++      },
++      "funding": {
++        "url": "https://github.com/chalk/supports-color?sponsor=1"
++      }
++    },
+     "node_modules/confbox": {
+       "version": "0.2.4",
+       "resolved": "https://registry.npmjs.org/confbox/-/confbox-0.2.4.tgz",
+@@ -5060,6 +5141,29 @@
+         "node": ">=6.9.0"
+       }
+     },
++    "node_modules/get-caller-file": {
++      "version": "2.0.5",
++      "resolved": "https://registry.npmjs.org/get-caller-file/-/get-caller-file-2.0.5.tgz",
++      "integrity": "sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==",
++      "dev": true,
++      "license": "ISC",
++      "engines": {
++        "node": "6.* || 8.* || >= 10.*"
++      }
++    },
++    "node_modules/get-east-asian-width": {
++      "version": "1.6.0",
++      "resolved": "https://registry.npmjs.org/get-east-asian-width/-/get-east-asian-width-1.6.0.tgz",
++      "integrity": "sha512-QRbvDIbx6YklUe6RxeTeleMR0yv3cYH6PsPZHcnVn7xv7zO1BHN8r0XETu8n6Ye3Q+ahtSarc3WgtNWmehIBfA==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": ">=18"
++      },
++      "funding": {
++        "url": "https://github.com/sponsors/sindresorhus"
++      }
++    },
+     "node_modules/get-intrinsic": {
+       "version": "1.3.0",
+       "resolved": "https://registry.npmjs.org/get-intrinsic/-/get-intrinsic-1.3.0.tgz",
+@@ -7603,6 +7707,16 @@
+         "queue-microtask": "^1.2.2"
+       }
+     },
++    "node_modules/rxjs": {
++      "version": "7.8.2",
++      "resolved": "https://registry.npmjs.org/rxjs/-/rxjs-7.8.2.tgz",
++      "integrity": "sha512-dhKf903U/PQZY6boNNtAGdWbG85WAbjT/1xYoZIC7FAY0yWapOBQVsVrDl58W86//e1VpMNBtRV4MaXfdMySFA==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "dependencies": {
++        "tslib": "^2.1.0"
++      }
++    },
+     "node_modules/safe-array-concat": {
+       "version": "1.1.4",
+       "resolved": "https://registry.npmjs.org/safe-array-concat/-/safe-array-concat-1.1.4.tgz",
+@@ -7817,6 +7931,19 @@
+         "node": ">=8"
+       }
+     },
++    "node_modules/shell-quote": {
++      "version": "1.9.0",
++      "resolved": "https://registry.npmjs.org/shell-quote/-/shell-quote-1.9.0.tgz",
++      "integrity": "sha512-Iov+JwFv/2HcTpcwNMKd8+IWNb8tboQJNQTkAY/LLVK7gGH9jy+LGkVqPxfekHl+yMmiqXszdGWXgkfml7hjqA==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": ">= 0.4"
++      },
++      "funding": {
++        "url": "https://github.com/sponsors/ljharb"
++      }
++    },
+     "node_modules/side-channel": {
+       "version": "1.1.1",
+       "resolved": "https://registry.npmjs.org/side-channel/-/side-channel-1.1.1.tgz",
+@@ -7949,6 +8076,31 @@
+         "node": ">= 0.4"
+       }
+     },
++    "node_modules/string-width": {
++      "version": "7.2.0",
++      "resolved": "https://registry.npmjs.org/string-width/-/string-width-7.2.0.tgz",
++      "integrity": "sha512-tsaTIkKW9b4N+AEj+SVA+WhJzV7/zMhcSu78mLKWSk7cXMOSHsBKFWUs0fWwq8QyK3MgJBQRX6Gbi4kYbdvGkQ==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "emoji-regex": "^10.3.0",
++        "get-east-asian-width": "^1.0.0",
++        "strip-ansi": "^7.1.0"
++      },
++      "engines": {
++        "node": ">=18"
++      },
++      "funding": {
++        "url": "https://github.com/sponsors/sindresorhus"
++      }
++    },
++    "node_modules/string-width/node_modules/emoji-regex": {
++      "version": "10.6.0",
++      "resolved": "https://registry.npmjs.org/emoji-regex/-/emoji-regex-10.6.0.tgz",
++      "integrity": "sha512-toUI84YS5YmxW219erniWD0CIVOo46xGKColeNQRgOzDorgBi1v4D71/OFzgD9GO2UGKIv1C3Sp8DAn0+j5w7A==",
++      "dev": true,
++      "license": "MIT"
++    },
+     "node_modules/string.prototype.includes": {
+       "version": "2.0.1",
+       "resolved": "https://registry.npmjs.org/string.prototype.includes/-/string.prototype.includes-2.0.1.tgz",
+@@ -8063,6 +8215,22 @@
+         "url": "https://github.com/sponsors/ljharb"
+       }
+     },
++    "node_modules/strip-ansi": {
++      "version": "7.2.0",
++      "resolved": "https://registry.npmjs.org/strip-ansi/-/strip-ansi-7.2.0.tgz",
++      "integrity": "sha512-yDPMNjp4WyfYBkHnjIRLfca1i6KMyGCtsVgoKe/z1+6vukgaENdgGBZt+ZmKPc4gavvEZ5OgHfHdrazhgNyG7w==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "ansi-regex": "^6.2.2"
++      },
++      "engines": {
++        "node": ">=12"
++      },
++      "funding": {
++        "url": "https://github.com/chalk/strip-ansi?sponsor=1"
++      }
++    },
+     "node_modules/strip-bom": {
+       "version": "3.0.0",
+       "resolved": "https://registry.npmjs.org/strip-bom/-/strip-bom-3.0.0.tgz",
+@@ -8274,6 +8442,16 @@
+         "node": ">=8.0"
+       }
+     },
++    "node_modules/tree-kill": {
++      "version": "1.2.2",
++      "resolved": "https://registry.npmjs.org/tree-kill/-/tree-kill-1.2.2.tgz",
++      "integrity": "sha512-L0Orpi8qGpRG//Nd+H90vFB+3iHnue1zSSGmNOOCh1GLJ7rUKVwV2HvijphGQS2UmhUZewS9VgvxYIdgr+fG1A==",
++      "dev": true,
++      "license": "MIT",
++      "bin": {
++        "tree-kill": "cli.js"
++      }
++    },
+     "node_modules/troika-three-text": {
+       "version": "0.52.5",
+       "resolved": "https://registry.npmjs.org/troika-three-text/-/troika-three-text-0.52.5.tgz",
+@@ -8795,6 +8973,47 @@
+         "node": ">=0.10.0"
+       }
+     },
++    "node_modules/wrap-ansi": {
++      "version": "9.0.2",
++      "resolved": "https://registry.npmjs.org/wrap-ansi/-/wrap-ansi-9.0.2.tgz",
++      "integrity": "sha512-42AtmgqjV+X1VpdOfyTGOYRi0/zsoLqtXQckTmqTeybT+BDIbM/Guxo7x3pE2vtpr1ok6xRqM9OpBe+Jyoqyww==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "ansi-styles": "^6.2.1",
++        "string-width": "^7.0.0",
++        "strip-ansi": "^7.1.0"
++      },
++      "engines": {
++        "node": ">=18"
++      },
++      "funding": {
++        "url": "https://github.com/chalk/wrap-ansi?sponsor=1"
++      }
++    },
++    "node_modules/wrap-ansi/node_modules/ansi-styles": {
++      "version": "6.2.3",
++      "resolved": "https://registry.npmjs.org/ansi-styles/-/ansi-styles-6.2.3.tgz",
++      "integrity": "sha512-4Dj6M28JB+oAH8kFkTLUo+a2jwOFkuqb3yucU0CANcRRUbxS0cP0nZYCGjcc3BNXwRIsUVmDGgzawme7zvJHvg==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": ">=12"
++      },
++      "funding": {
++        "url": "https://github.com/chalk/ansi-styles?sponsor=1"
++      }
++    },
++    "node_modules/y18n": {
++      "version": "5.0.8",
++      "resolved": "https://registry.npmjs.org/y18n/-/y18n-5.0.8.tgz",
++      "integrity": "sha512-0pfFzegeDWJHJIAmTLRP2DwHjdF5s7jo9tuztdQxAhINCdvS+3nGINqPd00AphqJR/0LhANUS6/+7SCb98YOfA==",
++      "dev": true,
++      "license": "ISC",
++      "engines": {
++        "node": ">=10"
++      }
++    },
+     "node_modules/yallist": {
+       "version": "3.1.1",
+       "resolved": "https://registry.npmjs.org/yallist/-/yallist-3.1.1.tgz",
+@@ -8802,6 +9021,34 @@
+       "dev": true,
+       "license": "ISC"
+     },
++    "node_modules/yargs": {
++      "version": "18.0.0",
++      "resolved": "https://registry.npmjs.org/yargs/-/yargs-18.0.0.tgz",
++      "integrity": "sha512-4UEqdc2RYGHZc7Doyqkrqiln3p9X2DZVxaGbwhn2pi7MrRagKaOcIKe8L3OxYcbhXLgLFUS3zAYuQjKBQgmuNg==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "cliui": "^9.0.1",
++        "escalade": "^3.1.1",
++        "get-caller-file": "^2.0.5",
++        "string-width": "^7.2.0",
++        "y18n": "^5.0.5",
++        "yargs-parser": "^22.0.0"
++      },
++      "engines": {
++        "node": "^20.19.0 || ^22.12.0 || >=23"
++      }
++    },
++    "node_modules/yargs-parser": {
++      "version": "22.0.0",
++      "resolved": "https://registry.npmjs.org/yargs-parser/-/yargs-parser-22.0.0.tgz",
++      "integrity": "sha512-rwu/ClNdSMpkSrUb+d6BRsSkLUq1fmfsY6TOpYzTwvwkg1/NRG85KBy3kq++A8LKQwX6lsu+aWad+2khvuXrqw==",
++      "dev": true,
++      "license": "ISC",
++      "engines": {
++        "node": "^20.19.0 || ^22.12.0 || >=23"
++      }
++    },
+     "node_modules/yocto-queue": {
+       "version": "0.1.0",
+       "resolved": "https://registry.npmjs.org/yocto-queue/-/yocto-queue-0.1.0.tgz",
+diff --git a/package.json b/package.json
+index b6335db..d214a94 100644
+--- a/package.json
++++ b/package.json
+@@ -4,7 +4,9 @@
+   "private": true,
+   "description": "A cinematic anime discovery interface.",
+   "scripts": {
++    "test:playback": "node --import=./scripts/server-only-test-register.mjs --experimental-strip-types --test src/lib/playback/descriptor.test.ts src/lib/playback/hls-policy.test.ts src/lib/playback/autonext.test.ts src/lib/playback/skip-segments.test.ts src/lib/playback/time.test.ts src/lib/watch-progress/policy.test.ts src/lib/watch-progress/selectors.test.ts src/server/playback/provider-manager.test.ts src/server/playback/translation-matching.test.ts",
+     "dev": "next dev --webpack",
++    "dev:all": "concurrently -k -n WEB,PROVIDER \"npm run dev\" \"npm run provider:dev\"",
+     "build": "next build",
+     "start": "next start",
+     "lint": "eslint .",
+@@ -45,7 +47,9 @@
+     "db:migrate:deploy": "prisma migrate deploy",
+     "db:studio": "prisma studio",
+     "db:seed": "node prisma/seed.mjs",
+-    "db:reset:dangerous": "prisma migrate reset"
++    "db:reset:dangerous": "prisma migrate reset",
++    "provider:dev": "py -3.12 -m uvicorn --app-dir services/anime-provider app:app --host 127.0.0.1 --port 8787",
++    "provider:health": "node scripts/dev/check-provider.mjs"
+   },
+   "dependencies": {
+     "@next-auth/prisma-adapter": "^1.0.7",
+@@ -53,6 +57,7 @@
+     "@react-three/drei": "^10.7.8",
+     "@react-three/fiber": "^9.7.0",
+     "bcryptjs": "^3.0.3",
++    "hls.js": "^1.7.1",
+     "lenis": "^1.3.26",
+     "lucide-react": "^0.468.0",
+     "motion": "^12.23.24",
+@@ -68,6 +73,7 @@
+     "@types/node": "^24.10.1",
+     "@types/react": "^19.2.6",
+     "@types/react-dom": "^19.2.3",
++    "concurrently": "^10.0.5",
+     "eslint": "^9.39.1",
+     "eslint-config-next": "^16.0.3",
+     "kodikwrapper": "^3.1.0",
+diff --git a/prisma/schema.prisma b/prisma/schema.prisma
+index 32f9537..ff0e8b2 100644
+--- a/prisma/schema.prisma
++++ b/prisma/schema.prisma
+@@ -214,6 +214,15 @@ model Anime {
+   coverImage         String?
+   coverImageLarge    String?
+   bannerImage        String?
++  heroImageUrl       String?
++  heroImageSource    String?
++  heroImageScore     Float?
++  heroImageUpdatedAt DateTime?
++  heroImageCropFocusX Float?
++  heroImageCropFocusY Float?
++  heroImageOverrideUrl String?
++  heroImageOverrideSource String?
++  heroImageApproved  Boolean  @default(false)
+   dominantColor      String?
+   genres             String[] @default([])
+   year               Int?
+diff --git a/src/app/anime/[slug]/page.module.css b/src/app/anime/[slug]/page.module.css
+index f4e1882..8bf2c00 100644
+--- a/src/app/anime/[slug]/page.module.css
++++ b/src/app/anime/[slug]/page.module.css
+@@ -1,6 +1,776 @@
+-.page { min-height: 100vh; background: radial-gradient(circle at 70% 0%, rgba(39, 118, 111, 0.12), transparent 38rem), var(--color-bg-root); }
+-.main { width: min(calc(100% - (var(--page-gutter) * 2)), var(--content-max-width)); margin-inline: auto; padding-block: clamp(7rem, 12vw, 10rem) clamp(4rem, 8vw, 7rem); }
+-.heading { margin-bottom: clamp(1.5rem, 3vw, 2.5rem); }
+-.eyebrow { margin: 0 0 0.65rem; color: var(--color-accent); font-size: 0.75rem; font-weight: 650; letter-spacing: 0.16em; text-transform: uppercase; }
+-.title { margin: 0; color: var(--color-text-primary); font-size: clamp(2rem, 5vw, 4.5rem); line-height: 0.96; text-wrap: balance; }
+-.secondary { margin: 0.8rem 0 0; color: var(--color-text-muted); font-size: clamp(0.9rem, 1.5vw, 1.05rem); }
++.page {
++  min-height: 100vh;
++  background: transparent;
++}
++.main {
++  position: relative;
++  min-height: 100vh;
++  overflow: clip;
++}
++.hero {
++  position: relative;
++  z-index: 1;
++  min-height: clamp(39rem, calc(100svh - 5rem), 58rem);
++  isolation: isolate;
++}
++.pageArtwork {
++  position: absolute;
++  inset: 0 0 auto;
++  z-index: 0;
++  height: clamp(58rem, 74vw, 88rem);
++  background-size: cover;
++  filter: saturate(0.72) contrast(0.94) brightness(0.66);
++  mask-image: linear-gradient(
++    to bottom,
++    #000 0%,
++    #000 42%,
++    rgba(0, 0, 0, 0.88) 62%,
++    rgba(0, 0, 0, 0.42) 82%,
++    transparent 100%
++  );
++  -webkit-mask-image: linear-gradient(
++    to bottom,
++    #000 0%,
++    #000 42%,
++    rgba(0, 0, 0, 0.88) 62%,
++    rgba(0, 0, 0, 0.42) 82%,
++    transparent 100%
++  );
++  transform: scale(1.015);
++  transform-origin: top center;
++  pointer-events: none;
++}
++.hero::before {
++  content: "";
++  position: absolute;
++  inset: 0 0 -12rem;
++  z-index: -1;
++  background:
++    linear-gradient(
++      90deg,
++      rgba(8, 12, 14, 0.92) 0%,
++      rgba(8, 20, 22, 0.68) 38%,
++      rgba(8, 20, 22, 0.14) 72%
++    ),
++    linear-gradient(
++      180deg,
++      rgba(8, 12, 14, 0.16),
++      rgba(7, 20, 22, 0.18) 48%,
++      rgba(9, 25, 28, 0.82) 100%
++    );
++  mask-image: linear-gradient(
++    to bottom,
++    #000 0%,
++    #000 72%,
++    rgba(0, 0, 0, 0.72) 86%,
++    transparent 100%
++  );
++  -webkit-mask-image: linear-gradient(
++    to bottom,
++    #000 0%,
++    #000 72%,
++    rgba(0, 0, 0, 0.72) 86%,
++    transparent 100%
++  );
++}
++.hero::after {
++  content: "";
++  position: absolute;
++  inset: 0 0 -9rem;
++  z-index: -1;
++  opacity: 0.42;
++  background: radial-gradient(
++    circle at 78% 32%,
++    rgba(121, 191, 192, 0.18),
++    transparent 34rem
++  );
++  mask-image: linear-gradient(to bottom, #000 0%, #000 74%, transparent 100%);
++  -webkit-mask-image: linear-gradient(
++    to bottom,
++    #000 0%,
++    #000 74%,
++    transparent 100%
++  );
++}
++.heroCopy {
++  display: flex;
++  min-height: inherit;
++  flex-direction: column;
++  width: min(42rem, 50%);
++  padding-top: clamp(8.5rem, 17svh, 12rem);
++  padding-bottom: clamp(4rem, 9svh, 7rem);
++  padding-left: max(
++    clamp(1rem, 4vw, 4rem),
++    calc((100vw - var(--content-max-width)) / 2)
++  );
++}
++.heroCopy[data-title-size="long"] {
++  width: min(48rem, 58%);
++}
++.heroCopy[data-title-size="extra-long"] {
++  width: min(52rem, 62%);
++}
++.eyebrow,
++.tileLabel,
++.sectionHeading p {
++  margin: 0;
++  color: #91cfd0;
++  font-size: 0.65rem;
++  font-weight: 650;
++  letter-spacing: 0.2em;
++  text-transform: uppercase;
++}
++.title {
++  max-width: 100%;
++  margin: 0;
++  color: #eef5f4;
++  font-family: var(--font-display);
++  font-weight: 400;
++  letter-spacing: -0.06em;
++  line-height: 0.88;
++  text-wrap: balance;
++  overflow-wrap: normal;
++  word-break: normal;
++  hyphens: auto;
++}
++.titleShort {
++  font-size: clamp(3.5rem, 6vw, 6.8rem);
++}
++.titleMedium {
++  font-size: clamp(3.1rem, 5.2vw, 5.8rem);
++}
++.titleLong {
++  font-size: clamp(2.7rem, 4.4vw, 4.8rem);
++  line-height: 0.92;
++}
++.titleExtraLong {
++  font-size: clamp(2.25rem, 3.6vw, 4rem);
++  line-height: 0.94;
++}
++.secondary {
++  margin: 1.2rem 0 0;
++  color: rgba(224, 239, 236, 0.76);
++  font-size: clamp(0.95rem, 1.4vw, 1.2rem);
++}
++.metadata {
++  margin: 1.8rem 0 0;
++  color: #d4e1df;
++  font-size: 0.8rem;
++  letter-spacing: 0.08em;
++  text-transform: uppercase;
++}
++.genres {
++  margin: 0.65rem 0 0;
++  color: #9fb4b2;
++  font-size: 0.9rem;
++}
++.heroDescription {
++  display: -webkit-box;
++  max-width: 35rem;
++  margin: 1.25rem 0 0;
++  overflow: hidden;
++  color: #afc1c0;
++  font-size: clamp(0.875rem, 1.1vw, 1rem);
++  line-height: 1.72;
++  -webkit-box-orient: vertical;
++  -webkit-line-clamp: 4;
++}
++.heroActions {
++  display: flex;
++  align-items: center;
++  gap: 1.25rem;
++  margin-top: clamp(1.75rem, 4svh, 3rem);
++}
++.heroPrimaryAction,
++.heroSecondaryAction {
++  display: inline-flex;
++  min-height: 52px;
++  align-items: center;
++  justify-content: center;
++  border: 1px solid rgba(185, 217, 211, 0.22);
++  border-radius: 999px;
++  font-size: 0.7rem;
++  letter-spacing: 0.08em;
++  text-transform: uppercase;
++  transition: 180ms cubic-bezier(0.2, 0, 0, 1);
++}
++.heroPrimaryAction {
++  min-width: 11.5rem;
++  justify-content: space-between;
++  gap: 2rem;
++  padding: 0 1.25rem;
++  border-color: rgba(185, 217, 211, 0.72);
++  background: rgba(225, 241, 240, 0.94);
++  color: #102629;
++}
++.heroSecondaryAction {
++  padding: 0 1.1rem;
++  border-bottom: 1px solid rgba(121, 191, 192, 0.62);
++  color: #bfd0cf;
++}
++.heroPrimaryAction:hover {
++  background: #eff8f6;
++  transform: translateY(-1px);
++}
++.heroSecondaryAction:hover {
++  border-color: rgba(185, 217, 211, 0.42);
++  color: #f1f6f5;
++}
++.heroIndex {
++  position: absolute;
++  right: max(
++    clamp(1rem, 4vw, 4rem),
++    calc((100vw - var(--content-max-width)) / 2)
++  );
++  bottom: 2rem;
++  margin: 0;
++  color: rgba(132, 169, 170, 0.52);
++  font-family: var(--font-mono);
++  font-size: 0.58rem;
++  letter-spacing: 0.14em;
++}
++.heroIndex span {
++  margin-right: 1rem;
++}
++.content {
++  width: min(calc(100% - 2 * clamp(1rem, 4vw, 4rem)), 108rem);
++  margin: -2rem auto 0;
++  padding-bottom: clamp(6rem, 10vw, 10rem);
++}
++.watchStage,
++.about,
++.related,
++.editorial {
++  scroll-margin-top: 6rem;
++  margin-top: clamp(4.5rem, 8vw, 8rem);
++}
++.watchStage {
++  --watch-border: rgba(226, 239, 235, 0.1);
++  --watch-border-hover: rgba(226, 239, 235, 0.18);
++  position: relative;
++  z-index: 1;
++  display: grid;
++  grid-template-columns: minmax(0, 2.7fr) minmax(19rem, 1fr);
++  align-items: stretch;
++  gap: clamp(0.75rem, 1.25vw, 1.25rem);
++  margin-top: 0;
++}
++.sectionHeading {
++  display: flex;
++  align-items: flex-start;
++  gap: 1.25rem;
++  margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
++}
++.sectionHeading > span {
++  padding-top: 0.22rem;
++  color: rgba(121, 191, 192, 0.48);
++  font-family: var(--font-mono);
++  font-size: 0.66rem;
++}
++.sectionHeading h2 {
++  margin: 0.3rem 0 0;
++  color: #eef5f4;
++  font-family: var(--font-display);
++  font-size: clamp(2rem, 4vw, 4rem);
++  font-weight: 400;
++  letter-spacing: -0.045em;
++  line-height: 1;
++}
++.playerColumn {
++  position: relative;
++  min-width: 0;
++}
++.playerColumn > section {
++  border-color: rgba(130, 200, 200, 0.12);
++  box-shadow: 0 2rem 6rem rgba(0, 0, 0, 0.16);
++}
++.stageLabel {
++  position: absolute;
++  top: 1rem;
++  left: 1.25rem;
++  z-index: 2;
++  margin: 0;
++  color: rgba(185, 217, 211, 0.48);
++  font-family: var(--font-mono);
++  font-size: 0.58rem;
++  letter-spacing: 0.14em;
++  text-transform: uppercase;
++  pointer-events: none;
++}
++.controlsColumn {
++  display: grid;
++  grid-template-rows: minmax(0, 1fr) auto;
++  gap: clamp(0.75rem, 1vw, 1rem);
++  min-width: 0;
++  min-height: 0;
++  contain: size;
++}
++.controlPanel,
++.spotifyTile {
++  position: relative;
++  min-width: 0;
++  border: 1px solid rgba(226, 239, 235, 0.12);
++  border-radius: clamp(1.125rem, 1.5vw, 1.5rem);
++  background: linear-gradient(
++    145deg,
++    rgba(35, 60, 62, 0.22),
++    rgba(8, 22, 24, 0.16)
++  );
++  box-shadow:
++    inset 0 1px 0 rgba(255, 255, 255, 0.045),
++    0 1rem 3.125rem rgba(0, 0, 0, 0.08);
++  backdrop-filter: blur(14px) saturate(0.9);
++  -webkit-backdrop-filter: blur(14px) saturate(0.9);
++}
++.controlPanel::before,
++.spotifyTile::before {
++  content: "";
++  position: absolute;
++  inset: 0;
++  border-radius: inherit;
++  background: linear-gradient(
++    135deg,
++    rgba(238, 250, 247, 0.035),
++    transparent 28%
++  );
++  pointer-events: none;
++}
++.controlPanel {
++  min-height: 0;
++  overflow: hidden;
++  padding-inline: clamp(1.125rem, 1.4vw, 1.375rem);
++}
++.controlSection {
++  min-height: 0;
++  padding-block: clamp(0.85rem, 1.1vw, 1.1rem);
++}
++.controlSection + .controlSection {
++  border-top: 1px solid rgba(220, 240, 238, 0.07);
++}
++.controlLabel {
++  display: flex;
++  align-items: center;
++  gap: 0.5rem;
++  color: #91cfd0;
++}
++.partyCopy,
++.musicCopy {
++  margin: 0.55rem 0 0;
++  color: #c5d5d3;
++  font-size: clamp(0.82rem, 1vw, 0.95rem);
++  line-height: 1.45;
++}
++.spotifyTile {
++  display: grid;
++  grid-template-columns: auto 1fr;
++  align-items: center;
++  gap: 0 0.9rem;
++  padding: clamp(1rem, 1.3vw, 1.25rem);
++  overflow: hidden;
++}
++.spotifyTile .actionControl {
++  grid-column: 2;
++  margin-top: 0.5rem;
++}
++.seasons {
++  display: flex;
++  flex-wrap: wrap;
++  gap: 0.35rem;
++  margin-top: 0.65rem;
++}
++.seasons a {
++  display: inline-flex;
++  min-height: 44px;
++  justify-content: center;
++  align-items: center;
++  padding: 0.55rem 0.8rem;
++  border: 1px solid var(--watch-border);
++  border-radius: 999px;
++  background: rgba(185, 217, 211, 0.035);
++  color: #8fa7a5;
++  font-size: 0.72rem;
++}
++.seasons .activeChip {
++  border-color: rgba(121, 191, 192, 0.5);
++  background: rgba(121, 191, 192, 0.1);
++  color: #eef5f4;
++}
++.episodeRail {
++  display: grid;
++  grid-template-columns: repeat(auto-fill, 44px);
++  gap: 0.35rem;
++  max-height: 9.5rem;
++  margin-top: 0.65rem;
++  padding-right: 0.2rem;
++  overflow-y: auto;
++  scrollbar-color: rgba(145, 207, 208, 0.18) transparent;
++  scrollbar-width: thin;
++}
++.episodeRail a,
++.episodeRail button {
++  display: grid;
++  width: 44px;
++  height: 44px;
++  align-content: center;
++  gap: 0.1rem;
++  padding: 0.35rem 0.45rem;
++  border: 1px solid var(--watch-border);
++  border-radius: 10px;
++  background: rgba(185, 217, 211, 0.025);
++  color: #b7c9c7;
++  text-align: left;
++  transition:
++    transform 180ms cubic-bezier(0.2, 0, 0, 1),
++    border-color 180ms cubic-bezier(0.2, 0, 0, 1);
++}
++.episodeRail a:hover,
++.episodeRail button:hover {
++  transform: translateY(-1px);
++  border-color: var(--watch-border-hover);
++}
++.episodeRail .activeEpisode {
++  border-color: rgba(121, 191, 192, 0.62);
++  background: rgba(121, 191, 192, 0.08);
++  color: #eef5f4;
++}
++.episodeRail strong {
++  font-family: var(--font-mono);
++  font-size: 0.72rem;
++  font-weight: 500;
++}
++.episodeRail span {
++  display: none;
++}
++.episodeRail small {
++  color: #718c8a;
++  font-size: 0.64rem;
++}
++.controlField,
++.actionControl {
++  display: inline-flex;
++  width: 100%;
++  min-height: 44px;
++  align-items: center;
++  justify-content: space-between;
++  gap: 0.75rem;
++  margin-top: 0.55rem;
++  padding: 0.6rem 0.75rem;
++  border: 1px solid var(--watch-border);
++  border-radius: 12px;
++  background: rgba(226, 239, 235, 0.025);
++  color: #c8d9d6;
++  font-size: 0.78rem;
++  transition:
++    border-color 180ms cubic-bezier(0.2, 0, 0, 1),
++    background-color 180ms cubic-bezier(0.2, 0, 0, 1);
++}
++.actionControl {
++  color: #b9d9d3;
++  font-size: 0.66rem;
++  letter-spacing: 0.09em;
++  text-transform: uppercase;
++}
++.controlField[aria-disabled="true"],
++.actionControl[aria-disabled="true"] {
++  color: rgba(185, 217, 211, 0.52);
++}
++.controlField:hover,
++.actionControl:hover {
++  border-color: var(--watch-border-hover);
++  background: rgba(226, 239, 235, 0.04);
++}
++.empty {
++  margin: 0.65rem 0 0;
++  color: #8fa7a5;
++  font-size: 0.78rem;
++}
++.playbackError {
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
++  gap: 1rem;
++  margin-top: 0.75rem;
++  padding: 0.8rem 1rem;
++  border: 1px solid rgba(255, 170, 160, 0.25);
++  border-radius: 0.8rem;
++  background: rgba(45, 15, 16, 0.5);
++  color: #f3c5bf;
++}
++.playbackError p {
++  margin: 0;
++}
++.playbackError button {
++  flex: none;
++  min-height: 44px;
++  padding: 0.55rem 0.8rem;
++  border: 1px solid rgba(255, 190, 180, 0.35);
++  border-radius: 0.7rem;
++  background: rgba(255, 255, 255, 0.05);
++  color: #f7d5d0;
++}
++.autonext {
++  position: absolute;
++  right: clamp(0.75rem, 2vw, 1.5rem);
++  bottom: clamp(4.75rem, 8vw, 6rem);
++  z-index: 3;
++  width: min(22rem, calc(100% - 1.5rem));
++  padding: 0.9rem 1rem;
++  border: 1px solid rgba(145, 207, 208, 0.28);
++  border-radius: 1rem;
++  background: rgba(8, 24, 27, 0.9);
++  box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.32);
++  color: #dbe9e7;
++  backdrop-filter: blur(16px);
++}
++.autonext p {
++  margin: 0;
++  font-size: 0.82rem;
++}
++.autonext strong {
++  color: #91cfd0;
++  font-family: var(--font-mono);
++}
++.autonext > div {
++  display: flex;
++  gap: 0.5rem;
++  margin-top: 0.75rem;
++}
++.autonext button {
++  min-height: 40px;
++  padding: 0.5rem 0.75rem;
++  border: 1px solid rgba(185, 217, 211, 0.22);
++  border-radius: 999px;
++  background: rgba(185, 217, 211, 0.08);
++  color: #eef5f4;
++  font-size: 0.7rem;
++  transition:
++    transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
++    border-color 150ms ease,
++    background 150ms ease;
++}
++.autonext button:hover,
++.autonext button:focus-visible {
++  border-color: rgba(185, 217, 211, 0.42);
++  outline: none;
++  transform: scale(1.025);
++}
++.autonext button:active {
++  transform: scale(0.93);
++}
++.autonext button:first-child {
++  background: #dceae7;
++  color: #102629;
++}
++.aboutGrid {
++  display: grid;
++  grid-template-columns: minmax(0, 1.7fr) minmax(13rem, 0.7fr);
++  gap: clamp(2rem, 4vw, 4rem);
++  padding-left: 2rem;
++}
++.aboutGrid > p {
++  max-width: 62ch;
++  margin: 0;
++  color: #afc1c0;
++  font-size: clamp(1rem, 1.45vw, 1.25rem);
++  line-height: 1.75;
++}
++.aboutGrid dl {
++  display: grid;
++  grid-template-columns: auto 1fr;
++  gap: 0.7rem 1.2rem;
++  margin: 0;
++  align-content: start;
++}
++.aboutGrid dt {
++  color: #718c8a;
++  font-size: 0.7rem;
++  letter-spacing: 0.1em;
++  text-transform: uppercase;
++}
++.aboutGrid dd {
++  margin: 0;
++  color: #c6d6d4;
++  font-size: 0.82rem;
++}
++.relatedGrid {
++  display: grid;
++  grid-template-columns: repeat(3, minmax(0, 1fr));
++  gap: clamp(0.75rem, 1.5vw, 1.4rem);
++}
++.editorial {
++  display: grid;
++  grid-template-columns: minmax(0, 1.65fr) minmax(22rem, 0.85fr);
++  align-items: start;
++  gap: clamp(1rem, 2vw, 2rem);
++}
++.about,
++.related {
++  margin-top: 0;
++  border: 1px solid rgba(226, 239, 235, 0.1);
++  border-radius: clamp(1.125rem, 1.8vw, 1.75rem);
++  background: linear-gradient(
++    145deg,
++    rgba(28, 57, 60, 0.28),
++    rgba(8, 22, 24, 0.14)
++  );
++  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
++  backdrop-filter: blur(12px);
++}
++.about {
++  padding: clamp(1.5rem, 3vw, 3rem);
++}
++.related {
++  padding: clamp(1.25rem, 2vw, 2rem);
++}
++.relatedHeading {
++  margin-bottom: 1.5rem;
++}
++.relatedHeading p {
++  margin: 0;
++  color: #91cfd0;
++  font-family: var(--font-mono);
++  font-size: 0.58rem;
++  letter-spacing: 0.14em;
++  text-transform: uppercase;
++}
++.relatedHeading h2 {
++  margin: 0.45rem 0 0;
++  color: #eef5f4;
++  font-family: var(--font-display);
++  font-size: clamp(1.65rem, 2.5vw, 2.5rem);
++  font-weight: 400;
++  letter-spacing: -0.04em;
++}
++@media (min-width: 768px) and (max-width: 1023px) {
++  .heroCopy {
++    width: 72%;
++  }
++  .heroCopy[data-title-size="long"],
++  .heroCopy[data-title-size="extra-long"] {
++    width: min(46rem, 82%);
++  }
++  .watchStage {
++    grid-template-columns: 1fr;
++  }
++  .controlsColumn {
++    grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.42fr);
++    grid-template-rows: auto;
++    align-items: stretch;
++    contain: none;
++  }
++  .relatedGrid {
++    grid-template-columns: repeat(3, minmax(0, 1fr));
++  }
++  .editorial {
++    grid-template-columns: 1fr;
++  }
++}
++@media (max-width: 767px) {
++  .hero {
++    min-height: max(40rem, 82svh);
++  }
++  .pageArtwork {
++    background-position: 64% 18%;
++  }
++  .hero::before {
++    background:
++      linear-gradient(
++        180deg,
++        rgba(8, 12, 14, 0.28),
++        rgba(8, 16, 18, 0.5) 42%,
++        #09191c 94%
++      ),
++      linear-gradient(90deg, rgba(8, 12, 14, 0.75), transparent);
++  }
++  .heroCopy {
++    width: 100%;
++    padding: clamp(9rem, 20svh, 12rem) var(--page-gutter) 5rem;
++  }
++  .heroCopy[data-title-size="long"],
++  .heroCopy[data-title-size="extra-long"] {
++    width: 100%;
++  }
++  .title {
++    hyphens: none;
++    overflow-wrap: break-word;
++  }
++  .heroDescription {
++    -webkit-line-clamp: 3;
++  }
++  .heroActions {
++    flex-wrap: wrap;
++  }
++  .titleShort {
++    font-size: clamp(2.8rem, 13vw, 4.8rem);
++  }
++  .titleMedium {
++    font-size: clamp(2.45rem, 11vw, 4rem);
++  }
++  .titleLong {
++    font-size: clamp(2.1rem, 9.4vw, 3.35rem);
++  }
++  .titleExtraLong {
++    font-size: clamp(1.8rem, 8.2vw, 2.8rem);
++  }
++  .heroIndex {
++    right: var(--page-gutter);
++  }
++  .content {
++    width: calc(100% - 2 * var(--page-gutter));
++    margin-top: -1rem;
++  }
++  .watchStage {
++    grid-template-columns: 1fr;
++  }
++  .controlsColumn {
++    display: grid;
++    grid-template-rows: auto auto;
++    contain: none;
++  }
++  .episodeRail {
++    display: flex;
++    max-height: none;
++    overflow-x: auto;
++    overflow-y: hidden;
++    padding-bottom: 0.5rem;
++    scroll-snap-type: x proximity;
++  }
++  .episodeRail a,
++  .episodeRail button {
++    min-width: 44px;
++    scroll-snap-align: start;
++  }
++  .aboutGrid {
++    grid-template-columns: 1fr;
++    padding-left: 0;
++  }
++  .relatedGrid {
++    grid-template-columns: repeat(3, minmax(10rem, 1fr));
++    overflow-x: auto;
++    padding-bottom: 0.5rem;
++    scroll-snap-type: x proximity;
++  }
++  .relatedGrid > * {
++    scroll-snap-align: start;
++  }
++  .editorial {
++    grid-template-columns: 1fr;
++  }
++  .about,
++  .related {
++    border-radius: 1rem;
++  }
++}
++@media (prefers-reduced-motion: reduce) {
++  .heroPrimaryAction,
++  .heroSecondaryAction,
++  .episodeRail a,
++  .controlField,
++  .actionControl {
++    transition: none;
++  }
++  .episodeRail a:hover,
++  .episodeRail button:hover {
++    transform: none;
++  }
++}
+diff --git a/src/app/anime/[slug]/page.tsx b/src/app/anime/[slug]/page.tsx
+index 8a108e8..0f473e9 100644
+--- a/src/app/anime/[slug]/page.tsx
++++ b/src/app/anime/[slug]/page.tsx
+@@ -1,37 +1,241 @@
+ import type { Metadata } from "next";
+ import { notFound } from "next/navigation";
+-import { PlayerPlaceholder } from "@/components/anime/PlayerPlaceholder";
++import { AnimeCard } from "@/components/anime/Cards";
++import { KairoWebGLSurface } from "@/components/effects/KairoWebGLSurface";
+ import { AppShell } from "@/components/layout/AppShell";
+-import { resolveAnimeBySlug } from "@/lib/anime/resolve";
+-import { getLocalizedAnimeTitle } from "@/lib/media-localization";
++import { resolveAnimeBySlug, resolveRelatedAnime } from "@/lib/anime/resolve";
++import {
++  getLocalizedAnimeTitle,
++  localizeGenre,
++  resolveLocalizedAnimeDescription,
++} from "@/lib/media-localization";
++import { AnimePlaybackPanel } from "./AnimePlaybackPanel";
++import { resolveHeroImage } from "@/server/services/hero-image.service";
+ import styles from "./page.module.css";
+ 
+ export const dynamic = "force-dynamic";
+ type AnimePageProps = PageProps<"/anime/[slug]">;
++type TitleSizeMode = "short" | "medium" | "long" | "extra-long";
+ 
+-export async function generateMetadata({ params }: AnimePageProps): Promise<Metadata> {
++function getTitleSizeMode(title: string): TitleSizeMode {
++  const words = title.trim().split(/\s+/u).filter(Boolean);
++  const length = Array.from(title.trim()).length;
++  const longestWord = Math.max(
++    0,
++    ...words.map((word) => Array.from(word).length),
++  );
++  if (length > 52 || words.length >= 8 || longestWord > 22) return "extra-long";
++  if (length > 28 || words.length >= 5 || longestWord > 16) return "long";
++  if (length > 18 || words.length >= 4) return "medium";
++  return "short";
++}
++
++export async function generateMetadata({
++  params,
++}: AnimePageProps): Promise<Metadata> {
+   const { slug } = await params;
+   const anime = await resolveAnimeBySlug(slug);
+-  return anime ? { title: `${getLocalizedAnimeTitle(anime, "ru")} — Kairo` } : {};
++  return anime
++    ? { title: `${getLocalizedAnimeTitle(anime, "ru")} — Kairo` }
++    : {};
+ }
+ 
+-export default async function AnimePage({ params }: AnimePageProps) {
+-  const { slug } = await params;
++export default async function AnimePage({
++  params,
++  searchParams,
++}: AnimePageProps) {
++  const [{ slug }, query] = await Promise.all([params, searchParams]);
+   const anime = await resolveAnimeBySlug(slug);
+   if (!anime) notFound();
++  const [related, heroImage] = await Promise.all([
++    resolveRelatedAnime(anime),
++    resolveHeroImage(anime),
++  ]);
+   const title = getLocalizedAnimeTitle(anime, "ru");
+-  const secondaryTitle = anime.titleRomaji && anime.titleRomaji !== title
+-    ? anime.titleRomaji
+-    : anime.titleEnglish && anime.titleEnglish !== title ? anime.titleEnglish : undefined;
++  const titleSize = getTitleSizeMode(title);
++  const titleSizeClass = {
++    short: styles.titleShort,
++    medium: styles.titleMedium,
++    long: styles.titleLong,
++    "extra-long": styles.titleExtraLong,
++  }[titleSize];
++  const secondaryTitle =
++    anime.titleRomaji && anime.titleRomaji !== title
++      ? anime.titleRomaji
++      : anime.titleEnglish && anime.titleEnglish !== title
++        ? anime.titleEnglish
++        : undefined;
++  const requestedEpisode = Number(
++    Array.isArray(query.episode) ? query.episode[0] : query.episode,
++  );
++  const initialEpisode =
++    Number.isSafeInteger(requestedEpisode) && requestedEpisode > 0
++      ? Math.min(requestedEpisode, anime.episodes ?? requestedEpisode)
++      : 1;
++  const description = resolveLocalizedAnimeDescription(anime, "ru");
++  const artwork =
++    heroImage?.url ??
++    anime.bannerImage ??
++    anime.coverImageLarge ??
++    anime.coverImage;
++  const meta = [
++    anime.format,
++    anime.year,
++    anime.episodes ? `${anime.episodes} серий` : null,
++  ].filter(Boolean);
+   return (
+-    <AppShell className={styles.page}>
++    <AppShell className={`app-shell-title ${styles.page}`}>
+       <main className={styles.main}>
+-        <header className={styles.heading}>
+-          <p className={styles.eyebrow}>Kairo Anime</p>
+-          <h1 className={styles.title}>{title}</h1>
+-          {secondaryTitle ? <p className={styles.secondary}>{secondaryTitle}</p> : null}
+-        </header>
+-        <PlayerPlaceholder poster={anime.bannerImage ?? anime.coverImageLarge} />
++        {artwork ? (
++          <div
++            className={styles.pageArtwork}
++            style={{
++              backgroundImage: `url(${JSON.stringify(artwork).slice(1, -1)})`,
++              backgroundPosition: `${(heroImage?.cropFocusX ?? 0.68) * 100}% ${(heroImage?.cropFocusY ?? 0.38) * 100}%`,
++            }}
++          />
++        ) : null}
++        <section className={styles.hero} aria-labelledby="title-heading">
++          <div className={styles.heroCopy} data-title-size={titleSize}>
++            <p className={styles.eyebrow}>Kairo / Title</p>
++            <h1
++              className={`${styles.title} ${titleSizeClass}`}
++              id="title-heading"
++            >
++              {title}
++            </h1>
++            {secondaryTitle ? (
++              <p className={styles.secondary}>{secondaryTitle}</p>
++            ) : null}
++            <p className={styles.metadata}>{meta.join(" · ")}</p>
++            <p className={styles.genres}>
++              {anime.genres
++                .slice(0, 3)
++                .map((genre) => localizeGenre(genre, "ru"))
++                .join(" · ")}
++            </p>
++            <p className={styles.heroDescription}>
++              {description.short ??
++                description.full ??
++                anime.description ??
++                "Описание скоро появится."}
++            </p>
++            <div className={styles.heroActions}>
++              <a className={styles.heroPrimaryAction} href="#player">
++                {anime.episodes ? `Серия ${initialEpisode}` : "К плееру"}
++                <span aria-hidden="true">↓</span>
++              </a>
++              <a className={styles.heroSecondaryAction} href="#about-heading">
++                О тайтле
++              </a>
++            </div>
++          </div>
++          <p className={styles.heroIndex} aria-hidden="true">
++            <span>01</span> KAIRO / WATCH
++          </p>
++        </section>
++        <div className={styles.content}>
++          <section
++            className={styles.watchStage}
++            id="player"
++            aria-labelledby="watch-stage-heading"
++          >
++            <h2 className="sr-only" id="watch-stage-heading">
++              Просмотр и управление
++            </h2>
++            <AnimePlaybackPanel
++              animeSlug={anime.slug}
++              shikimoriId={anime.malId}
++              initialEpisode={initialEpisode}
++              episodeCount={anime.episodes}
++              titles={[
++                anime.titleRu,
++                anime.titleEnglish,
++                anime.titleRomaji,
++                anime.titleNative,
++                anime.title,
++              ].filter((value): value is string => Boolean(value))}
++              year={anime.year}
++              mediaType={anime.format}
++              debugSimulateKodikFailure={
++                process.env.PLAYBACK_DEBUG_SIMULATION === "1"
++                  ? Array.isArray(query.simulateKodikFailure)
++                    ? query.simulateKodikFailure[0]
++                    : query.simulateKodikFailure
++                  : undefined
++              }
++            />
++          </section>
++          <section
++            className={styles.editorial}
++            aria-label="О тайтле и похожие тайтлы"
++          >
++            <article className={styles.about} aria-labelledby="about-heading">
++              <header className={styles.sectionHeading}>
++                <span>03</span>
++                <div>
++                  <p>О тайтле</p>
++                  <h2 id="about-heading">{title}</h2>
++                </div>
++              </header>
++              <div className={styles.aboutGrid}>
++                <p>
++                  {description.full ??
++                    description.short ??
++                    anime.description ??
++                    "Описание пока не добавлено."}
++                </p>
++                <dl>
++                  {anime.studios?.length ? (
++                    <>
++                      <dt>Студия</dt>
++                      <dd>{anime.studios.join(", ")}</dd>
++                    </>
++                  ) : null}
++                  {anime.status ? (
++                    <>
++                      <dt>Статус</dt>
++                      <dd>{anime.status}</dd>
++                    </>
++                  ) : null}
++                  {anime.duration ? (
++                    <>
++                      <dt>Длительность</dt>
++                      <dd>{anime.duration} мин.</dd>
++                    </>
++                  ) : null}
++                  {anime.source ? (
++                    <>
++                      <dt>Источник</dt>
++                      <dd>{anime.source}</dd>
++                    </>
++                  ) : null}
++                </dl>
++              </div>
++            </article>
++            {related.length ? (
++              <aside
++                className={styles.related}
++                aria-labelledby="related-heading"
++              >
++                <header className={styles.relatedHeading}>
++                  <p>04 / Продолжить открытие</p>
++                  <h2 id="related-heading">Похожие тайтлы</h2>
++                </header>
++                <KairoWebGLSurface className={styles.relatedGrid}>
++                  {related.slice(0, 3).map((item, index) => (
++                    <AnimeCard
++                      anime={item}
++                      index={index}
++                      compactHover
++                      key={item.id}
++                    />
++                  ))}
++                </KairoWebGLSurface>
++              </aside>
++            ) : null}
++          </section>
++        </div>
+       </main>
+     </AppShell>
+   );
+diff --git a/src/app/globals.css b/src/app/globals.css
+index 89b83ea..641271a 100644
+--- a/src/app/globals.css
++++ b/src/app/globals.css
+@@ -75,6 +75,9 @@ html {
+   scrollbar-gutter: stable;
+   background: var(--bg);
+ }
++html:has([data-testid="kairo-player"] :fullscreen) {
++  scrollbar-gutter: auto;
++}
+ body {
+   position: relative;
+   min-height: 100svh;
+@@ -133,6 +136,10 @@ body {
+   filter: saturate(0.82) contrast(0.9) brightness(1.03);
+   mask-image: linear-gradient(to right, transparent 3%, #000 28%, #000 100%);
+ }
++body:has(.app-shell-title) .app-background::before {
++  background-image: none;
++  opacity: 0;
++}
+ .app-background::after {
+   content: "";
+   position: absolute;
+@@ -255,15 +262,7 @@ a {
+   opacity: 0;
+ }
+ 
+-.site-header.is-scrolled {
+-  min-height: calc(62px + env(safe-area-inset-top, 0px));
+-  border-color: transparent;
+-  background: transparent;
+-  backdrop-filter: none;
+-}
+-
+-.site-header .header-inner,
+-.site-header.is-scrolled .header-inner {
++.site-header .header-inner {
+   min-height: 62px;
+   justify-content: space-between;
+ }
+@@ -289,7 +288,14 @@ a {
+   display: flex;
+   justify-content: center;
+   pointer-events: none;
+-  transition: transform var(--duration-normal) var(--ease-standard), opacity var(--duration-normal) var(--ease-standard);
++  transition:
++    transform var(--duration-normal) var(--ease-standard),
++    opacity var(--duration-normal) var(--ease-standard);
++}
++
++.mobile-nav-trigger,
++.mobile-liquid-nav {
++  display: none;
+ }
+ 
+ .navigation-dock-inner {
+@@ -317,7 +323,10 @@ a {
+   color: var(--color-text-secondary);
+   font-size: 0.62rem;
+   line-height: 1;
+-  transition: color var(--duration-fast) var(--ease-standard), background var(--duration-normal) var(--ease-standard), transform var(--duration-fast) var(--ease-standard);
++  transition:
++    color var(--duration-fast) var(--ease-standard),
++    background var(--duration-normal) var(--ease-standard),
++    transform var(--duration-fast) var(--ease-standard);
+ }
+ 
+ .navigation-dock a:hover,
+@@ -382,12 +391,6 @@ a {
+   background: linear-gradient(to bottom, rgba(8, 12, 14, 0.72), transparent);
+   pointer-events: none;
+ }
+-.site-header.is-scrolled {
+-  min-height: calc(72px + env(safe-area-inset-top, 0px));
+-  background: rgba(8, 12, 14, 0.86);
+-  border-color: var(--line);
+-  backdrop-filter: blur(var(--blur));
+-}
+ .header-inner {
+   position: relative;
+   width: 100%;
+@@ -397,10 +400,6 @@ a {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+-  transition: min-height var(--medium);
+-}
+-.site-header.is-scrolled .header-inner {
+-  min-height: 72px;
+ }
+ .logo {
+   font-size: 25px;
+@@ -2908,12 +2907,10 @@ html[data-kairo-tile-debug="neutral"] .category-tile {
+   .catalog-results-heading {
+     gap: 12px;
+   }
+-  .site-header,
+-  .site-header.is-scrolled {
++  .site-header {
+     min-height: calc(64px + env(safe-area-inset-top, 0px));
+   }
+-  .header-inner,
+-  .site-header.is-scrolled .header-inner {
++  .header-inner {
+     min-height: 64px;
+   }
+   .button {
+@@ -5146,7 +5143,11 @@ textarea:focus {
+   border: 1px solid rgba(130, 200, 200, 0.085);
+   border-radius: var(--radius-lg);
+   background:
+-    radial-gradient(circle at 14% 0%, rgba(83, 146, 148, 0.14), transparent 36%),
++    radial-gradient(
++      circle at 14% 0%,
++      rgba(83, 146, 148, 0.14),
++      transparent 36%
++    ),
+     linear-gradient(180deg, rgba(28, 57, 60, 0.42), rgba(11, 32, 35, 0.3));
+   box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.12);
+ }
+@@ -5273,7 +5274,9 @@ textarea:focus {
+ 
+ .new-page .filter-selects input:focus {
+   border-color: rgba(185, 217, 211, 0.42);
+-  box-shadow: 0 0 0 1px rgba(185, 217, 211, 0.08), 0 0 0 3px rgba(185, 217, 211, 0.06);
++  box-shadow:
++    0 0 0 1px rgba(185, 217, 211, 0.08),
++    0 0 0 3px rgba(185, 217, 211, 0.06);
+   outline: 0;
+ }
+ 
+@@ -5447,7 +5450,9 @@ textarea:focus {
+   border-radius: var(--radius-pill);
+   background: transparent;
+   cursor: pointer;
+-  transition: color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard);
++  transition:
++    color var(--duration-fast) var(--ease-standard),
++    background var(--duration-fast) var(--ease-standard);
+ }
+ 
+ .catalog-page .catalog-view-switcher button:hover,
+@@ -5728,31 +5733,61 @@ textarea:focus {
+   }
+ }
+ 
+-/* Final utility-only header contract, after the legacy header cascade. */
+-.site-header,
+-.site-header.is-scrolled {
++/* One edge-to-edge glass surface; the inner container owns layout only. */
++.site-header {
+   min-height: calc(62px + env(safe-area-inset-top, 0px));
+-  border-color: transparent;
+-  background: transparent;
+-  backdrop-filter: none;
++  border: 0;
++  border-bottom: 1px solid rgba(185, 217, 211, 0.045);
++  background-color: rgba(8, 24, 27, 0.16);
++  box-shadow: none;
++  backdrop-filter: blur(7px);
++  -webkit-backdrop-filter: blur(7px);
++  transition:
++    background-color 360ms cubic-bezier(0.2, 0, 0, 1),
++    border-color 360ms cubic-bezier(0.2, 0, 0, 1),
++    box-shadow 360ms cubic-bezier(0.2, 0, 0, 1);
++}
++
++.site-header.is-scrolled {
++  border-bottom-color: rgba(185, 217, 211, 0.04);
++  background-color: rgba(16, 25, 27, 0.68);
++  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
++  backdrop-filter: blur(16px) saturate(105%);
++  -webkit-backdrop-filter: blur(16px) saturate(105%);
+ }
+ 
+ .site-header::before {
+   opacity: 0;
+ }
+ 
+-.site-header .header-inner,
+-.site-header.is-scrolled .header-inner {
++.site-header .header-inner {
+   min-height: 62px;
+-  justify-content: flex-end;
++  justify-content: space-between;
+ }
+ 
+ .site-header .header-actions {
+-  padding: 0.2rem;
+-  border: 1px solid rgba(159, 215, 210, 0.07);
+-  border-radius: var(--radius-pill);
+-  background: rgba(9, 25, 28, 0.18);
+-  backdrop-filter: blur(6px);
++  padding: 0;
++  border: 0;
++  border-radius: 0;
++  background: transparent;
++  backdrop-filter: none;
++}
++
++.site-header .locale-switch {
++  background: transparent;
++  border: 0;
++}
++
++.site-header .icon-button,
++.site-header .profile-button {
++  width: 44px;
++  height: 44px;
++  min-width: 44px;
++  min-height: 44px;
++  flex-basis: 44px;
++  color: var(--text);
++  border-color: rgba(185, 217, 211, 0.1);
++  background: rgba(12, 35, 38, 0.18);
+ }
+ 
+ .app-shell {
+diff --git a/src/app/watch/[slug]/[episode]/page.tsx b/src/app/watch/[slug]/[episode]/page.tsx
+index d99d62f..ee9e07a 100644
+--- a/src/app/watch/[slug]/[episode]/page.tsx
++++ b/src/app/watch/[slug]/[episode]/page.tsx
+@@ -1,6 +1,12 @@
+ import { redirect } from "next/navigation";
+ 
+-export default async function LegacyWatchPage({ params }: PageProps<"/watch/[slug]/[episode]">) {
+-  const { slug } = await params;
+-  redirect(`/anime/${encodeURIComponent(slug)}`);
++export default async function LegacyWatchPage({
++  params,
++  searchParams,
++}: PageProps<"/watch/[slug]/[episode]">) {
++  const [{ slug, episode }, query] = await Promise.all([params, searchParams]);
++  const nextQuery = new URLSearchParams({ episode });
++  const season = Array.isArray(query.season) ? query.season[0] : query.season;
++  if (season && /^\d{1,3}$/.test(season)) nextQuery.set("season", season);
++  redirect(`/anime/${encodeURIComponent(slug)}?${nextQuery.toString()}`);
+ }
+diff --git a/src/components/home/HomeSections.tsx b/src/components/home/HomeSections.tsx
+index 533b205..efcd4ec 100644
+--- a/src/components/home/HomeSections.tsx
++++ b/src/components/home/HomeSections.tsx
+@@ -111,13 +111,16 @@ function EmptySlot({ loading = false }: { loading?: boolean }) {
+ 
+ function HomeContinueWatchingSection({ anime }: { anime: Anime[] }) {
+   const { locale, dictionary: t } = useLocale();
+-  const { progress, syncStatus, refresh } = useAccountData();
++  const { mode, progress, syncStatus, refresh } = useAccountData();
+   const loading = syncStatus === "idle" || syncStatus === "loading";
+   const failed = syncStatus === "error" || syncStatus === "session-expired";
+   const [historyOpen, setHistoryOpen] = useState(false);
+   const historyButton = useRef<HTMLButtonElement>(null);
+   const catalogBySlug = new Map(anime.map((item) => [item.slug, item]));
+-  const unfinishedItems = selectContinueWatching(progress, progress.length);
++  const unfinishedItems =
++    mode.kind === "account"
++      ? selectContinueWatching(progress, progress.length)
++      : [];
+   const items = unfinishedItems
+     .flatMap((entry) => {
+       const item = catalogBySlug.get(entry.animeSlug);
+@@ -135,6 +138,10 @@ function HomeContinueWatchingSection({ anime }: { anime: Anime[] }) {
+     <section
+       className={`${styles.section} ${styles.continueSection}`}
+       aria-labelledby="home-continue-title"
++      data-testid="continue-watching"
++      data-progress-mode={mode.kind}
++      data-progress-count={progress.length}
++      data-item-count={items.length}
+     >
+       <SectionHeader
+         id="home-continue-title"
+diff --git a/src/components/navigation/Header.tsx b/src/components/navigation/Header.tsx
+index 8fd86ca..f138bd1 100644
+--- a/src/components/navigation/Header.tsx
++++ b/src/components/navigation/Header.tsx
+@@ -1,7 +1,7 @@
+ "use client";
+ 
+ import { Search } from "lucide-react";
+-import { useRef, useState } from "react";
++import { useEffect, useRef, useState } from "react";
+ import Link from "next/link";
+ import { IconButton } from "@/components/ui/IconButton";
+ import { NavigationDock } from "@/components/navigation/NavigationDock";
+@@ -11,56 +11,66 @@ import { HeaderAccountMenu } from "./HeaderAccountMenu";
+ 
+ export function Header() {
+   const [searchOpen, setSearchOpen] = useState(false);
++  const [scrolled, setScrolled] = useState(false);
+   const searchRef = useRef<HTMLButtonElement>(null);
+   const { locale, setLocale, dictionary: t } = useLocale();
+ 
++  useEffect(() => {
++    const update = () => setScrolled(window.scrollY > 24);
++
++    update();
++    window.addEventListener("scroll", update, { passive: true });
++
++    return () => window.removeEventListener("scroll", update);
++  }, []);
++
+   return (
+     <>
+-    <header className="site-header">
+-      <div className="header-inner">
+-        <Link className="logo" href="/" aria-label={`Kairo — ${t.nav.home}`}>
+-          kairo<span>.</span>
+-        </Link>
+-        <div className="header-actions">
+-          <div className="locale-switch" aria-label={t.sync.subtitleLanguage}>
+-            <button
+-              className={locale === "ru" ? "active" : ""}
+-              onClick={() => setLocale("ru")}
+-            >
+-              RU
+-            </button>
+-            <span>/</span>
+-            <button
+-              className={locale === "uk" ? "active" : ""}
+-              onClick={() => setLocale("uk")}
+-            >
+-              UK
+-            </button>
+-            <span>/</span>
+-            <button
+-              className={locale === "en" ? "active" : ""}
+-              onClick={() => setLocale("en")}
++      <header className={`site-header${scrolled ? " is-scrolled" : ""}`}>
++        <div className="header-inner">
++          <Link className="logo" href="/" aria-label={`Kairo — ${t.nav.home}`}>
++            kairo<span>.</span>
++          </Link>
++          <div className="header-actions">
++            <div className="locale-switch" aria-label={t.sync.subtitleLanguage}>
++              <button
++                className={locale === "ru" ? "active" : ""}
++                onClick={() => setLocale("ru")}
++              >
++                RU
++              </button>
++              <span>/</span>
++              <button
++                className={locale === "uk" ? "active" : ""}
++                onClick={() => setLocale("uk")}
++              >
++                UK
++              </button>
++              <span>/</span>
++              <button
++                className={locale === "en" ? "active" : ""}
++                onClick={() => setLocale("en")}
++              >
++                EN
++              </button>
++            </div>
++            <IconButton
++              label={t.nav.search}
++              ref={searchRef}
++              onClick={() => setSearchOpen(true)}
+             >
+-              EN
+-            </button>
++              <Search size={19} />
++            </IconButton>
++            <HeaderAccountMenu />
+           </div>
+-          <IconButton
+-            label={t.nav.search}
+-            ref={searchRef}
+-            onClick={() => setSearchOpen(true)}
+-          >
+-            <Search size={19} />
+-          </IconButton>
+-          <HeaderAccountMenu />
+         </div>
+-      </div>
+-      <GlobalSearch
+-        open={searchOpen}
+-        onClose={() => setSearchOpen(false)}
+-        triggerRef={searchRef}
+-      />
+-    </header>
+-    <NavigationDock />
++        <GlobalSearch
++          open={searchOpen}
++          onClose={() => setSearchOpen(false)}
++          triggerRef={searchRef}
++        />
++      </header>
++      <NavigationDock />
+     </>
+   );
+ }
+diff --git a/src/components/navigation/NavigationDock.tsx b/src/components/navigation/NavigationDock.tsx
+index b25d3ae..0309170 100644
+--- a/src/components/navigation/NavigationDock.tsx
++++ b/src/components/navigation/NavigationDock.tsx
+@@ -3,15 +3,32 @@
+ import { Bookmark, Clapperboard, Compass, House, Layers3 } from "lucide-react";
+ import Link from "next/link";
+ import { usePathname } from "next/navigation";
+-import { useEffect, useState } from "react";
++import {
++  useCallback,
++  useEffect,
++  useRef,
++  useState,
++  type CSSProperties,
++} from "react";
+ import { useLocale } from "@/i18n";
+ 
+-const idleDelay = 1800;
++const desktopIdleDelay = 1800;
++const mobileOpenDuration = 440;
++const mobileCloseDuration = 360;
++const mobileAutoHideDelay = 3500;
++
++type MobileNavState = "hidden" | "opening" | "open" | "closing";
+ 
+ export function NavigationDock() {
+   const pathname = usePathname();
+   const { locale, dictionary: t } = useLocale();
+-  const [idle, setIdle] = useState(false);
++  const [desktopIdle, setDesktopIdle] = useState(false);
++  const [mobileState, setMobileState] = useState<MobileNavState>("hidden");
++  const capsuleRef = useRef<HTMLElement>(null);
++  const triggerRef = useRef<HTMLButtonElement>(null);
++  const phaseTimer = useRef(0);
++  const autoHideTimer = useRef(0);
++
+   const links = [
+     { href: "/", label: t.nav.home, icon: House },
+     { href: "/catalog", label: t.nav.catalog, icon: Compass },
+@@ -23,7 +40,8 @@ export function NavigationDock() {
+     },
+     {
+       href: "/history",
+-      label: locale === "ru" ? "История" : locale === "uk" ? "Історія" : "History",
++      label:
++        locale === "ru" ? "История" : locale === "uk" ? "Історія" : "History",
+       icon: Clapperboard,
+     },
+   ];
+@@ -33,17 +51,18 @@ export function NavigationDock() {
+     let timeout = 0;
+     const scheduleIdle = () => {
+       window.clearTimeout(timeout);
+-      timeout = window.setTimeout(() => setIdle(true), idleDelay);
++      timeout = window.setTimeout(() => setDesktopIdle(true), desktopIdleDelay);
+     };
+     const wake = () => {
+-      setIdle(false);
++      setDesktopIdle(false);
+       scheduleIdle();
+     };
+     const sync = () => {
+       window.clearTimeout(timeout);
+       if (pointer.matches) scheduleIdle();
+-      else setIdle(false);
++      else setDesktopIdle(false);
+     };
++
+     window.addEventListener("pointermove", wake, { passive: true });
+     pointer.addEventListener("change", sync);
+     sync();
+@@ -54,31 +73,148 @@ export function NavigationDock() {
+     };
+   }, []);
+ 
++  const clearMobileTimers = useCallback(() => {
++    window.clearTimeout(phaseTimer.current);
++    window.clearTimeout(autoHideTimer.current);
++  }, []);
++
++  const closeMobile = useCallback(() => {
++    setMobileState((current) => {
++      if (current === "hidden" || current === "closing") return current;
++      clearMobileTimers();
++      phaseTimer.current = window.setTimeout(
++        () => setMobileState("hidden"),
++        mobileCloseDuration,
++      );
++      return "closing";
++    });
++  }, [clearMobileTimers]);
++
++  const scheduleMobileAutoHide = useCallback(() => {
++    window.clearTimeout(autoHideTimer.current);
++    autoHideTimer.current = window.setTimeout(closeMobile, mobileAutoHideDelay);
++  }, [closeMobile]);
++
++  useEffect(() => {
++    const timeout = window.setTimeout(closeMobile, 0);
++    return () => window.clearTimeout(timeout);
++  }, [pathname, closeMobile]);
++
++  const openMobile = useCallback(() => {
++    clearMobileTimers();
++    setMobileState("opening");
++    phaseTimer.current = window.setTimeout(() => {
++      setMobileState("open");
++      scheduleMobileAutoHide();
++    }, mobileOpenDuration);
++  }, [clearMobileTimers, scheduleMobileAutoHide]);
++
++  useEffect(() => clearMobileTimers, [clearMobileTimers]);
++
++  useEffect(() => {
++    const handlePointerDown = (event: PointerEvent) => {
++      const target = event.target as Node;
++      if (
++        capsuleRef.current?.contains(target) ||
++        triggerRef.current?.contains(target)
++      ) {
++        return;
++      }
++      closeMobile();
++    };
++    const handleKeyDown = (event: KeyboardEvent) => {
++      if (event.key === "Escape") closeMobile();
++    };
++
++    document.addEventListener("pointerdown", handlePointerDown);
++    document.addEventListener("keydown", handleKeyDown);
++    window.addEventListener("scroll", closeMobile, { passive: true });
++    return () => {
++      document.removeEventListener("pointerdown", handlePointerDown);
++      document.removeEventListener("keydown", handleKeyDown);
++      window.removeEventListener("scroll", closeMobile);
++    };
++  }, [closeMobile]);
++
+   const isActive = (href: string) =>
+     href === "/" ? pathname === "/" : pathname.startsWith(href);
++  const mobileExpanded = mobileState === "opening" || mobileState === "open";
+ 
+   return (
+-    <nav
+-      className={`navigation-dock${idle ? " is-idle" : ""}`}
+-      aria-label={locale === "ru" ? "Основная навигация" : "Main navigation"}
+-      onPointerEnter={() => setIdle(false)}
+-    >
+-      <div className="navigation-dock-inner">
+-        {links.map(({ href, icon: Icon, label }) => {
+-          const active = isActive(href);
+-          return (
+-            <Link
+-              className={active ? "is-active" : ""}
+-              href={href}
+-              aria-current={active ? "page" : undefined}
+-              key={href}
+-            >
+-              <Icon size={19} strokeWidth={1.7} aria-hidden="true" />
+-              <span>{label}</span>
+-            </Link>
+-          );
+-        })}
+-      </div>
+-    </nav>
++    <>
++      <nav
++        className={desktopIdle ? "navigation-dock is-idle" : "navigation-dock"}
++        aria-label={locale === "ru" ? "Основная навигация" : "Main navigation"}
++        onPointerEnter={() => setDesktopIdle(false)}
++      >
++        <div className="navigation-dock-inner">
++          {links.map(({ href, icon: Icon, label }) => {
++            const active = isActive(href);
++            return (
++              <Link
++                className={active ? "is-active" : ""}
++                href={href}
++                aria-current={active ? "page" : undefined}
++                key={href}
++              >
++                <Icon size={19} strokeWidth={1.7} aria-hidden="true" />
++                <span>{label}</span>
++              </Link>
++            );
++          })}
++        </div>
++      </nav>
++
++      <button
++        ref={triggerRef}
++        className="mobile-nav-trigger"
++        type="button"
++        aria-label={
++          locale === "ru"
++            ? "Открыть навигацию"
++            : locale === "uk"
++              ? "Відкрити навігацію"
++              : "Open navigation"
++        }
++        aria-controls="kairo-mobile-navigation"
++        aria-expanded={mobileExpanded}
++        onClick={openMobile}
++      />
++
++      <nav
++        id="kairo-mobile-navigation"
++        ref={capsuleRef}
++        className={`mobile-liquid-nav is-${mobileState}`}
++        aria-label={
++          locale === "ru" ? "Мобильная навигация" : "Mobile navigation"
++        }
++        aria-hidden={mobileState === "hidden" ? true : undefined}
++        inert={mobileState === "hidden" ? true : undefined}
++        onPointerMove={scheduleMobileAutoHide}
++        onPointerDown={scheduleMobileAutoHide}
++        onFocus={scheduleMobileAutoHide}
++        onKeyDown={scheduleMobileAutoHide}
++      >
++        <div className="mobile-liquid-capsule">
++          {links.map(({ href, icon: Icon, label }, index) => {
++            const active = isActive(href);
++            return (
++              <Link
++                className={active ? "is-active" : ""}
++                href={href}
++                aria-current={active ? "page" : undefined}
++                key={href}
++                style={{ "--mobile-nav-index": index } as CSSProperties}
++              >
++                <span className="mobile-nav-icon">
++                  <Icon size={18} strokeWidth={1.65} aria-hidden="true" />
++                </span>
++                <span className="mobile-nav-label">{label}</span>
++              </Link>
++            );
++          })}
++        </div>
++      </nav>
++    </>
+   );
+ }
+diff --git a/src/lib/anime/local-first.test.ts b/src/lib/anime/local-first.test.ts
+index 5f4e56c..4ccd3aa 100644
+--- a/src/lib/anime/local-first.test.ts
++++ b/src/lib/anime/local-first.test.ts
+@@ -71,6 +71,26 @@ test("local catalog survives AniList 403 without snapshot or Jikan", async () =>
+   assert.equal(result, local);
+ });
+ 
++test("local sources survive database schema drift", async () => {
++  const local = {
++    ...anime,
++    id: "local-after-db-error",
++    slug: "local-after-db-error",
++    anilistId: 321,
++  };
++  const result = await findLocalAnimeForRoute("local-after-db-error", 321, {
++    database: async () => {
++      throw new Error("P2022 schema drift");
++    },
++    localCatalog: () => local,
++    catalogSnapshot: () => null,
++    runtime: () => null,
++    snapshot: async () => null,
++  });
++  assert.equal(result?.source, "local-catalog");
++  assert.equal(result?.anime, local);
++});
++
+ test("detail snapshot is returned before remote resolution", async () => {
+   const result = await findLocalAnimeForRoute("anilist-123-saved", 123, {
+     ...emptySources(),
+diff --git a/src/lib/anime/local-first.ts b/src/lib/anime/local-first.ts
+index 45e4502..4bf1897 100644
+--- a/src/lib/anime/local-first.ts
++++ b/src/lib/anime/local-first.ts
+@@ -43,7 +43,7 @@ export async function findLocalAnimeForRoute(
+     snapshot: () => Promise<Anime | null>;
+   },
+ ): Promise<LocalAnimeResolution | null> {
+-  const database = await sources.database();
++  const database = await sources.database().catch(() => null);
+   if (database) return { anime: database, source: "database" };
+   const localCatalog = sources.localCatalog();
+   if (localCatalog) return { anime: localCatalog, source: "local-catalog" };
+@@ -77,7 +77,7 @@ export async function resolveRelatedAnimeBestEffort(
+   loadRemote: () => Promise<Anime[]>,
+   isUnavailable: (error: unknown) => boolean,
+ ): Promise<Anime[]> {
+-  const local = await loadLocal();
++  const local = await loadLocal().catch(() => []);
+   if (local.length) return local;
+   try {
+     return await loadRemote();
+diff --git a/src/lib/watch-progress/selectors.ts b/src/lib/watch-progress/selectors.ts
+index da58b82..0a4415f 100644
+--- a/src/lib/watch-progress/selectors.ts
++++ b/src/lib/watch-progress/selectors.ts
+@@ -1,19 +1,35 @@
+ import type { WatchProgressEntry } from "./types";
+ import type { EpisodeMetadata } from "@/domain/watch/types";
++import { WATCH_COMPLETION_PERCENT } from "./policy";
+ 
+ export const calculateWatchPercent = (time: number, duration: number) =>
+   duration > 0 ? Math.min(100, Math.max(0, (time / duration) * 100)) : 0;
+ export const isEpisodeCompleted = (
+   entry: Pick<WatchProgressEntry, "percent" | "completed">,
+-) => entry.completed || entry.percent >= 95;
++) => entry.completed || entry.percent >= WATCH_COMPLETION_PERCENT;
+ export const selectContinueWatching = (
+   entries: WatchProgressEntry[],
+   limit = 6,
+-) =>
++) => {
++  const latestByAnime = new Map<string, WatchProgressEntry>();
+   entries
+-    .filter((e) => !isEpisodeCompleted(e) && e.percent >= 1)
++    .filter(
++      (entry) =>
++        !isEpisodeCompleted(entry) &&
++        entry.percent >= 1 &&
++        Number.isFinite(entry.currentTime) &&
++        entry.currentTime >= 5 &&
++        Number.isFinite(entry.duration) &&
++        entry.duration > 0 &&
++        Number.isFinite(Date.parse(entry.updatedAt)),
++    )
+     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+-    .slice(0, limit);
++    .forEach((entry) => {
++      if (!latestByAnime.has(entry.animeSlug))
++        latestByAnime.set(entry.animeSlug, entry);
++    });
++  return [...latestByAnime.values()].slice(0, limit);
++};
+ 
+ export const selectAnimeProgress = (
+   entries: WatchProgressEntry[],
+diff --git a/src/server/repositories/anime.repository.ts b/src/server/repositories/anime.repository.ts
+index 38e5b18..04c46ac 100644
+--- a/src/server/repositories/anime.repository.ts
++++ b/src/server/repositories/anime.repository.ts
+@@ -22,6 +22,15 @@ type AnimeRecord = {
+   coverImage: string | null;
+   coverImageLarge: string | null;
+   bannerImage: string | null;
++  heroImageUrl: string | null;
++  heroImageSource: string | null;
++  heroImageScore: number | null;
++  heroImageUpdatedAt: Date | null;
++  heroImageCropFocusX: number | null;
++  heroImageCropFocusY: number | null;
++  heroImageOverrideUrl: string | null;
++  heroImageOverrideSource: string | null;
++  heroImageApproved: boolean;
+   dominantColor: string | null;
+   genres: string[];
+   year: number | null;
+@@ -69,6 +78,15 @@ export function mapAnimeRecord(record: AnimeRecord): Anime {
+     coverImage: record.coverImage ?? undefined,
+     coverImageLarge: record.coverImageLarge ?? undefined,
+     bannerImage: record.bannerImage ?? undefined,
++    heroImageUrl: record.heroImageUrl ?? undefined,
++    heroImageSource: record.heroImageSource ?? undefined,
++    heroImageScore: record.heroImageScore ?? undefined,
++    heroImageUpdatedAt: record.heroImageUpdatedAt ?? undefined,
++    heroImageCropFocusX: record.heroImageCropFocusX ?? undefined,
++    heroImageCropFocusY: record.heroImageCropFocusY ?? undefined,
++    heroImageOverrideUrl: record.heroImageOverrideUrl ?? undefined,
++    heroImageOverrideSource: record.heroImageOverrideSource ?? undefined,
++    heroImageApproved: record.heroImageApproved,
+     dominantColor: record.dominantColor ?? undefined,
+     genres: record.genres,
+     year: record.year ?? undefined,
+diff --git a/src/server/services/progress.service.ts b/src/server/services/progress.service.ts
+index 75b0587..3c63179 100644
+--- a/src/server/services/progress.service.ts
++++ b/src/server/services/progress.service.ts
+@@ -2,6 +2,7 @@ import "server-only";
+ import { prisma } from "@/lib/db";
+ import type { z } from "zod";
+ import { progressInput } from "@/server/validation/data";
++import { WATCH_COMPLETION_PERCENT } from "@/lib/watch-progress/policy";
+ type Input = z.infer<typeof progressInput>;
+ const dto = (item: {
+   animeKey: string;
+@@ -32,12 +33,17 @@ export async function upsertProgress(userId: string, input: Input) {
+           episodeNumber: input.episodeNumber,
+         },
+       },
+-      create: { userId, ...input, percent, completed: percent >= 95 },
++      create: {
++        userId,
++        ...input,
++        percent,
++        completed: percent >= WATCH_COMPLETION_PERCENT,
++      },
+       update: {
+         currentTime: input.currentTime,
+         duration: input.duration,
+         percent,
+-        completed: percent >= 95,
++        completed: percent >= WATCH_COMPLETION_PERCENT,
+       },
+     }),
+   );
+diff --git a/src/server/validation/data.ts b/src/server/validation/data.ts
+index b24488d..a9eda73 100644
+--- a/src/server/validation/data.ts
++++ b/src/server/validation/data.ts
+@@ -9,8 +9,16 @@ export const progressInput = z.object({
+   animeKey,
+   seasonNumber: z.number().int().positive(),
+   episodeNumber: z.number().int().positive(),
+-  currentTime: z.number().finite().nonnegative(),
+-  duration: z.number().finite().nonnegative(),
++  currentTime: z
++    .number()
++    .finite()
++    .nonnegative()
++    .max(60 * 60 * 24),
++  duration: z
++    .number()
++    .finite()
++    .positive()
++    .max(60 * 60 * 24),
+ });
+ export const animeListInput = z.object({
+   animeKey,
+diff --git a/src/styles/responsive/mobile.css b/src/styles/responsive/mobile.css
+index 231bece..244e35d 100644
+--- a/src/styles/responsive/mobile.css
++++ b/src/styles/responsive/mobile.css
+@@ -4,12 +4,10 @@
+     --page-gutter: clamp(1rem, 4.8vw, 2rem);
+     --section-gap: clamp(3.5rem, 12vw, 5rem);
+   }
+-  .site-header,
+-  .site-header.is-scrolled {
++  .site-header {
+     min-height: calc(64px + env(safe-area-inset-top, 0px));
+   }
+-  .header-inner,
+-  .site-header.is-scrolled .header-inner {
++  .header-inner {
+     min-height: 64px;
+   }
+   .desktop-nav {
+@@ -37,6 +35,281 @@
+     min-width: 32px;
+     min-height: 44px;
+   }
++  .navigation-dock {
++    display: none;
++  }
++  .mobile-nav-trigger {
++    position: fixed;
++    right: auto;
++    bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
++    left: 50%;
++    z-index: 61;
++    display: grid;
++    width: 100px;
++    height: 38px;
++    place-items: center;
++    padding: 0;
++    border: 0;
++    background: transparent;
++    transform: translateX(-50%);
++    cursor: pointer;
++    touch-action: manipulation;
++  }
++  .mobile-nav-trigger::after {
++    content: "";
++    width: 24px;
++    height: 3px;
++    border-radius: var(--radius-pill);
++    background: rgba(210, 230, 228, 0.12);
++  }
++  .mobile-nav-trigger[aria-expanded="true"] {
++    opacity: 0;
++    pointer-events: none;
++  }
++  .mobile-nav-trigger:focus-visible {
++    outline: 2px solid rgba(185, 217, 211, 0.42);
++    outline-offset: -4px;
++    border-radius: var(--radius-pill);
++  }
++  .mobile-liquid-nav {
++    position: fixed;
++    right: auto;
++    bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
++    left: 50%;
++    z-index: 62;
++    display: block;
++    width: min(calc(100vw - 32px), 348px);
++    height: 62px;
++    opacity: 1;
++    visibility: visible;
++    transform: translateX(-50%);
++    pointer-events: auto;
++  }
++  .mobile-liquid-nav.is-hidden {
++    opacity: 0;
++    visibility: hidden;
++    pointer-events: none;
++  }
++  .mobile-liquid-nav.is-hidden .mobile-liquid-capsule {
++    background: transparent;
++    border-color: transparent;
++    box-shadow: none;
++    backdrop-filter: none;
++    -webkit-backdrop-filter: none;
++  }
++  .mobile-liquid-capsule {
++    position: absolute;
++    bottom: 0;
++    left: 50%;
++    z-index: 1;
++    display: flex;
++    width: 100%;
++    height: 62px;
++    align-items: stretch;
++    justify-content: space-between;
++    gap: 0;
++    overflow: visible;
++    padding: 5px;
++    border: 1px solid rgba(185, 217, 211, 0.1);
++    border-radius: var(--radius-pill);
++    background: linear-gradient(
++      180deg,
++      rgba(19, 42, 44, 0.82),
++      rgba(7, 22, 25, 0.88)
++    );
++    box-shadow:
++      0 12px 34px rgba(0, 0, 0, 0.22),
++      inset 0 1px 0 rgba(255, 255, 255, 0.025);
++    backdrop-filter: blur(18px) saturate(106%);
++    -webkit-backdrop-filter: blur(18px) saturate(106%);
++    transform: translateX(-50%);
++    transform-origin: 50% 100%;
++  }
++  .mobile-liquid-capsule::before,
++  .mobile-liquid-capsule::after {
++    content: "";
++    position: absolute;
++    top: 50%;
++    z-index: -1;
++    width: 32px;
++    height: 32px;
++    border-radius: 50%;
++    background: rgba(10, 28, 31, 0.86);
++    opacity: 0;
++    pointer-events: none;
++    transform: translateY(-50%) scale(0.72);
++  }
++  .mobile-liquid-capsule::before {
++    left: -8px;
++  }
++  .mobile-liquid-capsule::after {
++    right: -8px;
++  }
++  .mobile-liquid-nav.is-opening .mobile-liquid-capsule {
++    animation: mobile-liquid-open 440ms cubic-bezier(0.22, 1, 0.36, 1) both;
++  }
++  .mobile-liquid-nav.is-opening .mobile-liquid-capsule::before,
++  .mobile-liquid-nav.is-opening .mobile-liquid-capsule::after {
++    animation: mobile-liquid-lobes 250ms 105ms ease-out both;
++  }
++  .mobile-liquid-nav.is-closing {
++    pointer-events: none;
++  }
++  .mobile-liquid-nav.is-closing .mobile-liquid-capsule {
++    animation: mobile-liquid-close 360ms cubic-bezier(0.4, 0, 0.2, 1) both;
++  }
++  .mobile-liquid-nav a {
++    position: relative;
++    z-index: 2;
++    display: grid;
++    min-width: 0;
++    min-height: 52px;
++    flex: 1 1 0;
++    place-items: center;
++    align-content: center;
++    gap: 2px;
++    padding: 4px 2px;
++    border-radius: 15px;
++    color: rgba(226, 239, 235, 0.58);
++    font-size: 9px;
++    line-height: 1;
++    pointer-events: auto;
++  }
++  .mobile-nav-icon {
++    display: grid;
++    width: 30px;
++    height: 28px;
++    place-items: center;
++    border: 1px solid transparent;
++    border-radius: 14px;
++  }
++  .mobile-liquid-nav a.is-active {
++    color: var(--color-text-primary);
++    background: transparent;
++    box-shadow: none;
++  }
++  .mobile-liquid-nav a.is-active .mobile-nav-icon {
++    border-color: rgba(185, 217, 211, 0.11);
++    background: rgba(185, 217, 211, 0.08);
++  }
++  .mobile-liquid-nav.is-opening a {
++    animation: mobile-liquid-item-in 130ms
++      calc(285ms + var(--mobile-nav-index) * 18ms) var(--ease-standard) both;
++  }
++  .mobile-liquid-nav.is-closing a {
++    animation: mobile-liquid-item-out 100ms ease-in both;
++  }
++  .app-shell {
++    padding-bottom: 0;
++  }
++  @keyframes mobile-liquid-open {
++    0% {
++      width: 24px;
++      height: 24px;
++      border-radius: 50%;
++      opacity: 0;
++      transform: translateX(-50%) translateY(8px) scale(0.8);
++    }
++    24% {
++      width: 30px;
++      height: 30px;
++      border-radius: 50%;
++      opacity: 1;
++      transform: translateX(-50%) translateY(4px) scale(1.06);
++    }
++    44% {
++      width: 44px;
++      height: 28px;
++      border-radius: 55% 55% 48% 48%;
++      transform: translateX(-50%) translateY(2px);
++    }
++    72% {
++      width: 220px;
++      height: 48px;
++      border-radius: 38px;
++      transform: translateX(-50%);
++    }
++    88% {
++      width: 102%;
++      height: 62px;
++      border-radius: var(--radius-pill);
++      transform: translateX(-50%) scaleX(1.01);
++    }
++    100% {
++      width: 100%;
++      height: 62px;
++      border-radius: var(--radius-pill);
++      opacity: 1;
++      transform: translateX(-50%);
++    }
++  }
++  @keyframes mobile-liquid-close {
++    0% {
++      width: 100%;
++      height: 62px;
++      border-radius: var(--radius-pill);
++      opacity: 1;
++      transform: translateX(-50%);
++    }
++    42% {
++      width: 220px;
++      height: 48px;
++      border-radius: 38px;
++      transform: translateX(-50%) translateY(2px);
++    }
++    70% {
++      width: 44px;
++      height: 28px;
++      border-radius: 55% 55% 48% 48%;
++      opacity: 1;
++      transform: translateX(-50%) translateY(5px);
++    }
++    86% {
++      width: 24px;
++      height: 24px;
++      border-radius: 50%;
++      opacity: 0.86;
++      transform: translateX(-50%) translateY(8px);
++    }
++    100% {
++      width: 18px;
++      height: 18px;
++      border-radius: 50%;
++      opacity: 0;
++      transform: translateX(-50%) translateY(10px) scale(0.76);
++    }
++  }
++  @keyframes mobile-liquid-lobes {
++    0%,
++    100% {
++      opacity: 0;
++      transform: translateY(-50%) scale(0.72);
++    }
++    52% {
++      opacity: 0.68;
++      transform: translateY(-50%) scale(1.08, 0.84);
++    }
++  }
++  @keyframes mobile-liquid-item-in {
++    from {
++      opacity: 0;
++      transform: translateY(5px) scale(0.94);
++    }
++    to {
++      opacity: 1;
++      transform: none;
++    }
++  }
++  @keyframes mobile-liquid-item-out {
++    from {
++      opacity: 1;
++      transform: none;
++    }
++    to {
++      opacity: 0;
++      transform: translateY(3px) scale(0.96);
++    }
++  }
+   .page-hero {
+     padding-top: calc(6.25rem + env(safe-area-inset-top, 0px));
+   }
+@@ -143,3 +416,28 @@
+     gap-inline: 0.625rem;
+   }
+ }
++
++@media (prefers-reduced-motion: reduce) and (max-width: 767px) {
++  .mobile-liquid-nav.is-opening .mobile-liquid-capsule,
++  .mobile-liquid-nav.is-closing .mobile-liquid-capsule {
++    animation-duration: 140ms;
++    animation-name: mobile-liquid-reduced-motion;
++  }
++  .mobile-liquid-nav.is-closing .mobile-liquid-capsule {
++    animation-direction: reverse;
++  }
++  .mobile-liquid-nav.is-opening a,
++  .mobile-liquid-nav.is-closing a {
++    animation: none;
++  }
++  @keyframes mobile-liquid-reduced-motion {
++    from {
++      opacity: 0;
++      transform: translateY(4px) scale(0.96);
++    }
++    to {
++      opacity: 1;
++      transform: none;
++    }
++  }
++}
+diff --git a/src/types/media.ts b/src/types/media.ts
+index a77714b..e441514 100644
+--- a/src/types/media.ts
++++ b/src/types/media.ts
+@@ -30,6 +30,15 @@ export interface Anime {
+   coverImage?: string;
+   coverImageLarge?: string;
+   bannerImage?: string;
++  heroImageUrl?: string;
++  heroImageSource?: string;
++  heroImageScore?: number;
++  heroImageUpdatedAt?: Date;
++  heroImageCropFocusX?: number;
++  heroImageCropFocusY?: number;
++  heroImageOverrideUrl?: string;
++  heroImageOverrideSource?: string;
++  heroImageApproved?: boolean;
+   dominantColor?: string;
+   genres: string[];
+   year?: number;
+
+=== untracked files ===
+prisma/migrations/20260823010000_add_anime_hero_images/migration.sql
+reports/anime-detail-playback-acceptance.md
+reports/animego-cvh-provider-acceptance.md
+reports/kodik-player-browser-acceptance.md
+reports/manual-quality-baseline-20260826-204714.txt
+reports/player-ux-acceptance-latest.json
+reports/provider-manager-acceptance.md
+reports/translation-matching-acceptance.md
+scripts/dev/check-provider.mjs
+scripts/diagnose-anime-parsers-kodik.py
+scripts/playback/accept-anime-detail.mjs
+scripts/playback/accept-animego-cvh.mjs
+scripts/playback/accept-continue-autonext.mjs
+scripts/playback/accept-kodik-player.mjs
+scripts/playback/accept-player-ux.mjs
+scripts/playback/accept-provider-manager.mjs
+scripts/playback/accept-skip-segments.mjs
+scripts/playback/accept-watch-progress.mjs
+scripts/playback/compare-hls-transports.mjs
+scripts/playback/inspect-native-hls-cdp.mjs
+services/anime-provider/README.md
+services/anime-provider/__pycache__/app.cpython-312.pyc
+services/anime-provider/__pycache__/environment.cpython-312.pyc
+services/anime-provider/__pycache__/models.cpython-312.pyc
+services/anime-provider/__pycache__/test_animego_cvh.cpython-312.pyc
+services/anime-provider/__pycache__/test_cvh_relay.cpython-312.pyc
+services/anime-provider/__pycache__/test_environment.cpython-312.pyc
+services/anime-provider/__pycache__/test_kodik.cpython-312.pyc
+services/anime-provider/app.py
+services/anime-provider/environment.py
+services/anime-provider/models.py
+services/anime-provider/providers/__init__.py
+services/anime-provider/providers/__pycache__/__init__.cpython-312.pyc
+services/anime-provider/providers/__pycache__/animego_cvh.cpython-312.pyc
+services/anime-provider/providers/__pycache__/cvh_relay.cpython-312.pyc
+services/anime-provider/providers/__pycache__/kodik.cpython-312.pyc
+services/anime-provider/providers/animego_cvh.py
+services/anime-provider/providers/cvh_relay.py
+services/anime-provider/providers/kodik.py
+services/anime-provider/requirements.txt
+services/anime-provider/test_animego_cvh.py
+services/anime-provider/test_cvh_relay.py
+services/anime-provider/test_environment.py
+services/anime-provider/test_kodik.py
+src/app/anime/[slug]/AnimePlaybackPanel.tsx
+src/app/anime/[slug]/WatchControlGrid.tsx
+src/app/api/playback/animego/resolve/route.ts
+src/app/api/playback/animego/route.ts
+src/app/api/playback/animego/search/route.ts
+src/app/api/playback/animego/voices/route.ts
+src/app/api/playback/kodik/route.ts
+src/app/api/playback/kodik/translations/route.ts
+src/app/api/playback/resolve/route.ts
+src/app/api/stream/cvh/[sessionId]/[...resource]/route.ts
+src/app/debug/kodik-player/KodikPlayerDebug.tsx
+src/app/debug/kodik-player/page.module.css
+src/app/debug/kodik-player/page.tsx
+src/app/debug/providers/ProviderDebug.tsx
+src/app/debug/providers/page.tsx
+src/components/player/KairoPlayer.module.css
+src/components/player/KairoPlayer.tsx
+src/lib/playback/animego-cvh.ts
+src/lib/playback/autonext.test.ts
+src/lib/playback/autonext.ts
+src/lib/playback/descriptor.test.ts
+src/lib/playback/descriptor.ts
+src/lib/playback/hls-policy.test.ts
+src/lib/playback/hls-policy.ts
+src/lib/playback/skip-segments.test.ts
+src/lib/playback/skip-segments.ts
+src/lib/playback/time.test.ts
+src/lib/playback/time.ts
+src/lib/watch-progress/policy.test.ts
+src/lib/watch-progress/policy.ts
+src/lib/watch-progress/selectors.test.ts
+src/server/playback/animego-cvh-provider-client.ts
+src/server/playback/kodik-provider-client.ts
+src/server/playback/provider-manager.test.ts
+src/server/playback/provider-manager.ts
+src/server/playback/translation-matching.test.ts
+src/server/playback/translation-matching.ts
+src/server/services/hero-image-scoring.ts
+src/server/services/hero-image.service.test.ts
+src/server/services/hero-image.service.ts

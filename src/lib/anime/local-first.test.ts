@@ -71,6 +71,26 @@ test("local catalog survives AniList 403 without snapshot or Jikan", async () =>
   assert.equal(result, local);
 });
 
+test("local sources survive database schema drift", async () => {
+  const local = {
+    ...anime,
+    id: "local-after-db-error",
+    slug: "local-after-db-error",
+    anilistId: 321,
+  };
+  const result = await findLocalAnimeForRoute("local-after-db-error", 321, {
+    database: async () => {
+      throw new Error("P2022 schema drift");
+    },
+    localCatalog: () => local,
+    catalogSnapshot: () => null,
+    runtime: () => null,
+    snapshot: async () => null,
+  });
+  assert.equal(result?.source, "local-catalog");
+  assert.equal(result?.anime, local);
+});
+
 test("detail snapshot is returned before remote resolution", async () => {
   const result = await findLocalAnimeForRoute("anilist-123-saved", 123, {
     ...emptySources(),

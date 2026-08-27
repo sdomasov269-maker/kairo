@@ -22,6 +22,15 @@ type AnimeRecord = {
   coverImage: string | null;
   coverImageLarge: string | null;
   bannerImage: string | null;
+  heroImageUrl: string | null;
+  heroImageSource: string | null;
+  heroImageScore: number | null;
+  heroImageUpdatedAt: Date | null;
+  heroImageCropFocusX: number | null;
+  heroImageCropFocusY: number | null;
+  heroImageOverrideUrl: string | null;
+  heroImageOverrideSource: string | null;
+  heroImageApproved: boolean;
   dominantColor: string | null;
   genres: string[];
   year: number | null;
@@ -69,6 +78,15 @@ export function mapAnimeRecord(record: AnimeRecord): Anime {
     coverImage: record.coverImage ?? undefined,
     coverImageLarge: record.coverImageLarge ?? undefined,
     bannerImage: record.bannerImage ?? undefined,
+    heroImageUrl: record.heroImageUrl ?? undefined,
+    heroImageSource: record.heroImageSource ?? undefined,
+    heroImageScore: record.heroImageScore ?? undefined,
+    heroImageUpdatedAt: record.heroImageUpdatedAt ?? undefined,
+    heroImageCropFocusX: record.heroImageCropFocusX ?? undefined,
+    heroImageCropFocusY: record.heroImageCropFocusY ?? undefined,
+    heroImageOverrideUrl: record.heroImageOverrideUrl ?? undefined,
+    heroImageOverrideSource: record.heroImageOverrideSource ?? undefined,
+    heroImageApproved: record.heroImageApproved,
     dominantColor: record.dominantColor ?? undefined,
     genres: record.genres,
     year: record.year ?? undefined,

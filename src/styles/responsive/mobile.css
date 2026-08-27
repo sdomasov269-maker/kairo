@@ -4,12 +4,10 @@
     --page-gutter: clamp(1rem, 4.8vw, 2rem);
     --section-gap: clamp(3.5rem, 12vw, 5rem);
   }
-  .site-header,
-  .site-header.is-scrolled {
+  .site-header {
     min-height: calc(64px + env(safe-area-inset-top, 0px));
   }
-  .header-inner,
-  .site-header.is-scrolled .header-inner {
+  .header-inner {
     min-height: 64px;
   }
   .desktop-nav {
@@ -36,6 +34,281 @@
   .locale-switch button {
     min-width: 32px;
     min-height: 44px;
+  }
+  .navigation-dock {
+    display: none;
+  }
+  .mobile-nav-trigger {
+    position: fixed;
+    right: auto;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+    left: 50%;
+    z-index: 61;
+    display: grid;
+    width: 100px;
+    height: 38px;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    transform: translateX(-50%);
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .mobile-nav-trigger::after {
+    content: "";
+    width: 24px;
+    height: 3px;
+    border-radius: var(--radius-pill);
+    background: rgba(210, 230, 228, 0.12);
+  }
+  .mobile-nav-trigger[aria-expanded="true"] {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .mobile-nav-trigger:focus-visible {
+    outline: 2px solid rgba(185, 217, 211, 0.42);
+    outline-offset: -4px;
+    border-radius: var(--radius-pill);
+  }
+  .mobile-liquid-nav {
+    position: fixed;
+    right: auto;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+    left: 50%;
+    z-index: 62;
+    display: block;
+    width: min(calc(100vw - 32px), 348px);
+    height: 62px;
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%);
+    pointer-events: auto;
+  }
+  .mobile-liquid-nav.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .mobile-liquid-nav.is-hidden .mobile-liquid-capsule {
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .mobile-liquid-capsule {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    z-index: 1;
+    display: flex;
+    width: 100%;
+    height: 62px;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 0;
+    overflow: visible;
+    padding: 5px;
+    border: 1px solid rgba(185, 217, 211, 0.1);
+    border-radius: var(--radius-pill);
+    background: linear-gradient(
+      180deg,
+      rgba(19, 42, 44, 0.82),
+      rgba(7, 22, 25, 0.88)
+    );
+    box-shadow:
+      0 12px 34px rgba(0, 0, 0, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.025);
+    backdrop-filter: blur(18px) saturate(106%);
+    -webkit-backdrop-filter: blur(18px) saturate(106%);
+    transform: translateX(-50%);
+    transform-origin: 50% 100%;
+  }
+  .mobile-liquid-capsule::before,
+  .mobile-liquid-capsule::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    z-index: -1;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(10, 28, 31, 0.86);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-50%) scale(0.72);
+  }
+  .mobile-liquid-capsule::before {
+    left: -8px;
+  }
+  .mobile-liquid-capsule::after {
+    right: -8px;
+  }
+  .mobile-liquid-nav.is-opening .mobile-liquid-capsule {
+    animation: mobile-liquid-open 440ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .mobile-liquid-nav.is-opening .mobile-liquid-capsule::before,
+  .mobile-liquid-nav.is-opening .mobile-liquid-capsule::after {
+    animation: mobile-liquid-lobes 250ms 105ms ease-out both;
+  }
+  .mobile-liquid-nav.is-closing {
+    pointer-events: none;
+  }
+  .mobile-liquid-nav.is-closing .mobile-liquid-capsule {
+    animation: mobile-liquid-close 360ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+  .mobile-liquid-nav a {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    min-width: 0;
+    min-height: 52px;
+    flex: 1 1 0;
+    place-items: center;
+    align-content: center;
+    gap: 2px;
+    padding: 4px 2px;
+    border-radius: 15px;
+    color: rgba(226, 239, 235, 0.58);
+    font-size: 9px;
+    line-height: 1;
+    pointer-events: auto;
+  }
+  .mobile-nav-icon {
+    display: grid;
+    width: 30px;
+    height: 28px;
+    place-items: center;
+    border: 1px solid transparent;
+    border-radius: 14px;
+  }
+  .mobile-liquid-nav a.is-active {
+    color: var(--color-text-primary);
+    background: transparent;
+    box-shadow: none;
+  }
+  .mobile-liquid-nav a.is-active .mobile-nav-icon {
+    border-color: rgba(185, 217, 211, 0.11);
+    background: rgba(185, 217, 211, 0.08);
+  }
+  .mobile-liquid-nav.is-opening a {
+    animation: mobile-liquid-item-in 130ms
+      calc(285ms + var(--mobile-nav-index) * 18ms) var(--ease-standard) both;
+  }
+  .mobile-liquid-nav.is-closing a {
+    animation: mobile-liquid-item-out 100ms ease-in both;
+  }
+  .app-shell {
+    padding-bottom: 0;
+  }
+  @keyframes mobile-liquid-open {
+    0% {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      opacity: 0;
+      transform: translateX(-50%) translateY(8px) scale(0.8);
+    }
+    24% {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      opacity: 1;
+      transform: translateX(-50%) translateY(4px) scale(1.06);
+    }
+    44% {
+      width: 44px;
+      height: 28px;
+      border-radius: 55% 55% 48% 48%;
+      transform: translateX(-50%) translateY(2px);
+    }
+    72% {
+      width: 220px;
+      height: 48px;
+      border-radius: 38px;
+      transform: translateX(-50%);
+    }
+    88% {
+      width: 102%;
+      height: 62px;
+      border-radius: var(--radius-pill);
+      transform: translateX(-50%) scaleX(1.01);
+    }
+    100% {
+      width: 100%;
+      height: 62px;
+      border-radius: var(--radius-pill);
+      opacity: 1;
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes mobile-liquid-close {
+    0% {
+      width: 100%;
+      height: 62px;
+      border-radius: var(--radius-pill);
+      opacity: 1;
+      transform: translateX(-50%);
+    }
+    42% {
+      width: 220px;
+      height: 48px;
+      border-radius: 38px;
+      transform: translateX(-50%) translateY(2px);
+    }
+    70% {
+      width: 44px;
+      height: 28px;
+      border-radius: 55% 55% 48% 48%;
+      opacity: 1;
+      transform: translateX(-50%) translateY(5px);
+    }
+    86% {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      opacity: 0.86;
+      transform: translateX(-50%) translateY(8px);
+    }
+    100% {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      opacity: 0;
+      transform: translateX(-50%) translateY(10px) scale(0.76);
+    }
+  }
+  @keyframes mobile-liquid-lobes {
+    0%,
+    100% {
+      opacity: 0;
+      transform: translateY(-50%) scale(0.72);
+    }
+    52% {
+      opacity: 0.68;
+      transform: translateY(-50%) scale(1.08, 0.84);
+    }
+  }
+  @keyframes mobile-liquid-item-in {
+    from {
+      opacity: 0;
+      transform: translateY(5px) scale(0.94);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes mobile-liquid-item-out {
+    from {
+      opacity: 1;
+      transform: none;
+    }
+    to {
+      opacity: 0;
+      transform: translateY(3px) scale(0.96);
+    }
   }
   .page-hero {
     padding-top: calc(6.25rem + env(safe-area-inset-top, 0px));
@@ -141,5 +414,30 @@
   .anime-grid,
   .catalog-grid {
     gap-inline: 0.625rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) and (max-width: 767px) {
+  .mobile-liquid-nav.is-opening .mobile-liquid-capsule,
+  .mobile-liquid-nav.is-closing .mobile-liquid-capsule {
+    animation-duration: 140ms;
+    animation-name: mobile-liquid-reduced-motion;
+  }
+  .mobile-liquid-nav.is-closing .mobile-liquid-capsule {
+    animation-direction: reverse;
+  }
+  .mobile-liquid-nav.is-opening a,
+  .mobile-liquid-nav.is-closing a {
+    animation: none;
+  }
+  @keyframes mobile-liquid-reduced-motion {
+    from {
+      opacity: 0;
+      transform: translateY(4px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
 }

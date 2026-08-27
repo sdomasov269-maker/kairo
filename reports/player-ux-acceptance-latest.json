@@ -1,0 +1,577 @@
+{
+  "seek": {
+    "bottomBack": {
+      "before": 20,
+      "after": 15,
+      "delta": -5
+    },
+    "bottomForward": {
+      "before": 15,
+      "after": 20,
+      "delta": 5
+    },
+    "doubleLeft": {
+      "before": 20,
+      "after": 15,
+      "delta": -5
+    },
+    "doubleRight": {
+      "before": 15,
+      "after": 20,
+      "delta": 5
+    },
+    "keyboardLeft": {
+      "before": 20,
+      "after": 15,
+      "delta": -5
+    },
+    "keyboardRight": {
+      "before": 15,
+      "after": 20,
+      "delta": 5
+    },
+    "clampBeginning": 0,
+    "clampEnd": {
+      "currentTime": 1442.188,
+      "duration": 1442.188
+    },
+    "feedbackVisible": true
+  },
+  "keyboardVolume": 0.95,
+  "settings": {
+    "main": {
+      "quality": true,
+      "speed": true,
+      "subtitlesDisabled": true
+    },
+    "speedRate": 1.5,
+    "escapeClosed": true,
+    "outsideClickClosed": true,
+    "menuAutoHideProtection": {
+      "menuVisible": true,
+      "controlsVisible": "true"
+    },
+    "popovers": {
+      "desktop": {
+        "root": {
+          "x": 88.5,
+          "y": -1,
+          "width": 1246.375,
+          "height": 701.078125,
+          "top": -1,
+          "right": 1334.875,
+          "bottom": 700.078125,
+          "left": 88.5
+        },
+        "menu": {
+          "x": 927.09375,
+          "y": 464.09375,
+          "width": 240,
+          "height": 161.40625,
+          "top": 464.09375,
+          "right": 1167.09375,
+          "bottom": 625.5,
+          "left": 927.09375
+        },
+        "inside": true
+      },
+      "tablet": {
+        "root": {
+          "x": 32.203125,
+          "y": -109,
+          "width": 740.59375,
+          "height": 416.578125,
+          "top": -109,
+          "right": 772.796875,
+          "bottom": 307.578125,
+          "left": 32.203125
+        },
+        "menu": {
+          "x": 369.703125,
+          "y": 76.296875,
+          "width": 240,
+          "height": 161.40625,
+          "top": 76.296875,
+          "right": 609.703125,
+          "bottom": 237.703125,
+          "left": 369.703125
+        },
+        "inside": true
+      },
+      "mobile": {
+        "root": {
+          "x": 18,
+          "y": 258.078125,
+          "width": 339,
+          "height": 190.6875,
+          "top": 258.078125,
+          "right": 357,
+          "bottom": 448.765625,
+          "left": 18
+        },
+        "menu": {
+          "x": 71.203125,
+          "y": 267.484375,
+          "width": 256,
+          "height": 131.09375,
+          "top": 267.484375,
+          "right": 327.203125,
+          "bottom": 398.578125,
+          "left": 71.203125
+        },
+        "inside": true
+      },
+      "mobileQuality": {
+        "root": {
+          "x": 18,
+          "y": 258.078125,
+          "width": 339,
+          "height": 190.6875,
+          "top": 258.078125,
+          "right": 357,
+          "bottom": 448.765625,
+          "left": 18
+        },
+        "menu": {
+          "x": 71.203125,
+          "y": 323.578125,
+          "width": 256,
+          "height": 75,
+          "top": 323.578125,
+          "right": 327.203125,
+          "bottom": 398.578125,
+          "left": 71.203125
+        },
+        "inside": true
+      },
+      "mobileSpeed": {
+        "root": {
+          "x": 18,
+          "y": 258.078125,
+          "width": 339,
+          "height": 190.6875,
+          "top": 258.078125,
+          "right": 357,
+          "bottom": 448.765625,
+          "left": 18
+        },
+        "menu": {
+          "x": 71.203125,
+          "y": 259.578125,
+          "width": 256,
+          "height": 139,
+          "top": 259.578125,
+          "right": 327.203125,
+          "bottom": 398.578125,
+          "left": 71.203125
+        },
+        "inside": true
+      },
+      "fullscreen": {
+        "root": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "left": 0
+        },
+        "menu": {
+          "x": 1513.21875,
+          "y": 845.015625,
+          "width": 240,
+          "height": 161.40625,
+          "top": 845.015625,
+          "right": 1753.21875,
+          "bottom": 1006.421875,
+          "left": 1513.21875
+        },
+        "inside": true
+      }
+    }
+  },
+  "episodeNavigation": {
+    "before": {
+      "label": "Серия 1 из 121 / 12",
+      "previousDisabled": true,
+      "nextDisabled": false
+    },
+    "afterNext": {
+      "label": "Серия 2 из 122 / 12",
+      "url": "http://localhost:3000/anime/anilist-169583-oh-boy-was-i-wrong-about-her?episode=2&season=1#player",
+      "resolveRequests": 1,
+      "previousDisabled": false
+    },
+    "afterPrevious": {
+      "label": "Серия 1 из 121 / 12",
+      "url": "http://localhost:3000/anime/anilist-169583-oh-boy-was-i-wrong-about-her?episode=1&season=1#player",
+      "previousDisabled": true
+    },
+    "lastEpisodeProtection": {
+      "label": "Серия 12 из 1212 / 12",
+      "nextDisabled": true
+    }
+  },
+  "timelinePreview": {
+    "visible": true,
+    "value": "12:01"
+  },
+  "fullscreen": {
+    "before": {
+      "viewport": [
+        1920,
+        1080
+      ],
+      "client": [
+        1905,
+        1080
+      ],
+      "root": {
+        "x": 88.5,
+        "y": -1,
+        "width": 1246.375,
+        "height": 701.078125,
+        "top": -1,
+        "right": 1334.875,
+        "bottom": 700.078125,
+        "left": 88.5
+      },
+      "video": {
+        "x": 89.5,
+        "y": 0,
+        "width": 1244.375,
+        "height": 699.078125,
+        "top": 0,
+        "right": 1333.875,
+        "bottom": 699.078125,
+        "left": 89.5
+      }
+    },
+    "after": {
+      "active": true,
+      "viewport": [
+        1920,
+        1080
+      ],
+      "client": [
+        1920,
+        1080
+      ],
+      "root": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 1080,
+        "top": 0,
+        "right": 1920,
+        "bottom": 1080,
+        "left": 0
+      },
+      "video": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 1080,
+        "top": 0,
+        "right": 1920,
+        "bottom": 1080,
+        "left": 0
+      },
+      "gaps": {
+        "left": 0,
+        "right": 0,
+        "top": 0,
+        "bottom": 0
+      },
+      "style": {
+        "border": "0px none rgb(237, 248, 246)",
+        "borderRadius": "0px",
+        "aspectRatio": "auto"
+      }
+    },
+    "idle": {
+      "controlsVisible": "false",
+      "cursor": "none"
+    },
+    "afterMove": "true",
+    "navigator": {
+      "navigator": {
+        "x": 1702,
+        "y": 12,
+        "width": 206,
+        "height": 46,
+        "top": 12,
+        "right": 1908,
+        "bottom": 58,
+        "left": 1702
+      },
+      "inside": true
+    }
+  },
+  "capabilities": {
+    "levelCount": 0,
+    "qualityOptionCount": 1,
+    "subtitleTrackCount": 0,
+    "subtitleButtonCount": 1,
+    "pipSupported": true,
+    "pipWorks": true
+  },
+  "desktopLayout": {
+    "overflow": false,
+    "overlaps": [],
+    "controls": [
+      {
+        "name": "Предыдущая серия",
+        "left": 1116.875,
+        "right": 1160.875,
+        "top": 13,
+        "bottom": 57
+      },
+      {
+        "name": "Следующая серия",
+        "left": 1276.875,
+        "right": 1320.875,
+        "top": 13,
+        "bottom": 57
+      },
+      {
+        "name": "Позиция воспроизведения",
+        "left": 113.5,
+        "right": 1309.875,
+        "top": 607.5,
+        "bottom": 623.5
+      },
+      {
+        "name": "Назад на 5 секунд",
+        "left": 113.5,
+        "right": 155.5,
+        "top": 635.890625,
+        "bottom": 677.890625
+      },
+      {
+        "name": "Пауза",
+        "left": 161.09375,
+        "right": 207.09375,
+        "top": 633.890625,
+        "bottom": 679.890625
+      },
+      {
+        "name": "Вперёд на 5 секунд",
+        "left": 212.6875,
+        "right": 254.6875,
+        "top": 635.890625,
+        "bottom": 677.890625
+      },
+      {
+        "name": "00:32 / 24:02",
+        "left": 260.28125,
+        "right": 342.421875,
+        "top": 647.53125,
+        "bottom": 666.25
+      },
+      {
+        "name": "Настройки",
+        "left": 1125.09375,
+        "right": 1167.09375,
+        "top": 635.890625,
+        "bottom": 677.890625
+      },
+      {
+        "name": "Выключить звук",
+        "left": 1172.6875,
+        "right": 1214.6875,
+        "top": 635.890625,
+        "bottom": 677.890625
+      },
+      {
+        "name": "Громкость",
+        "left": 1214.6875,
+        "right": 1214.6875,
+        "top": 648.890625,
+        "bottom": 664.890625
+      },
+      {
+        "name": "Картинка в картинке",
+        "left": 1219.5462646484375,
+        "right": 1263.0162353515625,
+        "top": 635.1556396484375,
+        "bottom": 678.6256103515625
+      },
+      {
+        "name": "Полноэкранный режим",
+        "left": 1267.875,
+        "right": 1309.875,
+        "top": 635.890625,
+        "bottom": 677.890625
+      }
+    ]
+  },
+  "tabletLayout": {
+    "overflow": false,
+    "overlaps": [],
+    "controls": [
+      {
+        "name": "Предыдущая серия",
+        "left": 554.796875,
+        "right": 598.796875,
+        "top": -101,
+        "bottom": -57
+      },
+      {
+        "name": "Следующая серия",
+        "left": 714.796875,
+        "right": 758.796875,
+        "top": -101,
+        "bottom": -57
+      },
+      {
+        "name": "Позиция воспроизведения",
+        "left": 52.515625,
+        "right": 752.484375,
+        "top": 219.703125,
+        "bottom": 235.703125
+      },
+      {
+        "name": "Назад на 5 секунд",
+        "left": 52.515625,
+        "right": 94.515625,
+        "top": 248.09375,
+        "bottom": 290.09375
+      },
+      {
+        "name": "Пауза",
+        "left": 100.109375,
+        "right": 146.109375,
+        "top": 246.09375,
+        "bottom": 292.09375
+      },
+      {
+        "name": "Вперёд на 5 секунд",
+        "left": 151.703125,
+        "right": 193.703125,
+        "top": 248.09375,
+        "bottom": 290.09375
+      },
+      {
+        "name": "00:33 / 24:02",
+        "left": 199.296875,
+        "right": 281.4375,
+        "top": 259.734375,
+        "bottom": 278.453125
+      },
+      {
+        "name": "Настройки",
+        "left": 567.703125,
+        "right": 609.703125,
+        "top": 248.09375,
+        "bottom": 290.09375
+      },
+      {
+        "name": "Выключить звук",
+        "left": 615.296875,
+        "right": 657.296875,
+        "top": 248.09375,
+        "bottom": 290.09375
+      },
+      {
+        "name": "Громкость",
+        "left": 657.296875,
+        "right": 657.296875,
+        "top": 261.09375,
+        "bottom": 277.09375
+      },
+      {
+        "name": "Картинка в картинке",
+        "left": 662.890625,
+        "right": 704.890625,
+        "top": 248.09375,
+        "bottom": 290.09375
+      },
+      {
+        "name": "Полноэкранный режим",
+        "left": 710.484375,
+        "right": 752.484375,
+        "top": 248.09375,
+        "bottom": 290.09375
+      }
+    ]
+  },
+  "mobileLayout": {
+    "overflow": false,
+    "overlaps": [],
+    "controls": [
+      {
+        "name": "Предыдущая серия",
+        "left": 212.609375,
+        "right": 252.609375,
+        "top": -216.921875,
+        "bottom": -176.921875
+      },
+      {
+        "name": "Следующая серия",
+        "left": 307,
+        "right": 347,
+        "top": -216.921875,
+        "bottom": -176.921875
+      },
+      {
+        "name": "Позиция воспроизведения",
+        "left": 27.796875,
+        "right": 347.203125,
+        "top": -98.015625,
+        "bottom": -82.015625
+      },
+      {
+        "name": "Назад на 5 секунд",
+        "left": 27.796875,
+        "right": 61.796875,
+        "top": -76.421875,
+        "bottom": -38.421875
+      },
+      {
+        "name": "Пауза",
+        "left": 61.796875,
+        "right": 99.796875,
+        "top": -76.421875,
+        "bottom": -38.421875
+      },
+      {
+        "name": "Вперёд на 5 секунд",
+        "left": 99.796875,
+        "right": 133.796875,
+        "top": -76.421875,
+        "bottom": -38.421875
+      },
+      {
+        "name": "00:34 / 24:02",
+        "left": 133.796875,
+        "right": 171.5625,
+        "top": -65.828125,
+        "bottom": -49.03125
+      },
+      {
+        "name": "Настройки",
+        "left": 245.203125,
+        "right": 279.203125,
+        "top": -76.421875,
+        "bottom": -38.421875
+      },
+      {
+        "name": "Выключить звук",
+        "left": 279.203125,
+        "right": 313.203125,
+        "top": -76.421875,
+        "bottom": -38.421875
+      },
+      {
+        "name": "Полноэкранный режим",
+        "left": 313.203125,
+        "right": 347.203125,
+        "top": -76.421875,
+        "bottom": -38.421875
+      }
+    ]
+  }
+}

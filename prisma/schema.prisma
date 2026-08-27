@@ -214,6 +214,15 @@ model Anime {
   coverImage         String?
   coverImageLarge    String?
   bannerImage        String?
+  heroImageUrl       String?
+  heroImageSource    String?
+  heroImageScore     Float?
+  heroImageUpdatedAt DateTime?
+  heroImageCropFocusX Float?
+  heroImageCropFocusY Float?
+  heroImageOverrideUrl String?
+  heroImageOverrideSource String?
+  heroImageApproved  Boolean  @default(false)
   dominantColor      String?
   genres             String[] @default([])
   year               Int?
