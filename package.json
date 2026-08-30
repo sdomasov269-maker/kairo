@@ -4,6 +4,7 @@
   "private": true,
   "description": "A cinematic anime discovery interface.",
   "scripts": {
+    "postinstall": "prisma generate",
     "test:playback": "node --import=./scripts/server-only-test-register.mjs --experimental-strip-types --test src/lib/playback/descriptor.test.ts src/lib/playback/hls-policy.test.ts src/lib/playback/autonext.test.ts src/lib/playback/skip-segments.test.ts src/lib/playback/time.test.ts src/lib/playback/quality.test.ts src/lib/watch-progress/policy.test.ts src/lib/watch-progress/selectors.test.ts src/server/playback/provider-manager.test.ts src/server/playback/translation-matching.test.ts",
     "test:header": "node scripts/accept-header-localization.mjs",
     "dev": "next dev --webpack",
