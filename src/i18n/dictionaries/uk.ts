@@ -10,6 +10,12 @@ export const uk: Dictionary = {
     profile: "Профіль",
     openMenu: "Відкрити меню",
     closeMenu: "Закрити меню",
+    myList: "Моє",
+    history: "Історія",
+    mainNavigation: "Основна навігація",
+    mobileNavigation: "Мобільна навігація",
+    openNavigation: "Відкрити навігацію",
+    languageSwitcher: "Мова інтерфейсу",
   },
   auth: {
     account: "Обліковий запис",

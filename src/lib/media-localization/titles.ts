@@ -25,7 +25,7 @@ export function resolveAnimeTitle(anime: Anime, locale: MediaLocale): string {
   return resolveDisplayAnimeTitle({
     locale,
     localizedRu: firstTitle(
-      [anime.localization?.ru?.title, manualTitle, anime.titleRu],
+      [manualTitle, anime.localization?.ru?.title, anime.titleRu],
       "",
     ),
     localizedUk: firstTitle(

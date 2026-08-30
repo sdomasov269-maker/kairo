@@ -48,14 +48,14 @@ await translationSelect.waitFor({ state: "attached" });
 await page.waitForFunction(
   () => {
     const select = document.querySelector("#playback-translation");
-    return select && !select.disabled && select.options.length > 0;
+    return select instanceof HTMLButtonElement && !select.disabled;
   },
   null,
   { timeout: 60_000 },
 );
-const translations = await translationSelect
-  .locator("option")
-  .allTextContents();
+await translationSelect.click();
+const translations = await page.getByRole("option").allTextContents();
+await page.keyboard.press("Escape");
 await page.waitForFunction(
   () => {
     const players = document.querySelectorAll("[data-testid=kairo-player]");
@@ -127,11 +127,12 @@ if ((await episodeButtons.count()) > 1) {
 let translationSwitch = translations.length > 1 ? "FAIL" : "NOT AVAILABLE";
 if (translations.length > 1) {
   const select = translationSelect;
-  const before = await select.inputValue();
-  await select.selectOption({ index: 1 });
+  const before = await select.getAttribute("data-value");
+  await select.click();
+  await page.getByRole("option").nth(1).click();
   await page.waitForFunction(
     (previous) =>
-      document.querySelector("#playback-translation")?.value !== previous,
+      document.querySelector("#playback-translation")?.getAttribute("data-value") !== previous,
     before,
   );
   await page.waitForTimeout(5_000);

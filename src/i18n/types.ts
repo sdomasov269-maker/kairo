@@ -10,6 +10,12 @@ export interface Dictionary {
     profile: string;
     openMenu: string;
     closeMenu: string;
+    myList: string;
+    history: string;
+    mainNavigation: string;
+    mobileNavigation: string;
+    openNavigation: string;
+    languageSwitcher: string;
   };
   auth: {
     account: string;

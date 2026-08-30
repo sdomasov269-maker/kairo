@@ -1,6 +1,7 @@
 export type DropdownOption = {
   value: string;
   label: string;
+  meta?: string;
   disabled?: boolean;
 };
 

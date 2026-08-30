@@ -1133,6 +1133,14 @@ export function KairoPlayer({
                     {formatPlaybackTime(telemetry.duration)}
                   </span>
                 </output>
+                <span
+                  className={styles.controlBrand}
+                  data-testid="kairo-player-brand"
+                  aria-hidden="true"
+                >
+                  kairo<span>.</span>
+                  <small>плеер</small>
+                </span>
               </div>
               <div className={`${styles.controlGroup} ${styles.rightControls}`}>
                 <div className={styles.menuAnchor} ref={settingsRef}>

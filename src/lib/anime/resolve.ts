@@ -14,6 +14,7 @@ import {
   readAnimeSnapshot,
   readMalAnimeSnapshot,
   findCatalogSnapshotAnime,
+  listCatalogSnapshotAnime,
   writeAnimeSnapshot,
 } from "@/lib/catalog/snapshot";
 import {
@@ -21,7 +22,10 @@ import {
   getJikanAnimeBySearch,
   mapJikanAnime,
 } from "@/lib/jikan";
-import { applyCanonicalTitleLocalization } from "@/lib/media-localization";
+import {
+  applyCanonicalTitleLocalization,
+  getLocalizedAnimeTitle,
+} from "@/lib/media-localization";
 import type { Anime } from "@/types/media";
 import {
   enrichAnimeListWithLocalizedTitles,
@@ -225,4 +229,82 @@ export async function resolveRelatedAnime(anime: Anime): Promise<Anime[]> {
   return enrichAnimeListWithLocalizedTitles(
     related.map(applyCanonicalTitleLocalization),
   );
+}
+
+export type AnimeFranchiseSeason = {
+  slug: string;
+  title: string;
+  year?: number;
+  episodes?: number;
+};
+
+const franchiseSeasonCache = new Map<number, AnimeFranchiseSeason[]>();
+
+const franchiseTitleKey = (value: string | undefined) =>
+  (value ?? "")
+    .toLocaleLowerCase("en")
+    .replace(/\bseason\s*\d+(?:\s*(?:part|cour)\s*\d+)?\b/giu, " ")
+    .replace(/\b(?:part|cour)\s*\d+\b/giu, " ")
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim();
+
+export async function resolveAnimeFranchiseSeasons(
+  anime: Anime,
+): Promise<AnimeFranchiseSeason[]> {
+  if (!anime.anilistId) return [];
+  const cached = franchiseSeasonCache.get(anime.anilistId);
+  if (cached) return cached;
+  const found = new Map<number, Anime>([[anime.anilistId, anime]]);
+  const pending = [anime.anilistId];
+  try {
+    while (pending.length && found.size < 10) {
+      const media = await getAnimeByAniListId(pending.shift()!);
+      for (const edge of media?.relations.edges ?? []) {
+        if (
+          !["PREQUEL", "SEQUEL"].includes(edge.relationType) ||
+          edge.node.type !== "ANIME" ||
+          !["TV", "TV_SHORT"].includes(edge.node.format ?? "") ||
+          found.has(edge.node.id)
+        )
+          continue;
+        found.set(edge.node.id, mapAniListAnime(edge.node));
+        pending.push(edge.node.id);
+      }
+    }
+  } catch (error) {
+    if (!(error instanceof AniListRequestError)) throw error;
+  }
+  if (found.size < 2) {
+    const keys = new Set(
+      [anime.titleEnglish, anime.titleRomaji, anime.title]
+        .map(franchiseTitleKey)
+        .filter(Boolean),
+    );
+    for (const candidate of await listCatalogSnapshotAnime()) {
+      if (
+        candidate.anilistId &&
+        ["TV", "TV_SHORT"].includes(candidate.format ?? "") &&
+        [candidate.titleEnglish, candidate.titleRomaji, candidate.title]
+          .map(franchiseTitleKey)
+          .some((key) => keys.has(key))
+      )
+        found.set(candidate.anilistId, candidate);
+    }
+  }
+  if (found.size < 2) return [];
+  const result = [...found.values()]
+    .sort(
+      (left, right) =>
+        (left.year ?? Number.MAX_SAFE_INTEGER) -
+          (right.year ?? Number.MAX_SAFE_INTEGER) ||
+        (left.anilistId ?? 0) - (right.anilistId ?? 0),
+    )
+    .map((entry) => ({
+      slug: entry.slug,
+      title: getLocalizedAnimeTitle(entry, "ru"),
+      year: entry.year,
+      episodes: entry.episodes,
+    }));
+  for (const id of found.keys()) franchiseSeasonCache.set(id, result);
+  return result;
 }

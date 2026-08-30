@@ -50,7 +50,10 @@ export function AnimePlaybackPanel({
   animeSlug,
   shikimoriId,
   initialEpisode,
+  initialSeason,
   episodeCount,
+  seasonOptions,
+  activeSeasonValue,
   titles,
   year,
   mediaType,
@@ -59,13 +62,23 @@ export function AnimePlaybackPanel({
   animeSlug: string;
   shikimoriId?: number;
   initialEpisode: number;
+  initialSeason: number;
   episodeCount?: number;
+  seasonOptions: Array<{
+    value: string;
+    label: string;
+    detail: string;
+    href: string;
+    number: number;
+  }>;
+  activeSeasonValue: string;
   titles: string[];
   year?: number;
   mediaType?: string;
   debugSimulateKodikFailure?: string;
 }) {
   const [episode, setEpisode] = useState(initialEpisode);
+  const [providerEpisodeCount, setProviderEpisodeCount] = useState(0);
   const [translations, setTranslations] = useState<PlaybackTranslation[]>([]);
   const [translationId, setTranslationId] = useState("");
   const [descriptor, setDescriptor] = useState<PlaybackDescriptor | null>(null);
@@ -120,7 +133,7 @@ export function AnimePlaybackPanel({
       };
       upsertProgress({
         animeSlug,
-        seasonNumber: 1,
+        seasonNumber: initialSeason,
         episodeNumber: snapshot.episode,
         currentTime: snapshot.currentTime,
         duration: snapshot.duration,
@@ -131,7 +144,7 @@ export function AnimePlaybackPanel({
         updatedAt: new Date().toISOString(),
       });
     },
-    [animeSlug, mode.kind, upsertProgress],
+    [animeSlug, initialSeason, mode.kind, upsertProgress],
   );
 
   const onPlaybackEvent = useCallback(
@@ -143,7 +156,10 @@ export function AnimePlaybackPanel({
         saveSnapshot(true);
       else if (event.event === "ended") {
         saveSnapshot(true, true);
-        const nextEpisode = getNextEpisode(event.episode, episodeCount);
+        const nextEpisode = getNextEpisode(
+          event.episode,
+          Math.max(episodeCount ?? 0, providerEpisodeCount),
+        );
         const sourceKey = `${event.episode}:${event.sourceUrl}`;
         if (nextEpisode && cancelledEndedRef.current !== sourceKey)
           setAutonext({
@@ -154,7 +170,7 @@ export function AnimePlaybackPanel({
           });
       }
     },
-    [episodeCount, saveSnapshot],
+    [episodeCount, providerEpisodeCount, saveSnapshot],
   );
 
   const resolvePlayback = useCallback(
@@ -239,6 +255,7 @@ export function AnimePlaybackPanel({
       const info = playbackTitleInfoSchema.parse(await readJson(response));
       if (generation !== generationRef.current) return;
       setTranslations(info.translations);
+      setProviderEpisodeCount(info.seriesCount);
       const selected = info.translations[0]?.id ?? "";
       setTranslationId(selected);
       await resolvePlayback(
@@ -283,7 +300,7 @@ export function AnimePlaybackPanel({
     const saved = progress.find(
       (entry) =>
         entry.animeSlug === animeSlug &&
-        entry.seasonNumber === 1 &&
+        entry.seasonNumber === initialSeason &&
         entry.episodeNumber === episode,
     );
     if (!saved) return;
@@ -296,7 +313,15 @@ export function AnimePlaybackPanel({
       0,
     );
     return () => window.clearTimeout(timer);
-  }, [animeSlug, descriptor, episode, mode.kind, progress, syncStatus]);
+  }, [
+    animeSlug,
+    descriptor,
+    episode,
+    initialSeason,
+    mode.kind,
+    progress,
+    syncStatus,
+  ]);
 
   const switchEpisode = useCallback(
     (nextEpisode: number, autoplay = false) => {
@@ -308,7 +333,7 @@ export function AnimePlaybackPanel({
       setEpisode(nextEpisode);
       const url = new URL(window.location.href);
       url.searchParams.set("episode", String(nextEpisode));
-      url.searchParams.set("season", "1");
+      url.searchParams.set("season", String(initialSeason));
       url.hash = "player";
       window.history.replaceState(window.history.state, "", url);
       if (autoplay) setAutoPlayRequest((value) => value + 1);
@@ -318,7 +343,7 @@ export function AnimePlaybackPanel({
         translations.find((item) => item.id === translationId)?.name,
       );
     },
-    [resolvePlayback, saveSnapshot, translationId, translations],
+    [initialSeason, resolvePlayback, saveSnapshot, translationId, translations],
   );
 
   useEffect(() => {
@@ -369,6 +394,11 @@ export function AnimePlaybackPanel({
     );
   };
 
+  const effectiveEpisodeCount = Math.max(
+    episodeCount ?? 0,
+    providerEpisodeCount,
+  );
+
   return (
     <>
       <div
@@ -377,7 +407,7 @@ export function AnimePlaybackPanel({
         data-progress-count={progress.length}
         data-progress-sync-status={syncStatus}
       >
-        <p className={styles.stageLabel}>01 / Kairo Watch</p>
+        <p className={styles.stageLabel}>01 / Kairo / Просмотр</p>
         <KairoPlayer
           descriptor={descriptor}
           onPlaybackEvent={onPlaybackEvent}
@@ -391,7 +421,7 @@ export function AnimePlaybackPanel({
           showTelemetry={false}
           episodeNavigation={{
             current: episode,
-            count: episodeCount,
+            count: effectiveEpisodeCount || undefined,
             loading: state === "resolving",
             hidden: Boolean(autonext),
             onChange: (nextEpisode) => switchEpisode(nextEpisode, true),
@@ -445,6 +475,9 @@ export function AnimePlaybackPanel({
       <WatchControlGrid
         animeSlug={animeSlug}
         episodeCount={episodeCount}
+        providerEpisodeCount={providerEpisodeCount}
+        seasonOptions={seasonOptions}
+        activeSeasonValue={activeSeasonValue}
         activeEpisode={episode}
         onEpisodeChange={(nextEpisode) => switchEpisode(nextEpisode)}
         translations={translations}

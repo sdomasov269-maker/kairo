@@ -21,7 +21,7 @@ type MobileNavState = "hidden" | "opening" | "open" | "closing";
 
 export function NavigationDock() {
   const pathname = usePathname();
-  const { locale, dictionary: t } = useLocale();
+  const { dictionary: t } = useLocale();
   const [desktopIdle, setDesktopIdle] = useState(false);
   const [mobileState, setMobileState] = useState<MobileNavState>("hidden");
   const capsuleRef = useRef<HTMLElement>(null);
@@ -35,13 +35,12 @@ export function NavigationDock() {
     { href: "/collections", label: t.nav.collections, icon: Layers3 },
     {
       href: "/my-list",
-      label: locale === "ru" ? "Моё" : locale === "uk" ? "Моє" : "My list",
+      label: t.nav.myList,
       icon: Bookmark,
     },
     {
       href: "/history",
-      label:
-        locale === "ru" ? "История" : locale === "uk" ? "Історія" : "History",
+      label: t.nav.history,
       icon: Clapperboard,
     },
   ];
@@ -144,7 +143,7 @@ export function NavigationDock() {
     <>
       <nav
         className={desktopIdle ? "navigation-dock is-idle" : "navigation-dock"}
-        aria-label={locale === "ru" ? "Основная навигация" : "Main navigation"}
+        aria-label={t.nav.mainNavigation}
         onPointerEnter={() => setDesktopIdle(false)}
       >
         <div className="navigation-dock-inner">
@@ -169,13 +168,7 @@ export function NavigationDock() {
         ref={triggerRef}
         className="mobile-nav-trigger"
         type="button"
-        aria-label={
-          locale === "ru"
-            ? "Открыть навигацию"
-            : locale === "uk"
-              ? "Відкрити навігацію"
-              : "Open navigation"
-        }
+        aria-label={t.nav.openNavigation}
         aria-controls="kairo-mobile-navigation"
         aria-expanded={mobileExpanded}
         onClick={openMobile}
@@ -185,9 +178,7 @@ export function NavigationDock() {
         id="kairo-mobile-navigation"
         ref={capsuleRef}
         className={`mobile-liquid-nav is-${mobileState}`}
-        aria-label={
-          locale === "ru" ? "Мобильная навигация" : "Mobile navigation"
-        }
+        aria-label={t.nav.mobileNavigation}
         aria-hidden={mobileState === "hidden" ? true : undefined}
         inert={mobileState === "hidden" ? true : undefined}
         onPointerMove={scheduleMobileAutoHide}

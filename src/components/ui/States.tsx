@@ -45,7 +45,7 @@ export function BrowseEmptyState({
       aria-live="polite"
     >
       {icon}
-      <p className="eyebrow">0 results</p>
+      <p className="eyebrow">0 результатов</p>
       <h2>{title}</h2>
       {description && <p>{description}</p>}
       <button className="button button-primary" type="button" onClick={onReset}>

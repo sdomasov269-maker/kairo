@@ -5,12 +5,9 @@ export function resolveEpisodeTitle(input: {
   titleRu?: string | null;
   titleUk?: string | null;
 }) {
-  const localized =
-    input.locale === "uk"
-      ? input.titleUk
-      : input.locale === "ru"
-        ? input.titleRu
-        : input.title;
+  if (input.locale === "ru")
+    return input.titleRu?.trim() || `Серия ${input.episodeNumber}`;
+  const localized = input.locale === "uk" ? input.titleUk : input.title;
   return (
     localized ?? input.titleRu ?? input.title ?? `Серия ${input.episodeNumber}`
   );

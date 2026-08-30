@@ -351,6 +351,32 @@
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
+.controlBrand {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.22rem;
+  margin-left: 0.2rem;
+  padding-left: 0.75rem;
+  border-left: 1px solid rgb(168 220 214 / 14%);
+  color: rgb(239 249 247 / 76%);
+  font-size: 1.05rem;
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.06em;
+  white-space: nowrap;
+}
+.controlBrand > span {
+  margin-left: -0.22rem;
+  color: var(--warm, #f0a15b);
+}
+.controlBrand small {
+  color: rgb(190 215 211 / 58%);
+  font-family: var(--font-mono);
+  font-size: 0.48rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
 .textButton {
   padding: 0 0.7rem;
   font-size: 0.76rem;
@@ -648,6 +674,14 @@
   }
 }
 @media (max-width: 430px) {
+  .controlBrand {
+    margin-left: 0;
+    padding-left: 0.45rem;
+    font-size: 0.82rem;
+  }
+  .controlBrand small {
+    display: none;
+  }
   .rightControls {
     gap: 0;
   }

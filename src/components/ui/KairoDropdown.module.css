@@ -1,6 +1,7 @@
 .root {
   position: relative;
   width: 100%;
+  min-width: 0;
 }
 
 .trigger {
@@ -12,7 +13,7 @@
   min-height: 45px;
   padding: 0 0.8rem;
   border: 1px solid rgba(185, 217, 211, 0.13);
-  border-radius: 11px;
+  border-radius: var(--watch-pill-radius, var(--radius-pill));
   color: #e8f0ef;
   background: rgba(14, 27, 29, 0.72);
   font: inherit;
@@ -22,6 +23,21 @@
     border-color var(--duration-fast) var(--ease-standard),
     background var(--duration-fast) var(--ease-standard),
     box-shadow var(--duration-fast) var(--ease-standard);
+}
+.triggerCopy {
+  display: grid;
+  min-width: 0;
+}
+.triggerCopy > span,
+.triggerCopy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.triggerCopy small {
+  color: rgba(190, 215, 211, 0.56);
+  font-size: 0.64rem;
+  line-height: 1.2;
 }
 
 .trigger:hover:not(:disabled),
@@ -62,17 +78,22 @@
   z-index: var(--z-dropdown);
   top: calc(100% + 0.45rem);
   left: 0;
+  display: grid;
+  gap: 0.28rem;
   box-sizing: border-box;
   width: max(100%, var(--dropdown-menu-min-width, 10.5rem));
+  max-width: 100%;
   max-height: 15rem;
   margin: 0;
   padding: 0.35rem;
   overflow-x: hidden;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
   list-style: none;
   border: 1px solid rgba(185, 217, 211, 0.14);
-  border-radius: 12px;
-  background: rgba(10, 25, 28, 0.96);
+  border-radius: var(--watch-control-radius, var(--radius-md));
+  background: rgba(8, 23, 26, 0.995);
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.32);
   backdrop-filter: blur(18px);
   animation: menu-in var(--duration-fast) var(--ease-standard);
@@ -96,20 +117,40 @@
   gap: 0.75rem;
   min-height: 2.35rem;
   padding: 0.5rem 0.7rem;
-  border-radius: 0.5rem;
-  color: #9aa6a5;
+  border-radius: var(--watch-control-radius, var(--radius-md));
+  border: 1px solid rgba(187, 220, 215, 0.055);
+  background: rgba(105, 151, 147, 0.07);
+  color: #b6c8c5;
   cursor: pointer;
+}
+.optionCopy {
+  display: grid;
+  min-width: 0;
+  line-height: 1.2;
+}
+.optionCopy > span,
+.optionCopy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.optionCopy small {
+  margin-top: 0.15rem;
+  color: rgba(190, 215, 211, 0.55);
+  font-size: 0.62rem;
 }
 
 .option:hover,
 .option.active {
   color: var(--text-primary);
-  background: rgba(121, 191, 192, 0.1);
+  border-color: rgba(145, 207, 208, 0.18);
+  background: rgba(121, 191, 192, 0.14);
 }
 
 .option.selected {
   color: #eef5f4;
-  background: rgba(121, 191, 192, 0.14);
+  border-color: rgba(145, 207, 208, 0.34);
+  background: rgba(121, 191, 192, 0.19);
 }
 
 .option.disabled {
@@ -126,5 +167,50 @@
   from {
     opacity: 0;
     transform: translateY(-4px) scale(0.985);
+  }
+}
+.twoColumns {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.moreRow {
+  position: sticky;
+  bottom: -0.35rem;
+  grid-column: 1 / -1;
+  padding-top: 0.25rem;
+  background: linear-gradient(180deg, transparent, rgba(8, 23, 26, 1) 28%);
+}
+.moreRow button {
+  width: 100%;
+  min-height: 2.2rem;
+  border: 1px solid rgba(145, 207, 208, 0.16);
+  border-radius: 0.55rem;
+  background: rgba(121, 191, 192, 0.1);
+  color: #cfe3df;
+  font: inherit;
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+.moreRow button:hover,
+.moreRow button:focus-visible {
+  border-color: rgba(145, 207, 208, 0.32);
+  outline: none;
+  background: rgba(121, 191, 192, 0.16);
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .menu.tabletUp {
+    top: auto;
+    bottom: calc(100% + 0.45rem);
+    max-height: 7.25rem;
+  }
+}
+
+@media (max-width: 430px) {
+  .menu {
+    max-height: min(14rem, 44vh);
+  }
+  .option {
+    min-height: 2.2rem;
+    padding: 0.45rem 0.55rem;
   }
 }

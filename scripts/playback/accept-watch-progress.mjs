@@ -159,7 +159,8 @@ await page.waitForFunction(
 );
 const translation = page.locator("#playback-translation");
 await video.evaluate((element) => delete element.dataset.resumeApplied);
-await translation.selectOption({ index: 1 });
+await translation.click();
+await page.getByRole("option").nth(1).click();
 await page.waitForFunction(
   () => {
     const video = document.querySelector("video");

@@ -56,11 +56,12 @@ await opening.waitFor({ state: "visible" });
 const seekBackVisible = await opening.isVisible();
 
 const translation = page.locator("#playback-translation");
-const translationCount = await translation.locator("option").count();
+await translation.click();
+const translationCount = await page.getByRole("option").count();
 if (translationCount > 1) {
-  await translation.selectOption({ index: 1 });
+  await page.getByRole("option").nth(1).click();
   await page.waitForTimeout(100);
-}
+} else await page.keyboard.press("Escape");
 const translationCleanup = await opening.count();
 
 await openEpisode();

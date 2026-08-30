@@ -15,7 +15,7 @@ export function resolveDisplayAnimeTitle(params: {
   const { locale, localizedRu, localizedUk, base } = params;
   const candidates =
     locale === "ru"
-      ? [localizedRu, base.english, base.romaji, base.native]
+      ? [localizedRu]
       : locale === "uk"
         ? [localizedUk, base.english, base.romaji, base.native]
         : [base.english, base.romaji, base.native];

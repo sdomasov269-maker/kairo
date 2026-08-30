@@ -10,6 +10,12 @@ export const en: Dictionary = {
     profile: "Profile",
     openMenu: "Open menu",
     closeMenu: "Close menu",
+    myList: "My list",
+    history: "History",
+    mainNavigation: "Main navigation",
+    mobileNavigation: "Mobile navigation",
+    openNavigation: "Open navigation",
+    languageSwitcher: "Interface language",
   },
   auth: {
     account: "Account",

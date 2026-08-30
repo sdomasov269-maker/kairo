@@ -3,9 +3,15 @@ import { notFound } from "next/navigation";
 import { AnimeCard } from "@/components/anime/Cards";
 import { KairoWebGLSurface } from "@/components/effects/KairoWebGLSurface";
 import { AppShell } from "@/components/layout/AppShell";
-import { resolveAnimeBySlug, resolveRelatedAnime } from "@/lib/anime/resolve";
+import {
+  resolveAnimeBySlug,
+  resolveAnimeFranchiseSeasons,
+  resolveRelatedAnime,
+} from "@/lib/anime/resolve";
 import {
   getLocalizedAnimeTitle,
+  formatEpisodeCount,
+  localizeFormat,
   localizeGenre,
   resolveLocalizedAnimeDescription,
 } from "@/lib/media-localization";
@@ -47,9 +53,10 @@ export default async function AnimePage({
   const [{ slug }, query] = await Promise.all([params, searchParams]);
   const anime = await resolveAnimeBySlug(slug);
   if (!anime) notFound();
-  const [related, heroImage] = await Promise.all([
+  const [related, heroImage, franchiseSeasons] = await Promise.all([
     resolveRelatedAnime(anime),
     resolveHeroImage(anime),
+    resolveAnimeFranchiseSeasons(anime),
   ]);
   const title = getLocalizedAnimeTitle(anime, "ru");
   const titleSize = getTitleSizeMode(title);
@@ -60,11 +67,9 @@ export default async function AnimePage({
     "extra-long": styles.titleExtraLong,
   }[titleSize];
   const secondaryTitle =
-    anime.titleRomaji && anime.titleRomaji !== title
-      ? anime.titleRomaji
-      : anime.titleEnglish && anime.titleEnglish !== title
-        ? anime.titleEnglish
-        : undefined;
+    anime.titleNative && anime.titleNative !== title
+      ? anime.titleNative
+      : undefined;
   const requestedEpisode = Number(
     Array.isArray(query.episode) ? query.episode[0] : query.episode,
   );
@@ -72,6 +77,22 @@ export default async function AnimePage({
     Number.isSafeInteger(requestedEpisode) && requestedEpisode > 0
       ? Math.min(requestedEpisode, anime.episodes ?? requestedEpisode)
       : 1;
+  const seasonOptions = franchiseSeasons.map((season, index) => {
+    const match = season.title.match(
+      /\bseason\s*(\d+)(?:\s*(?:part|cour)\s*(\d+))?/iu,
+    );
+    const number = match ? Number(match[1]) : index + 1;
+    const part = match?.[2] ? Number(match[2]) : undefined;
+    return {
+      value: season.slug,
+      label: `Сезон ${number}${part ? ` · часть ${part}` : ""}`,
+      detail: season.title,
+      href: `/anime/${season.slug}?season=${number}&episode=1#player`,
+      number,
+    };
+  });
+  const seasonNumber =
+    seasonOptions.find((season) => season.value === anime.slug)?.number ?? 1;
   const description = resolveLocalizedAnimeDescription(anime, "ru");
   const artwork =
     heroImage?.url ??
@@ -79,9 +100,9 @@ export default async function AnimePage({
     anime.coverImageLarge ??
     anime.coverImage;
   const meta = [
-    anime.format,
+    anime.format ? localizeFormat(anime.format, "ru") : null,
     anime.year,
-    anime.episodes ? `${anime.episodes} серий` : null,
+    anime.episodes ? formatEpisodeCount(anime.episodes, "ru") : null,
   ].filter(Boolean);
   return (
     <AppShell className={`app-shell-title ${styles.page}`}>
@@ -97,7 +118,7 @@ export default async function AnimePage({
         ) : null}
         <section className={styles.hero} aria-labelledby="title-heading">
           <div className={styles.heroCopy} data-title-size={titleSize}>
-            <p className={styles.eyebrow}>Kairo / Title</p>
+            <p className={styles.eyebrow}>Kairo / Тайтл</p>
             <h1
               className={`${styles.title} ${titleSizeClass}`}
               id="title-heading"
@@ -117,7 +138,6 @@ export default async function AnimePage({
             <p className={styles.heroDescription}>
               {description.short ??
                 description.full ??
-                anime.description ??
                 "Описание скоро появится."}
             </p>
             <div className={styles.heroActions}>
@@ -131,7 +151,7 @@ export default async function AnimePage({
             </div>
           </div>
           <p className={styles.heroIndex} aria-hidden="true">
-            <span>01</span> KAIRO / WATCH
+            <span>01</span> KAIRO / ПРОСМОТР
           </p>
         </section>
         <div className={styles.content}>
@@ -147,7 +167,10 @@ export default async function AnimePage({
               animeSlug={anime.slug}
               shikimoriId={anime.malId}
               initialEpisode={initialEpisode}
+              initialSeason={seasonNumber}
               episodeCount={anime.episodes}
+              activeSeasonValue={anime.slug}
+              seasonOptions={seasonOptions}
               titles={[
                 anime.titleRu,
                 anime.titleEnglish,

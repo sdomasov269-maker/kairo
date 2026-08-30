@@ -100,6 +100,10 @@ test("resolves locale-specific fallbacks without RU leaking into UK", () => {
     "Русское",
   );
   assert.equal(
+    resolveDisplayAnimeTitle({ locale: "ru", localizedRu: "", base }),
+    "Название неизвестно",
+  );
+  assert.equal(
     resolveDisplayAnimeTitle({
       locale: "uk",
       localizedRu: "Русское",

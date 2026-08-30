@@ -382,9 +382,6 @@
   .logo {
     font-size: 23px;
   }
-  .profile-button {
-    display: none;
-  }
   .card-title-row h3 {
     font-size: clamp(13px, 3.8vw, 15px);
   }

@@ -105,7 +105,7 @@ export function GlobalSearch({
       >
         <div className="search-dialog-head">
           <div>
-            <p className="eyebrow">Kairo discovery</p>
+            <p className="eyebrow">Поиск Kairo</p>
             <h2 id="global-search-title">{t.catalog.quickSearch}</h2>
           </div>
           <button
@@ -126,12 +126,12 @@ export function GlobalSearch({
             maxLength={100}
             aria-label={t.catalog.placeholder}
           />
-          {loading && query.trim().length >= 2 && <i aria-label="Loading" />}
+          {loading && query.trim().length >= 2 && <i aria-label="Загрузка" />}
         </div>
         {query.length < 2 ? (
           <div className="popular-searches">
             <p>{t.catalog.popularSearches}</p>
-            {["Frieren", "Cowboy Bebop", "Attack on Titan"].map((term) => (
+            {["Фрирен", "Ковбой Бибоп", "Атака титанов"].map((term) => (
               <button onClick={() => setQuery(term)} key={term}>
                 {term}
               </button>

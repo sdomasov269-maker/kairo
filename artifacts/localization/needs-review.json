@@ -1,0 +1,35 @@
+[
+  {
+    "anilistId": 199748,
+    "malId": 62617,
+    "slug": "anilist-199748-i-became-a-legend-after-my-10-year-long-last-stand",
+    "reason": "PROVIDER_ERROR_OR_NOT_FOUND",
+    "aliases": [
+      "I Became a Legend After My 10 Year-Long Last Stand",
+      "Koko wa Ore ni Makasete Saki ni Ike to Ittekara 10-nen ga Tattara Densetsu ni Natteita.",
+      "ここは俺に任せて先に行けと言ってから１０年がたったら伝説になっていた。"
+    ]
+  },
+  {
+    "anilistId": 203275,
+    "malId": null,
+    "slug": "anilist-203275-devils-crest",
+    "reason": "NO_MAL_ID",
+    "aliases": [
+      "Devils' Crest",
+      "Demons' Crest",
+      "デモンズ・クレスト"
+    ]
+  },
+  {
+    "anilistId": 187990,
+    "malId": null,
+    "slug": "anilist-187990-battle-spirits-re-zekkai-no-ku",
+    "reason": "NO_MAL_ID",
+    "aliases": [
+      "Battle Spirits [Re] Zekkai No Ku",
+      "Battle Spirits [Re] Zekkai No Ku",
+      "Battle Spirits [Re] 絶界の空"
+    ]
+  }
+]

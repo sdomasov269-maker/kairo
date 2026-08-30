@@ -151,6 +151,11 @@ export async function findCatalogSnapshotAnime(
   return match;
 }
 
+export async function listCatalogSnapshotAnime(): Promise<Anime[]> {
+  await indexPersistedCatalogSnapshots();
+  return [...catalogBySlug.values()];
+}
+
 export const animeSnapshotKey = (anilistId: number) => `anime:${anilistId}`;
 export const malAnimeSnapshotKey = (malId: number) => `mal-anime:${malId}`;
 

@@ -1,12 +1,17 @@
 "use client";
 
 import { ArrowRight, Headphones, Music2, Radio } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { KairoDropdown } from "@/components/ui/KairoDropdown";
 import type { PlaybackTranslation } from "@/lib/playback/descriptor";
 import styles from "./page.module.css";
 
 export function WatchControlGrid({
   animeSlug,
   episodeCount,
+  providerEpisodeCount,
+  seasonOptions,
+  activeSeasonValue,
   activeEpisode,
   onEpisodeChange,
   translations,
@@ -16,6 +21,15 @@ export function WatchControlGrid({
 }: {
   animeSlug: string;
   episodeCount?: number;
+  providerEpisodeCount: number;
+  seasonOptions: Array<{
+    value: string;
+    label: string;
+    detail: string;
+    href: string;
+    number: number;
+  }>;
+  activeSeasonValue: string;
   activeEpisode: number;
   onEpisodeChange: (episode: number) => void;
   translations: PlaybackTranslation[];
@@ -23,8 +37,13 @@ export function WatchControlGrid({
   onTranslationChange: (translationId: string) => void;
   translationsLoading: boolean;
 }) {
+  const router = useRouter();
+  const resolvedEpisodeCount = Math.max(
+    episodeCount ?? 0,
+    providerEpisodeCount,
+  );
   const episodes = Array.from(
-    { length: Math.max(0, episodeCount ?? 0) },
+    { length: resolvedEpisodeCount },
     (_, index) => index + 1,
   );
   return (
@@ -36,6 +55,25 @@ export function WatchControlGrid({
       <div className={styles.controlPanel}>
         <section className={styles.controlSection}>
           <p className={styles.tileLabel}>Сезон / эпизоды</p>
+          {seasonOptions.length > 1 ? (
+            <div className={styles.seasonSelector}>
+              <KairoDropdown
+                ariaLabel="Выбор сезона"
+                options={seasonOptions.map((season) => ({
+                  value: season.value,
+                  label: season.label,
+                  meta: season.detail,
+                }))}
+                value={activeSeasonValue}
+                onChange={(value) => {
+                  const selected = seasonOptions.find(
+                    (season) => season.value === value,
+                  );
+                  if (selected) router.push(selected.href);
+                }}
+              />
+            </div>
+          ) : null}
           {episodes.length ? (
             <div className={styles.episodeRail} aria-label="Выбор эпизода">
               {episodes.map((episode) => (
@@ -60,34 +98,45 @@ export function WatchControlGrid({
         <section className={styles.controlSection}>
           <div className={styles.controlLabel}>
             <Headphones size={15} aria-hidden="true" />
-            <label className={styles.tileLabel} htmlFor="playback-translation">
-              Озвучка
-            </label>
+            <p className={styles.tileLabel}>Озвучка</p>
           </div>
-          <select
-            className={styles.controlField}
-            id="playback-translation"
-            value={translationId}
-            disabled={translationsLoading || !translations.length}
-            onChange={(event) => onTranslationChange(event.target.value)}
-          >
-            {translationsLoading ? (
-              <option value="">Загрузка переводов…</option>
-            ) : !translations.length ? (
-              <option value="">Недоступно</option>
-            ) : (
-              translations.map((translation) => (
-                <option value={translation.id} key={translation.id}>
-                  {translation.name}
-                </option>
-              ))
-            )}
-          </select>
+          <div className={styles.translationSelector}>
+            <KairoDropdown
+              ariaLabel="Выбор озвучки"
+              id="playback-translation"
+              disabled={translationsLoading || !translations.length}
+              menuPlacement="tablet-up"
+              initialVisibleCount={10}
+              columns={2}
+              options={
+                translations.length
+                  ? translations.map((translation) => ({
+                      value: translation.id,
+                      label: translation.name,
+                      meta: /\(\d+(?:[~–-]\d+)?\s*эп\.\)$/iu.test(
+                        translation.name,
+                      )
+                        ? undefined
+                        : `${resolvedEpisodeCount || "—"} эп.`,
+                    }))
+                  : [
+                      {
+                        value: "",
+                        label: translationsLoading
+                          ? "Загрузка переводов…"
+                          : "Недоступно",
+                      },
+                    ]
+              }
+              value={translationId}
+              onChange={onTranslationChange}
+            />
+          </div>
         </section>
         <section className={styles.controlSection}>
           <div className={styles.controlLabel}>
             <Radio size={15} aria-hidden="true" />
-            <p className={styles.tileLabel}>Watch Party</p>
+            <p className={styles.tileLabel}>Совместный просмотр</p>
           </div>
           <p className={styles.partyCopy}>Смотрите синхронно с друзьями.</p>
           <span className={styles.actionControl} aria-disabled="true">
@@ -98,8 +147,8 @@ export function WatchControlGrid({
       <section className={styles.spotifyTile}>
         <Music2 size={21} aria-hidden="true" />
         <div>
-          <p className={styles.tileLabel}>Music / Spotify</p>
-          <p className={styles.musicCopy}>Найти opening этой серии</p>
+          <p className={styles.tileLabel}>Музыка / Spotify</p>
+          <p className={styles.musicCopy}>Найти заставку этой серии</p>
         </div>
         <span className={styles.actionControl} aria-disabled="true">
           Подключение скоро <ArrowRight size={14} aria-hidden="true" />

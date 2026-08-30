@@ -55,7 +55,7 @@ export async function GET(request: Request) {
       });
     }
     return NextResponse.json(
-      { error: "AniList is temporarily unavailable", results: [] },
+      { error: "AniList временно недоступен", results: [] },
       { status: 503 },
     );
   }

@@ -338,6 +338,14 @@ test("schedule adapter classifies 403, 429, timeout and malformed responses", as
 test("episode title localization follows locale, RU, English and generated fallback", () => {
   assert.equal(
     resolveEpisodeTitle({
+      locale: "ru",
+      episodeNumber: 7,
+      title: "The Blade Is Me",
+    }),
+    "Серия 7",
+  );
+  assert.equal(
+    resolveEpisodeTitle({
       locale: "uk",
       episodeNumber: 2,
       title: "English",

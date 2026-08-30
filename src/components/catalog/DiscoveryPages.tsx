@@ -25,6 +25,7 @@ import {
 import { ReleaseDiscoveryControls } from "@/components/catalog/ReleaseDiscoveryControls";
 import { KairoWebGLSurface } from "@/components/effects/KairoWebGLSurface";
 import { KairoDomCurlTarget } from "@/components/effects/KairoDomCurlTarget";
+import discovery from "@/components/discovery/Discovery.module.css";
 
 export function NewReleasesContent({
   anime,
@@ -219,7 +220,7 @@ export function CollectionsContent({
 }: {
   collections: CollectionCardData[];
 }) {
-  const { dictionary: t } = useLocale();
+  const { locale, dictionary: t } = useLocale();
   const { quick, setQuick, filterValues, setFilterValues, resetAll } =
     useBrowseFilterState();
   const genres = useMemo(
@@ -278,39 +279,59 @@ export function CollectionsContent({
   }, [collections, filterValues, quick, t]);
   return (
     <DiscoveryPageShell
+      className={discovery.page}
       hero={
         <DiscoveryPageHero
-          eyebrow={t.sections.curated}
-          title={t.nav.collections}
+          eyebrow={locale === "ru" ? "ВЫБОР РЕДАКЦИИ" : locale === "uk" ? "ВИБІР РЕДАКЦІЇ" : "EDITOR'S CHOICE"}
+          title={locale === "ru" ? "Истории, собранные с вниманием" : locale === "uk" ? "Історії, зібрані з увагою" : "Stories, thoughtfully collected"}
           description={t.discovery.collectionsDescription}
-        />
+        >
+          <p className={discovery.index}>03 KAIRO / {locale === "en" ? "COLLECTIONS" : "КОЛЛЕКЦИИ"}</p>
+        </DiscoveryPageHero>
       }
       controls={
-        <BrowseFilters
-          value={filterValues}
-          onChange={setFilterValues}
-          genres={genres}
-          quickFilters={[
-            ["all", t.discovery.all],
-            ["popular", t.discovery.popular],
-            ["top-rated", t.discovery.topRated],
-            ["new-releases", t.discovery.newReleases],
-          ]}
-          quickValue={quick}
-          onQuickChange={setQuick}
-          resultCount={visibleCollections.length}
-          mode="collections"
-          onResetAll={() => setQuick("all")}
-        />
+        <section className={`${discovery.surface} ${discovery.collectionsControls}`} aria-labelledby="collections-discovery-title">
+          <header className={discovery.surfaceHead}>
+            <div>
+              <p className={discovery.surfaceEyebrow}>{locale === "ru" ? "БИБЛИОТЕКА KAIRO" : locale === "uk" ? "БІБЛІОТЕКА KAIRO" : "KAIRO LIBRARY"}</p>
+              <h2 id="collections-discovery-title">{locale === "ru" ? "Выберите свою коллекцию" : locale === "uk" ? "Оберіть свою колекцію" : "Choose your collection"}</h2>
+              <p className={discovery.surfaceDescription}>{locale === "ru" ? "Редакционные подборки для разных настроений и маршрутов просмотра." : locale === "uk" ? "Редакційні добірки для різних настроїв і маршрутів перегляду." : "Editorial selections for every mood and viewing path."}</p>
+            </div>
+          </header>
+          <div className={discovery.collectionsTools}>
+            <BrowseFilters
+              value={filterValues}
+              onChange={setFilterValues}
+              genres={genres}
+              quickFilters={[
+                ["all", t.discovery.all],
+                ["popular", t.discovery.popular],
+                ["top-rated", t.discovery.topRated],
+                ["new-releases", t.discovery.newReleases],
+              ]}
+              quickValue={quick}
+              onQuickChange={setQuick}
+              resultCount={visibleCollections.length}
+              mode="collections"
+              onResetAll={() => setQuick("all")}
+            />
+          </div>
+        </section>
       }
     >
+      <header className={discovery.resultsHead}>
+        <div>
+          <p className={discovery.resultsEyebrow}>{locale === "ru" ? "КОЛЛЕКЦИИ" : locale === "uk" ? "КОЛЕКЦІЇ" : "COLLECTIONS"}</p>
+          <h2>{locale === "ru" ? "Начните с подборки" : locale === "uk" ? "Почніть із добірки" : "Start with a collection"}</h2>
+        </div>
+      </header>
       {visibleCollections.length ? (
-        <KairoWebGLSurface className="system-collection-grid">
+        <KairoWebGLSurface className={`${discovery.collectionGrid} system-collection-grid`}>
           {visibleCollections.map((collection) => {
             const preview = collection.anime.slice(0, 4);
             return (
               <Link
-                className="system-collection-card"
+                className={`${discovery.collectionCard} system-collection-card`}
                 href={`/collections/${collection.slug}`}
                 key={collection.slug}
               >

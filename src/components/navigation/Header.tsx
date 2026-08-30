@@ -26,33 +26,39 @@ export function Header() {
 
   return (
     <>
-      <header className={`site-header${scrolled ? " is-scrolled" : ""}`}>
+      <header
+        className={`site-header${scrolled ? " is-scrolled" : ""}`}
+        data-scrolled={scrolled ? "true" : "false"}
+      >
         <div className="header-inner">
           <Link className="logo" href="/" aria-label={`Kairo — ${t.nav.home}`}>
             kairo<span>.</span>
           </Link>
           <div className="header-actions">
-            <div className="locale-switch" aria-label={t.sync.subtitleLanguage}>
-              <button
-                className={locale === "ru" ? "active" : ""}
-                onClick={() => setLocale("ru")}
-              >
-                RU
-              </button>
-              <span>/</span>
-              <button
-                className={locale === "uk" ? "active" : ""}
-                onClick={() => setLocale("uk")}
-              >
-                UK
-              </button>
-              <span>/</span>
-              <button
-                className={locale === "en" ? "active" : ""}
-                onClick={() => setLocale("en")}
-              >
-                EN
-              </button>
+            <div
+              className="locale-switch"
+              role="group"
+              aria-label={t.nav.languageSwitcher}
+            >
+              {(
+                [
+                  ["ru", "RU", "Русский"],
+                  ["uk", "UA", "Українська"],
+                  ["en", "EN", "English"],
+                ] as const
+              ).map(([value, shortLabel, label]) => (
+                <button
+                  type="button"
+                  className={locale === value ? "active" : ""}
+                  aria-pressed={locale === value}
+                  aria-label={label}
+                  title={label}
+                  onClick={() => setLocale(value)}
+                  key={value}
+                >
+                  {shortLabel}
+                </button>
+              ))}
             </div>
             <IconButton
               label={t.nav.search}

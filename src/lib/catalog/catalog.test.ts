@@ -128,7 +128,7 @@ test("uses safe locale fallbacks without machine-generated titles", () => {
     title: "",
     titleNative: "葬送のフリーレン",
   });
-  assert.equal(resolveAnimeTitle(nativeOnly, "ru"), "葬送のフリーレン");
+  assert.equal(resolveAnimeTitle(nativeOnly, "ru"), "Название неизвестно");
   assert.equal(resolveAnimeTitle(nativeOnly, "en"), "葬送のフリーレン");
   assert.equal(resolveAnimeTitle(anime({ title: "" }), "uk"), "Назва невідома");
   assert.equal(

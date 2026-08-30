@@ -25,7 +25,7 @@ export const MobileNavigation = forwardRef<HTMLElement, MobileNavigationProps>(
           <motion.nav
             ref={ref}
             className="mobile-nav"
-            aria-label="Mobile navigation"
+            aria-label="Мобильная навигация"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}

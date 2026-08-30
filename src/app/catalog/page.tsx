@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import { CatalogClient } from "@/components/catalog/CatalogClient";
 import { AppShell } from "@/components/layout/AppShell";
-import { filtersForCatalogView, parseCatalogParams, parseCatalogView } from "@/lib/catalog";
+import {
+  currentCatalogSeason,
+  filtersForCatalogView,
+  parseCatalogParams,
+  parseCatalogView,
+} from "@/lib/catalog";
 import { normalizeAnimeTitle } from "@/lib/catalog/identity";
 import { getPublicCatalog } from "@/lib/catalog/public";
 import {
@@ -15,6 +20,8 @@ import { applyCanonicalTitleLocalization } from "@/lib/media-localization";
 import { getJikanAnimeBySearch, mapJikanAnime } from "@/lib/jikan";
 import type { Anime } from "@/types/media";
 import { enrichAnimeListWithLocalizedTitles } from "@/server/services/anime-title-enrichment.service";
+import { listAnime } from "@/server/repositories/anime.repository";
+import { listCatalogSnapshotAnime } from "@/lib/catalog/snapshot";
 
 export const dynamic = "force-dynamic";
 
@@ -38,30 +45,63 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
   const raw = await searchParams;
   const view = parseCatalogView(raw.view);
   const filters = filtersForCatalogView(view, parseCatalogParams(raw));
+  const [databaseCatalog, snapshotCatalog] = await Promise.all([
+    listAnime().catch(() => []),
+    listCatalogSnapshotAnime().catch(() => []),
+  ]);
+  const localCatalog = [
+    ...new Map(
+      [...databaseCatalog, ...snapshotCatalog].map((item) => [item.id, item]),
+    ).values(),
+  ];
   let remotePage: {
     media: AniListMedia[];
     pageInfo: CatalogPageInfo;
   } | null = null;
   let backupSearchAnime: Anime[] | null = null;
-  try {
-    remotePage = await searchAnimeCatalog(filters);
-  } catch (error) {
-    if (!(error instanceof AniListRequestError)) throw error;
-    if (filters.search) {
-      const backup = await getJikanAnimeBySearch(filters.search);
-      if (backup.ok && backup.data) {
-        backupSearchAnime = [
-          applyCanonicalTitleLocalization(mapJikanAnime(backup.data)),
-        ];
+  if (!localCatalog.length) {
+    try {
+      remotePage = await searchAnimeCatalog(filters);
+    } catch (error) {
+      if (!(error instanceof AniListRequestError)) throw error;
+      if (filters.search) {
+        const backup = await getJikanAnimeBySearch(filters.search);
+        if (backup.ok && backup.data) {
+          backupSearchAnime = [
+            applyCanonicalTitleLocalization(mapJikanAnime(backup.data)),
+          ];
+        }
       }
     }
   }
   const remoteAnime =
     backupSearchAnime ??
     remotePage?.media.map(mapAniListAnime).map(applyCanonicalTitleLocalization);
-  const publicCatalog = remoteAnime?.length
-    ? await enrichAnimeListWithLocalizedTitles(remoteAnime)
-    : await getPublicCatalog();
+  const publicCatalog = localCatalog.length
+    ? localCatalog
+    : remoteAnime?.length
+      ? await enrichAnimeListWithLocalizedTitles(remoteAnime)
+      : await getPublicCatalog();
+  const currentSeason = currentCatalogSeason();
+  const catalogSeasons = [0, 1, 2, 3].map((offset) =>
+    currentCatalogSeason(
+      new Date(currentSeason.year, new Date().getMonth() - offset * 3, 1),
+    ),
+  );
+  const seasonalCatalog = localCatalog.length
+    ? []
+    : (
+        await Promise.all(
+          catalogSeasons.map(({ season, year }) =>
+            getPublicCatalog({ season, seasonYear: year, perPage: 50 }),
+          ),
+        )
+      ).flat();
+  const overviewAnime = [
+    ...new Map(
+      [...localCatalog, ...publicCatalog, ...seasonalCatalog].map((item) => [item.id, item]),
+    ).values(),
+  ];
   const normalizedSearch = filters.search
     ? normalizeAnimeTitle(filters.search)
     : undefined;
@@ -108,6 +148,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
         initialFilters={filters}
         initialView={view}
         initialAnime={anime}
+        overviewAnime={overviewAnime}
         initialPageInfo={pageInfo}
       />
     </AppShell>

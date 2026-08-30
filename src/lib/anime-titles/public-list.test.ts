@@ -40,7 +40,7 @@ test("the same AniList ID gets one RU displayTitle across public sections", asyn
   assert.equal(calls, 3);
 });
 
-test("catalog fallbacks are RU, English, Romaji, then Native", async () => {
+test("Russian catalog never falls back to English, Romaji or Native", async () => {
   const localized = async () => new Map([[21, { ru: "Ван-Пис", aliases: [] }]]);
   assert.equal(
     (await localizePublicAnimeListWithLoader([anime()], "ru", localized))[0]
@@ -55,7 +55,7 @@ test("catalog fallbacks are RU, English, Romaji, then Native", async () => {
         async () => new Map(),
       )
     )[0].displayTitle,
-    "One Piece",
+    "Название неизвестно",
   );
   assert.equal(
     (
@@ -65,7 +65,7 @@ test("catalog fallbacks are RU, English, Romaji, then Native", async () => {
         async () => new Map(),
       )
     )[0].displayTitle,
-    "ONE PIECE",
+    "Название неизвестно",
   );
   assert.equal(
     (
@@ -75,7 +75,7 @@ test("catalog fallbacks are RU, English, Romaji, then Native", async () => {
         async () => new Map(),
       )
     )[0].displayTitle,
-    "ワンピース",
+    "Название неизвестно",
   );
 });
 

@@ -85,9 +85,11 @@ export function resolveLocalizedAnimeDescription(
   const rawFull =
     manualFull ??
     localizedDescription ??
-    (isRussian || isUkrainian
-      ? anime.description || anime.synopsis
-      : anime.descriptionEn || anime.synopsis || anime.description);
+    (isRussian
+      ? undefined
+      : isUkrainian
+        ? anime.descriptionUk
+        : anime.descriptionEn || anime.synopsis || anime.description);
   const full = rawFull ? normalizeWhitespace(rawFull) : null;
   const explicitShort = manualShort ?? anime.shortDescription;
   const short = explicitShort
@@ -126,8 +128,6 @@ export function getLocalizedAnimeDescription(
       (anime.anilistId
         ? animeLocalizationOverridesRu[anime.anilistId]?.descriptionRu
         : undefined) ??
-      anime.description ??
-      anime.shortDescription ??
       "Описание пока отсутствует"
     );
   if (locale === "uk")

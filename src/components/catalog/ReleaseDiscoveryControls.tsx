@@ -79,8 +79,15 @@ export function ReleaseDiscoveryControls({
     onResetAll();
   };
   const active =
-    Boolean(selectedGenres.length || value.search || value.year || value.season || value.format || value.status || value.score) ||
-    value.sort !== "default";
+    Boolean(
+      selectedGenres.length ||
+      value.search ||
+      value.year ||
+      value.season ||
+      value.format ||
+      value.status ||
+      value.score,
+    ) || value.sort !== "default";
 
   return (
     <section
@@ -89,7 +96,7 @@ export function ReleaseDiscoveryControls({
     >
       <div className="category-navigation-head">
         <div>
-          <p className="eyebrow">Kairo index</p>
+          <p className="eyebrow">Каталог Kairo</p>
           <h2 id="release-discovery-title">{t.catalog.filters}</h2>
         </div>
         {active ? (
@@ -104,10 +111,15 @@ export function ReleaseDiscoveryControls({
           const art = genre.toLowerCase().replaceAll(" ", "-");
           const label = localizeGenre(genre, locale);
           return (
-            <WebGLImageTarget src={`/images/categories/${art}.webp`} key={genre}>
+            <WebGLImageTarget
+              src={`/images/categories/${art}.webp`}
+              key={genre}
+            >
               <button
                 type="button"
-                className={selected ? "category-tile is-selected" : "category-tile"}
+                className={
+                  selected ? "category-tile is-selected" : "category-tile"
+                }
                 onClick={() => {
                   onSelectedGenresChange(
                     selected
@@ -118,7 +130,11 @@ export function ReleaseDiscoveryControls({
                 }}
                 aria-pressed={selected}
                 aria-label={`${selected ? "Убрать" : "Добавить"} жанр ${label}`}
-                style={{ "--category-art": `url(/images/categories/${art}.webp)` } as CSSProperties}
+                style={
+                  {
+                    "--category-art": `url(/images/categories/${art}.webp)`,
+                  } as CSSProperties
+                }
               >
                 <span>{label}</span>
                 <i className="category-tile-action" aria-hidden="true">
@@ -147,7 +163,9 @@ export function ReleaseDiscoveryControls({
           <ChevronDown size={16} aria-hidden="true" />
         </button>
       </div>
-      <div className={advanced ? "catalog-advanced is-open" : "catalog-advanced"}>
+      <div
+        className={advanced ? "catalog-advanced is-open" : "catalog-advanced"}
+      >
         <div className="catalog-advanced-inner filter-selects">
           <label>
             {t.catalog.year}
@@ -161,7 +179,11 @@ export function ReleaseDiscoveryControls({
                 placeholder="2026"
               />
               {value.year && (
-                <button type="button" onClick={() => set("year", "")} aria-label={`${t.catalog.reset} ${t.catalog.year}`}>
+                <button
+                  type="button"
+                  onClick={() => set("year", "")}
+                  aria-label={`${t.catalog.reset} ${t.catalog.year}`}
+                >
                   <X size={14} />
                 </button>
               )}
@@ -175,7 +197,13 @@ export function ReleaseDiscoveryControls({
                 menuMinWidth={key === "status" ? "11rem" : "10.5rem"}
                 value={value[key]}
                 onChange={(next) => set(key, next)}
-                options={[{ value: "", label: "—" }, ...releaseOptions[key].map(([value, label]) => ({ value, label }))]}
+                options={[
+                  { value: "", label: "—" },
+                  ...releaseOptions[key].map(([value, label]) => ({
+                    value,
+                    label,
+                  })),
+                ]}
               />
             </label>
           ))}
@@ -186,7 +214,10 @@ export function ReleaseDiscoveryControls({
               menuMinWidth="10.5rem"
               value={value.score}
               onChange={(next) => set("score", next)}
-              options={["", "6", "7", "8", "9"].map((score) => ({ value: score, label: score ? `${score}+` : "0+" }))}
+              options={["", "6", "7", "8", "9"].map((score) => ({
+                value: score,
+                label: score ? `${score}+` : "0+",
+              }))}
             />
           </label>
           <label>

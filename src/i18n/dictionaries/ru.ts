@@ -10,6 +10,12 @@ export const ru: Dictionary = {
     profile: "Профиль",
     openMenu: "Открыть меню",
     closeMenu: "Закрыть меню",
+    myList: "Моё",
+    history: "История",
+    mainNavigation: "Основная навигация",
+    mobileNavigation: "Мобильная навигация",
+    openNavigation: "Открыть навигацию",
+    languageSwitcher: "Язык интерфейса",
   },
   auth: {
     account: "Аккаунт",

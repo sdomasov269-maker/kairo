@@ -17,16 +17,19 @@ import {
   type CatalogPageInfo,
 } from "@/lib/catalog";
 import type { Anime } from "@/types/media";
+import discovery from "@/components/discovery/Discovery.module.css";
 
 export function CatalogClient({
   initialFilters,
   initialView,
   initialAnime,
+  overviewAnime,
   initialPageInfo,
 }: {
   initialFilters: CatalogFilters;
   initialView: CatalogView;
   initialAnime: Anime[];
+  overviewAnime: Anime[];
   initialPageInfo: CatalogPageInfo;
 }) {
   const { locale, dictionary: t } = useLocale();
@@ -144,13 +147,21 @@ export function CatalogClient({
   );
   return (
     <DiscoveryPageShell
-      className="catalog-page"
-      hero={<CatalogHero />}
-      controls={<CatalogControls filters={filters} view={view} onChange={change} onViewChange={changeView} />}
+      className={`${discovery.page} catalog-page`}
+      hero={<CatalogHero featuredAnime={overviewAnime} />}
+      controls={
+        <CatalogControls
+          anime={overviewAnime}
+          filters={filters}
+          view={view}
+          onChange={change}
+          onViewChange={changeView}
+        />
+      }
     >
-      <header className="catalog-results-heading">
+      <header className={`${discovery.resultsHead} catalog-results-heading`}>
         <div>
-          <p className="eyebrow">{locale === "ru" ? "Каталог" : "Catalog"}</p>
+          <p className={`${discovery.resultsEyebrow} eyebrow`}>{locale === "ru" ? "Каталог" : "Catalog"}</p>
           <h2>{
             view === "season"
               ? locale === "ru" ? "Этот сезон" : "This season"

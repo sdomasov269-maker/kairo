@@ -1,0 +1,781 @@
+- generic [active] [ref=f2e1]:
+  - alert [ref=f2e980]
+  - banner [ref=f2e981]:
+    - generic [ref=f2e982]:
+      - link "Kairo — Главная" [ref=f2e983] [cursor=pointer]:
+        - /url: /
+        - text: kairo.
+      - generic [ref=f2e984]:
+        - group "Язык интерфейса" [ref=f2e985]:
+          - button "Русский" [pressed] [ref=f2e986] [cursor=pointer]: RU
+          - button "Українська" [ref=f2e987] [cursor=pointer]: UA
+          - button "English" [ref=f2e988] [cursor=pointer]: EN
+        - button "Поиск" [ref=f2e989] [cursor=pointer]
+        - button "Профиль" [ref=f2e994] [cursor=pointer]
+  - navigation "Основная навигация":
+    - generic [ref=f2e998]:
+      - link "Главная" [ref=f2e999] [cursor=pointer]:
+        - /url: /
+      - link "Каталог" [ref=f2e1004] [cursor=pointer]:
+        - /url: /catalog
+      - link "Коллекции" [ref=f2e1009] [cursor=pointer]:
+        - /url: /collections
+      - link "Моё" [ref=f2e1015] [cursor=pointer]:
+        - /url: /my-list
+      - link "История" [ref=f2e1019] [cursor=pointer]:
+        - /url: /history
+  - generic [ref=f2e1027]:
+    - main [ref=f2e1028]:
+      - generic [ref=f2e1029]:
+        - generic [ref=f2e1031]:
+          - generic [ref=f2e1032]:
+            - paragraph [ref=f2e1034]: 02 KAIRO / КАТАЛОГ
+            - paragraph [ref=f2e1035]: Категории
+            - heading "Найди историю по настроению" [level=1] [ref=f2e1036]
+            - paragraph [ref=f2e1037]: Жанры, темы и направления аниме — в одном спокойном пространстве для исследования.
+          - region "Случайный выбор аниме" [ref=f2e1038]:
+            - generic [ref=f2e1039]:
+              - button "Атака титанов" [ref=f2e1040] [cursor=pointer]:
+                - 'img "Постер аниме: Атака титанов" [ref=f2e1043]'
+                - generic [ref=f2e1044]:
+                  - strong [ref=f2e1045]: Атака титанов
+                  - generic [ref=f2e1046]: Боевик · Драма
+                  - generic [ref=f2e1047]:
+                    - generic [ref=f2e1048]: 8,5
+                    - generic [ref=f2e1051]: "2013"
+              - button "Клинок, рассекающий демонов" [ref=f2e1052] [cursor=pointer]:
+                - 'img "Постер аниме: Клинок, рассекающий демонов" [ref=f2e1055]'
+                - generic [ref=f2e1056]:
+                  - strong [ref=f2e1057]: Клинок, рассекающий демонов
+                  - generic [ref=f2e1058]: Боевик · Приключения
+                  - generic [ref=f2e1059]:
+                    - generic [ref=f2e1060]: 8,3
+                    - generic [ref=f2e1063]: "2019"
+              - button "Магическая битва" [ref=f2e1064] [cursor=pointer]:
+                - 'img "Постер аниме: Магическая битва" [ref=f2e1067]'
+                - generic [ref=f2e1068]:
+                  - strong [ref=f2e1069]: Магическая битва
+                  - generic [ref=f2e1070]: Боевик · Драма
+                  - generic [ref=f2e1071]:
+                    - generic [ref=f2e1072]: 8,4
+                    - generic [ref=f2e1075]: "2020"
+              - 'button "Смотреть: Тетрадь смерти" [ref=f2e1076] [cursor=pointer]':
+                - 'img "Постер аниме: Тетрадь смерти" [ref=f2e1079]'
+                - generic [ref=f2e1080]:
+                  - strong [ref=f2e1081]: Тетрадь смерти
+                  - generic [ref=f2e1082]: Мистика · Психологическое
+                  - generic [ref=f2e1083]:
+                    - generic [ref=f2e1084]: 8,4
+                    - generic [ref=f2e1087]: "2006"
+              - button "Моя геройская академия" [ref=f2e1088] [cursor=pointer]:
+                - 'img "Постер аниме: Моя геройская академия" [ref=f2e1091]'
+                - generic [ref=f2e1092]:
+                  - strong [ref=f2e1093]: Моя геройская академия
+                  - generic [ref=f2e1094]: Боевик · Приключения
+                  - generic [ref=f2e1095]:
+                    - generic [ref=f2e1096]: 7,7
+                    - generic [ref=f2e1099]: "2016"
+              - button "Охотник х Охотник" [ref=f2e1100] [cursor=pointer]:
+                - 'img "Постер аниме: Охотник х Охотник" [ref=f2e1103]'
+                - generic [ref=f2e1104]:
+                  - strong [ref=f2e1105]: Охотник х Охотник
+                  - generic [ref=f2e1106]: Боевик · Приключения
+                  - generic [ref=f2e1107]:
+                    - generic [ref=f2e1108]: 8,9
+                    - generic [ref=f2e1111]: "2011"
+              - 'button "Стальной алхимик: Братство" [ref=f2e1112] [cursor=pointer]':
+                - 'img "Постер аниме: Стальной алхимик: Братство" [ref=f2e1115]'
+                - generic [ref=f2e1116]:
+                  - strong [ref=f2e1117]: "Стальной алхимик: Братство"
+                  - generic [ref=f2e1118]: Боевик · Приключения
+                  - generic [ref=f2e1119]:
+                    - generic [ref=f2e1120]: 9,0
+                    - generic [ref=f2e1123]: "2009"
+            - generic [ref=f2e1124]:
+              - generic [ref=f2e1125]:
+                - generic [ref=f2e1126]: Выбрано
+                - strong [ref=f2e1127]: Тетрадь смерти
+                - generic [ref=f2e1128]: Мистика · Психологическое · ★ 8,4
+              - generic [ref=f2e1129]:
+                - button "Previous title" [ref=f2e1130]
+                - button "Крутить" [ref=f2e1133]
+                - button "Next title" [ref=f2e1140]
+                - link "Смотреть" [ref=f2e1143] [cursor=pointer]:
+                  - /url: /anime/anilist-1535-death-note
+        - generic [ref=f2e1147]:
+          - region "Разделы каталога" [ref=f2e1148]:
+            - navigation [ref=f2e1149]:
+              - button "Жанры" [pressed] [ref=f2e1150]
+              - button "Этот сезон" [ref=f2e1151]
+              - button "Новые эпизоды" [ref=f2e1152]
+              - link "Коллекции" [ref=f2e1153] [cursor=pointer]:
+                - /url: /collections
+              - button "Все аниме" [ref=f2e1154]
+            - generic [ref=f2e1155]:
+              - search [ref=f2e1156]:
+                - generic [ref=f2e1157]: Название аниме…
+                - searchbox "Название аниме…" [ref=f2e1158]
+              - button "Фильтры" [ref=f2e1159]
+            - generic:
+              - generic:
+                - generic [ref=f2e1162]:
+                  - text: Год
+                  - textbox "Год" [ref=f2e1164]:
+                    - /placeholder: "2026"
+                - generic [ref=f2e1165]:
+                  - text: Сезон
+                  - button "Сезон" [ref=f2e1167] [cursor=pointer]:
+                    - generic [ref=f2e1168]: —
+                - generic [ref=f2e1172]:
+                  - text: Формат
+                  - button "Формат" [ref=f2e1174] [cursor=pointer]:
+                    - generic [ref=f2e1175]: —
+                - generic [ref=f2e1179]:
+                  - text: Статус
+                  - button "Статус" [ref=f2e1181] [cursor=pointer]:
+                    - generic [ref=f2e1182]: —
+                - generic [ref=f2e1186]:
+                  - text: Минимальный рейтинг
+                  - button "Минимальный рейтинг" [ref=f2e1188] [cursor=pointer]:
+                    - generic [ref=f2e1189]: 0+
+                - generic [ref=f2e1193]:
+                  - text: Сортировка
+                  - button "Сортировка" [ref=f2e1195] [cursor=pointer]:
+                    - generic [ref=f2e1196]: Популярное
+          - region [ref=f2e1200]:
+            - generic [ref=f2e1201]:
+              - generic [ref=f2e1202]:
+                - paragraph [ref=f2e1203]: 01 — ДОМИНАНТА
+                - heading "Жанры и направления" [level=2] [ref=f2e1204]
+              - generic [ref=f2e1205]: 12 тайтлов
+            - generic [ref=f2e1206]:
+              - button "Боевик 343 тайтлов" [ref=f2e1208]:
+                - generic [ref=f2e1210]:
+                  - strong [ref=f2e1211]: Боевик
+                  - generic [ref=f2e1212]: 343 тайтлов
+              - button "Приключения 232 тайтлов" [ref=f2e1214]:
+                - generic [ref=f2e1216]:
+                  - strong [ref=f2e1217]: Приключения
+                  - generic [ref=f2e1218]: 232 тайтлов
+              - button "Фэнтези 306 тайтлов" [ref=f2e1220]:
+                - generic [ref=f2e1222]:
+                  - strong [ref=f2e1223]: Фэнтези
+                  - generic [ref=f2e1224]: 306 тайтлов
+              - button "Драма 272 тайтлов" [ref=f2e1226]:
+                - generic [ref=f2e1228]:
+                  - strong [ref=f2e1229]: Драма
+                  - generic [ref=f2e1230]: 272 тайтлов
+              - button "Романтика 203 тайтлов" [ref=f2e1232]:
+                - generic [ref=f2e1234]:
+                  - strong [ref=f2e1235]: Романтика
+                  - generic [ref=f2e1236]: 203 тайтлов
+              - button "Научная фантастика 80 тайтлов" [ref=f2e1238]:
+                - generic [ref=f2e1240]:
+                  - strong [ref=f2e1241]: Научная фантастика
+                  - generic [ref=f2e1242]: 80 тайтлов
+              - button "Психологическое 74 тайтлов" [ref=f2e1244]:
+                - generic [ref=f2e1246]:
+                  - strong [ref=f2e1247]: Психологическое
+                  - generic [ref=f2e1248]: 74 тайтлов
+              - button "Мистика 76 тайтлов" [ref=f2e1250]:
+                - generic [ref=f2e1252]:
+                  - strong [ref=f2e1253]: Мистика
+                  - generic [ref=f2e1254]: 76 тайтлов
+              - button "Повседневность 104 тайтлов" [ref=f2e1256]:
+                - generic [ref=f2e1258]:
+                  - strong [ref=f2e1259]: Повседневность
+                  - generic [ref=f2e1260]: 104 тайтлов
+              - button "Комедия 263 тайтлов" [ref=f2e1262]:
+                - generic [ref=f2e1264]:
+                  - strong [ref=f2e1265]: Комедия
+                  - generic [ref=f2e1266]: 263 тайтлов
+              - button "Спорт 21 тайтлов" [ref=f2e1268]:
+                - generic [ref=f2e1270]:
+                  - strong [ref=f2e1271]: Спорт
+                  - generic [ref=f2e1272]: 21 тайтлов
+              - button "Триллер 40 тайтлов" [ref=f2e1274]:
+                - generic [ref=f2e1276]:
+                  - strong [ref=f2e1277]: Триллер
+                  - generic [ref=f2e1278]: 40 тайтлов
+          - region [ref=f2e1279]:
+            - generic [ref=f2e1281]:
+              - paragraph [ref=f2e1282]: 02 — ВТОРОЙ УРОВЕНЬ
+              - heading "Сезоны" [level=2] [ref=f2e1283]
+            - generic [ref=f2e1284]:
+              - button "ТЕКУЩИЙ СЕЗОН Лето 2026 129 тайтлов" [ref=f2e1285]:
+                - generic [ref=f2e1286]: ТЕКУЩИЙ СЕЗОН
+                - strong [ref=f2e1287]: Лето 2026
+                - generic [ref=f2e1288]: 129 тайтлов
+              - button "Весна 2026 76 тайтлов" [ref=f2e1289]:
+                - strong [ref=f2e1290]: Весна 2026
+                - generic [ref=f2e1291]: 76 тайтлов
+              - button "Зима 2026 60 тайтлов" [ref=f2e1292]:
+                - strong [ref=f2e1293]: Зима 2026
+                - generic [ref=f2e1294]: 60 тайтлов
+              - button "Осень 2025 56 тайтлов" [ref=f2e1295]:
+                - strong [ref=f2e1296]: Осень 2025
+                - generic [ref=f2e1297]: 56 тайтлов
+            - button "Все сезоны" [ref=f2e1298]
+          - region [ref=f2e1301]:
+            - generic [ref=f2e1302]:
+              - generic [ref=f2e1303]:
+                - paragraph [ref=f2e1304]: 03 — ЛЕНТЫ
+                - heading "Новые эпизоды" [level=2] [ref=f2e1305]
+              - button "Все аниме" [ref=f2e1306]
+            - generic [ref=f2e1309]:
+              - article [ref=f2e1310]:
+                - generic [ref=f2e1311]:
+                  - 'link "Подробнее: Название неизвестно" [ref=f2e1312] [cursor=pointer]':
+                    - /url: /anime/anilist-21-one-piece
+                    - 'img "Постер аниме: Название неизвестно" [ref=f2e1315]'
+                  - 'button "Добавить в список: Название неизвестно" [ref=f2e1316] [cursor=pointer]'
+                  - generic [ref=f2e1318]: Онгоинг
+                - generic [ref=f2e1319]:
+                  - generic [ref=f2e1320]:
+                    - heading [level=3] [ref=f2e1321]:
+                      - 'link "Подробнее: Название неизвестно" [ref=f2e1322] [cursor=pointer]':
+                        - /url: /anime/anilist-21-one-piece
+                        - text: Название неизвестно
+                    - 'generic "Рейтинг: 8,7" [ref=f2e1323]': 8,7
+                  - generic [ref=f2e1326]:
+                    - paragraph [ref=f2e1327]: Боевик · Приключения
+                    - generic [ref=f2e1328]: "1999"
+              - article [ref=f2e1329]:
+                - generic [ref=f2e1330]:
+                  - 'link "Подробнее: Название неизвестно" [ref=f2e1331] [cursor=pointer]':
+                    - /url: /anime/anilist-178789-mushoku-tensei-jobless-reincarnation-season-3
+                    - 'img "Постер аниме: Название неизвестно" [ref=f2e1334]'
+                  - 'button "Добавить в список: Название неизвестно" [ref=f2e1335] [cursor=pointer]'
+                  - generic [ref=f2e1337]: Онгоинг
+                - generic [ref=f2e1338]:
+                  - generic [ref=f2e1339]:
+                    - heading [level=3] [ref=f2e1340]:
+                      - 'link "Подробнее: Название неизвестно" [ref=f2e1341] [cursor=pointer]':
+                        - /url: /anime/anilist-178789-mushoku-tensei-jobless-reincarnation-season-3
+                        - text: Название неизвестно
+                    - 'generic "Рейтинг: 8,4" [ref=f2e1342]': 8,4
+                  - generic [ref=f2e1345]:
+                    - paragraph [ref=f2e1346]: Приключения · Драма
+                    - generic [ref=f2e1347]: "2026"
+              - article [ref=f2e1348]:
+                - generic [ref=f2e1349]:
+                  - 'link "Подробнее: Название неизвестно" [ref=f2e1350] [cursor=pointer]':
+                    - /url: /anime/anilist-189046-re-zero-starting-life-in-another-world-season-4
+                    - 'img "Постер аниме: Название неизвестно" [ref=f2e1353]'
+                  - 'button "Добавить в список: Название неизвестно" [ref=f2e1354] [cursor=pointer]'
+                  - generic [ref=f2e1356]: Онгоинг
+                - generic [ref=f2e1357]:
+                  - generic [ref=f2e1358]:
+                    - heading [level=3] [ref=f2e1359]:
+                      - 'link "Подробнее: Название неизвестно" [ref=f2e1360] [cursor=pointer]':
+                        - /url: /anime/anilist-189046-re-zero-starting-life-in-another-world-season-4
+                        - text: Название неизвестно
+                    - 'generic "Рейтинг: 9,0" [ref=f2e1361]': 9,0
+                  - generic [ref=f2e1364]:
+                    - paragraph [ref=f2e1365]: Боевик · Приключения
+                    - generic [ref=f2e1366]: "2026"
+              - article [ref=f2e1367]:
+                - generic [ref=f2e1368]:
+                  - 'link "Подробнее: Название неизвестно" [ref=f2e1369] [cursor=pointer]':
+                    - /url: /anime/anilist-195600-daemons-of-the-shadow-realm
+                    - 'img "Постер аниме: Название неизвестно" [ref=f2e1372]'
+                  - 'button "Добавить в список: Название неизвестно" [ref=f2e1373] [cursor=pointer]'
+                  - generic [ref=f2e1375]: Онгоинг
+                - generic [ref=f2e1376]:
+                  - generic [ref=f2e1377]:
+                    - heading [level=3] [ref=f2e1378]:
+                      - 'link "Подробнее: Название неизвестно" [ref=f2e1379] [cursor=pointer]':
+                        - /url: /anime/anilist-195600-daemons-of-the-shadow-realm
+                        - text: Название неизвестно
+                    - 'generic "Рейтинг: 7,8" [ref=f2e1380]': 7,8
+                  - generic [ref=f2e1383]:
+                    - paragraph [ref=f2e1384]: Боевик · Приключения
+                    - generic [ref=f2e1385]: "2026"
+              - article [ref=f2e1386]:
+                - generic [ref=f2e1387]:
+                  - 'link "Подробнее: Название неизвестно" [ref=f2e1388] [cursor=pointer]':
+                    - /url: /anime/anilist-182205-that-time-i-got-reincarnated-as-a-slime-season-4
+                    - 'img "Постер аниме: Название неизвестно" [ref=f2e1391]'
+                  - 'button "Добавить в список: Название неизвестно" [ref=f2e1392] [cursor=pointer]'
+                  - generic [ref=f2e1394]: Онгоинг
+                - generic [ref=f2e1395]:
+                  - generic [ref=f2e1396]:
+                    - heading [level=3] [ref=f2e1397]:
+                      - 'link "Подробнее: Название неизвестно" [ref=f2e1398] [cursor=pointer]':
+                        - /url: /anime/anilist-182205-that-time-i-got-reincarnated-as-a-slime-season-4
+                        - text: Название неизвестно
+                    - 'generic "Рейтинг: 8,3" [ref=f2e1399]': 8,3
+                  - generic [ref=f2e1402]:
+                    - paragraph [ref=f2e1403]: Боевик · Приключения
+                    - generic [ref=f2e1404]: "2026"
+              - article [ref=f2e1405]:
+                - generic [ref=f2e1406]:
+                  - 'link "Подробнее: Название неизвестно" [ref=f2e1407] [cursor=pointer]':
+                    - /url: /anime/anilist-196187-smoking-behind-the-supermarket-with-you
+                    - 'img "Постер аниме: Название неизвестно" [ref=f2e1410]'
+                  - 'button "Добавить в список: Название неизвестно" [ref=f2e1411] [cursor=pointer]'
+                  - generic [ref=f2e1413]: Онгоинг
+                - generic [ref=f2e1414]:
+                  - generic [ref=f2e1415]:
+                    - heading [level=3] [ref=f2e1416]:
+                      - 'link "Подробнее: Название неизвестно" [ref=f2e1417] [cursor=pointer]':
+                        - /url: /anime/anilist-196187-smoking-behind-the-supermarket-with-you
+                        - text: Название неизвестно
+                    - 'generic "Рейтинг: 8,2" [ref=f2e1418]': 8,2
+                  - generic [ref=f2e1421]:
+                    - paragraph [ref=f2e1422]: Комедия · Романтика
+                    - generic [ref=f2e1423]: "2026"
+          - region [ref=f2e1424]:
+            - generic [ref=f2e1425]:
+              - heading "Коллекции" [level=2] [ref=f2e1427]
+              - link "Все подборки" [ref=f2e1428] [cursor=pointer]:
+                - /url: /collections
+            - generic [ref=f2e1431]:
+              - link "Популярное 4+ тайтлов" [ref=f2e1432] [cursor=pointer]:
+                - /url: /collections/popular
+                - generic [ref=f2e1446]:
+                  - strong [ref=f2e1447]: Популярное
+                  - generic [ref=f2e1448]: 4+ тайтлов
+              - link "Лучшие по рейтингу 4+ тайтлов" [ref=f2e1449] [cursor=pointer]:
+                - /url: /collections/top-rated
+                - generic [ref=f2e1463]:
+                  - strong [ref=f2e1464]: Лучшие по рейтингу
+                  - generic [ref=f2e1465]: 4+ тайтлов
+              - link "Новые релизы 4+ тайтлов" [ref=f2e1466] [cursor=pointer]:
+                - /url: /collections/new-releases
+                - generic [ref=f2e1480]:
+                  - strong [ref=f2e1481]: Новые релизы
+                  - generic [ref=f2e1482]: 4+ тайтлов
+      - generic [ref=f2e1483]:
+        - generic [ref=f2e1485]:
+          - paragraph [ref=f2e1486]: Каталог
+          - heading "Все аниме" [level=2] [ref=f2e1487]
+        - generic [ref=f2e1488]:
+          - article [ref=f2e1489]:
+            - generic [ref=f2e1490]:
+              - 'link "Подробнее: Атака титанов" [ref=f2e1491] [cursor=pointer]':
+                - /url: /anime/anilist-16498-attack-on-titan
+                - 'img "Постер аниме: Атака титанов" [ref=f2e1494]'
+              - 'button "Добавить в список: Атака титанов" [ref=f2e1495] [cursor=pointer]'
+              - generic [ref=f2e1497]: Завершено
+            - generic [ref=f2e1498]:
+              - generic [ref=f2e1499]:
+                - heading [level=3] [ref=f2e1500]:
+                  - 'link "Подробнее: Атака титанов" [ref=f2e1501] [cursor=pointer]':
+                    - /url: /anime/anilist-16498-attack-on-titan
+                    - text: Атака титанов
+                - 'generic "Рейтинг: 8,5" [ref=f2e1502]': 8,5
+              - generic [ref=f2e1505]:
+                - paragraph [ref=f2e1506]: Боевик · Драма
+                - generic [ref=f2e1507]: "2013"
+          - article [ref=f2e1508]:
+            - generic [ref=f2e1509]:
+              - 'link "Подробнее: Клинок, рассекающий демонов" [ref=f2e1510] [cursor=pointer]':
+                - /url: /anime/anilist-101922-demon-slayer-kimetsu-no-yaiba
+                - 'img "Постер аниме: Клинок, рассекающий демонов" [ref=f2e1513]'
+              - 'button "Добавить в список: Клинок, рассекающий демонов" [ref=f2e1514] [cursor=pointer]'
+              - generic [ref=f2e1516]: Завершено
+            - generic [ref=f2e1517]:
+              - generic [ref=f2e1518]:
+                - heading [level=3] [ref=f2e1519]:
+                  - 'link "Подробнее: Клинок, рассекающий демонов" [ref=f2e1520] [cursor=pointer]':
+                    - /url: /anime/anilist-101922-demon-slayer-kimetsu-no-yaiba
+                    - text: Клинок, рассекающий демонов
+                - 'generic "Рейтинг: 8,3" [ref=f2e1521]': 8,3
+              - generic [ref=f2e1524]:
+                - paragraph [ref=f2e1525]: Боевик · Приключения
+                - generic [ref=f2e1526]: "2019"
+          - article [ref=f2e1527]:
+            - generic [ref=f2e1528]:
+              - 'link "Подробнее: Магическая битва" [ref=f2e1529] [cursor=pointer]':
+                - /url: /anime/anilist-113415-jujutsu-kaisen
+                - 'img "Постер аниме: Магическая битва" [ref=f2e1532]'
+              - 'button "Добавить в список: Магическая битва" [ref=f2e1533] [cursor=pointer]'
+              - generic [ref=f2e1535]: Завершено
+            - generic [ref=f2e1536]:
+              - generic [ref=f2e1537]:
+                - heading [level=3] [ref=f2e1538]:
+                  - 'link "Подробнее: Магическая битва" [ref=f2e1539] [cursor=pointer]':
+                    - /url: /anime/anilist-113415-jujutsu-kaisen
+                    - text: Магическая битва
+                - 'generic "Рейтинг: 8,4" [ref=f2e1540]': 8,4
+              - generic [ref=f2e1543]:
+                - paragraph [ref=f2e1544]: Боевик · Драма
+                - generic [ref=f2e1545]: "2020"
+          - article [ref=f2e1546]:
+            - generic [ref=f2e1547]:
+              - 'link "Подробнее: Тетрадь смерти" [ref=f2e1548] [cursor=pointer]':
+                - /url: /anime/anilist-1535-death-note
+                - 'img "Постер аниме: Тетрадь смерти" [ref=f2e1551]'
+              - 'button "Добавить в список: Тетрадь смерти" [ref=f2e1552] [cursor=pointer]'
+              - generic [ref=f2e1554]: Завершено
+            - generic [ref=f2e1555]:
+              - generic [ref=f2e1556]:
+                - heading [level=3] [ref=f2e1557]:
+                  - 'link "Подробнее: Тетрадь смерти" [ref=f2e1558] [cursor=pointer]':
+                    - /url: /anime/anilist-1535-death-note
+                    - text: Тетрадь смерти
+                - 'generic "Рейтинг: 8,4" [ref=f2e1559]': 8,4
+              - generic [ref=f2e1562]:
+                - paragraph [ref=f2e1563]: Мистика · Психологическое
+                - generic [ref=f2e1564]: "2006"
+          - article [ref=f2e1565]:
+            - generic [ref=f2e1566]:
+              - 'link "Подробнее: Моя геройская академия" [ref=f2e1567] [cursor=pointer]':
+                - /url: /anime/anilist-21459-my-hero-academia
+                - 'img "Постер аниме: Моя геройская академия" [ref=f2e1570]'
+              - 'button "Добавить в список: Моя геройская академия" [ref=f2e1571] [cursor=pointer]'
+              - generic [ref=f2e1573]: Завершено
+            - generic [ref=f2e1574]:
+              - generic [ref=f2e1575]:
+                - heading [level=3] [ref=f2e1576]:
+                  - 'link "Подробнее: Моя геройская академия" [ref=f2e1577] [cursor=pointer]':
+                    - /url: /anime/anilist-21459-my-hero-academia
+                    - text: Моя геройская академия
+                - 'generic "Рейтинг: 7,7" [ref=f2e1578]': 7,7
+              - generic [ref=f2e1581]:
+                - paragraph [ref=f2e1582]: Боевик · Приключения
+                - generic [ref=f2e1583]: "2016"
+          - article [ref=f2e1584]:
+            - generic [ref=f2e1585]:
+              - 'link "Подробнее: Охотник х Охотник" [ref=f2e1586] [cursor=pointer]':
+                - /url: /anime/anilist-11061-hunter-x-hunter-2011
+                - 'img "Постер аниме: Охотник х Охотник" [ref=f2e1589]'
+              - 'button "Добавить в список: Охотник х Охотник" [ref=f2e1590] [cursor=pointer]'
+              - generic [ref=f2e1592]: Завершено
+            - generic [ref=f2e1593]:
+              - generic [ref=f2e1594]:
+                - heading [level=3] [ref=f2e1595]:
+                  - 'link "Подробнее: Охотник х Охотник" [ref=f2e1596] [cursor=pointer]':
+                    - /url: /anime/anilist-11061-hunter-x-hunter-2011
+                    - text: Охотник х Охотник
+                - 'generic "Рейтинг: 8,9" [ref=f2e1597]': 8,9
+              - generic [ref=f2e1600]:
+                - paragraph [ref=f2e1601]: Боевик · Приключения
+                - generic [ref=f2e1602]: "2011"
+          - article [ref=f2e1603]:
+            - generic [ref=f2e1604]:
+              - 'link "Подробнее: Название неизвестно" [ref=f2e1605] [cursor=pointer]':
+                - /url: /anime/anilist-21087-one-punch-man
+                - 'img "Постер аниме: Название неизвестно" [ref=f2e1608]'
+              - 'button "Добавить в список: Название неизвестно" [ref=f2e1609] [cursor=pointer]'
+              - generic [ref=f2e1611]: Завершено
+            - generic [ref=f2e1612]:
+              - generic [ref=f2e1613]:
+                - heading [level=3] [ref=f2e1614]:
+                  - 'link "Подробнее: Название неизвестно" [ref=f2e1615] [cursor=pointer]':
+                    - /url: /anime/anilist-21087-one-punch-man
+                    - text: Название неизвестно
+                - 'generic "Рейтинг: 8,3" [ref=f2e1616]': 8,3
+              - generic [ref=f2e1619]:
+                - paragraph [ref=f2e1620]: Боевик · Комедия
+                - generic [ref=f2e1621]: "2015"
+          - article [ref=f2e1622]:
+            - generic [ref=f2e1623]:
+              - 'link "Подробнее: Название неизвестно" [ref=f2e1624] [cursor=pointer]':
+                - /url: /anime/anilist-21-one-piece
+                - 'img "Постер аниме: Название неизвестно" [ref=f2e1627]'
+              - 'button "Добавить в список: Название неизвестно" [ref=f2e1628] [cursor=pointer]'
+              - generic [ref=f2e1630]: Онгоинг
+            - generic [ref=f2e1631]:
+              - generic [ref=f2e1632]:
+                - heading [level=3] [ref=f2e1633]:
+                  - 'link "Подробнее: Название неизвестно" [ref=f2e1634] [cursor=pointer]':
+                    - /url: /anime/anilist-21-one-piece
+                    - text: Название неизвестно
+                - 'generic "Рейтинг: 8,7" [ref=f2e1635]': 8,7
+              - generic [ref=f2e1638]:
+                - paragraph [ref=f2e1639]: Боевик · Приключения
+                - generic [ref=f2e1640]: "1999"
+          - article [ref=f2e1641]:
+            - generic [ref=f2e1642]:
+              - 'link "Подробнее: Название неизвестно" [ref=f2e1643] [cursor=pointer]':
+                - /url: /anime/anilist-20605-tokyo-ghoul
+                - 'img "Постер аниме: Название неизвестно" [ref=f2e1646]'
+              - 'button "Добавить в список: Название неизвестно" [ref=f2e1647] [cursor=pointer]'
+              - generic [ref=f2e1649]: Завершено
+            - generic [ref=f2e1650]:
+              - generic [ref=f2e1651]:
+                - heading [level=3] [ref=f2e1652]:
+                  - 'link "Подробнее: Название неизвестно" [ref=f2e1653] [cursor=pointer]':
+                    - /url: /anime/anilist-20605-tokyo-ghoul
+                    - text: Название неизвестно
+                - 'generic "Рейтинг: 7,6" [ref=f2e1654]': 7,6
+              - generic [ref=f2e1657]:
+                - paragraph [ref=f2e1658]: Боевик · Драма
+                - generic [ref=f2e1659]: "2014"
+          - article [ref=f2e1660]:
+            - generic [ref=f2e1661]:
+              - 'link "Подробнее: Название неизвестно" [ref=f2e1662] [cursor=pointer]':
+                - /url: /anime/anilist-20958-attack-on-titan-season-2
+                - 'img "Постер аниме: Название неизвестно" [ref=f2e1665]'
+              - 'button "Добавить в список: Название неизвестно" [ref=f2e1666] [cursor=pointer]'
+              - generic [ref=f2e1668]: Завершено
+            - generic [ref=f2e1669]:
+              - generic [ref=f2e1670]:
+                - heading [level=3] [ref=f2e1671]:
+                  - 'link "Подробнее: Название неизвестно" [ref=f2e1672] [cursor=pointer]':
+                    - /url: /anime/anilist-20958-attack-on-titan-season-2
+                    - text: Название неизвестно
+                - 'generic "Рейтинг: 8,5" [ref=f2e1673]': 8,5
+              - generic [ref=f2e1676]:
+                - paragraph [ref=f2e1677]: Боевик · Драма
+                - generic [ref=f2e1678]: "2017"
+          - article [ref=f2e1679]:
+            - generic [ref=f2e1680]:
+              - 'link "Подробнее: Стальной алхимик: Братство" [ref=f2e1681] [cursor=pointer]':
+                - /url: /anime/anilist-5114-fullmetal-alchemist-brotherhood
+                - 'img "Постер аниме: Стальной алхимик: Братство" [ref=f2e1684]'
+              - 'button "Добавить в список: Стальной алхимик: Братство" [ref=f2e1685] [cursor=pointer]'
+              - generic [ref=f2e1687]: Завершено
+            - generic [ref=f2e1688]:
+              - generic [ref=f2e1689]:
+                - heading [level=3] [ref=f2e1690]:
+                  - 'link "Подробнее: Стальной алхимик: Братство" [ref=f2e1691] [cursor=pointer]':
+                    - /url: /anime/anilist-5114-fullmetal-alchemist-brotherhood
+                    - text: "Стальной алхимик: Братство"
+                - 'generic "Рейтинг: 9,0" [ref=f2e1692]': 9,0
+              - generic [ref=f2e1695]:
+                - paragraph [ref=f2e1696]: Боевик · Приключения
+                - generic [ref=f2e1697]: "2009"
+          - article [ref=f2e1698]:
+            - generic [ref=f2e1699]:
+              - 'link "Подробнее: Название неизвестно" [ref=f2e1700] [cursor=pointer]':
+                - /url: /anime/anilist-20-naruto
+                - 'img "Постер аниме: Название неизвестно" [ref=f2e1703]'
+              - 'button "Добавить в список: Название неизвестно" [ref=f2e1704] [cursor=pointer]'
+              - generic [ref=f2e1706]: Завершено
+            - generic [ref=f2e1707]:
+              - generic [ref=f2e1708]:
+                - heading [level=3] [ref=f2e1709]:
+                  - 'link "Подробнее: Название неизвестно" [ref=f2e1710] [cursor=pointer]':
+                    - /url: /anime/anilist-20-naruto
+                    - text: Название неизвестно
+                - 'generic "Рейтинг: 8,0" [ref=f2e1711]': 8,0
+              - generic [ref=f2e1714]:
+                - paragraph [ref=f2e1715]: Боевик · Приключения
+                - generic [ref=f2e1716]: "2002"
+          - article [ref=f2e1717]:
+            - generic [ref=f2e1718]:
+              - 'link "Подробнее: Название неизвестно" [ref=f2e1719] [cursor=pointer]':
+                - /url: /anime/anilist-11757-sword-art-online
+                - 'img "Постер аниме: Название неизвестно" [ref=f2e1722]'
+              - 'button "Добавить в список: Название неизвестно" [ref=f2e1723] [cursor=pointer]'
+              - generic [ref=f2e1725]: Завершено
+            - generic [ref=f2e1726]:
+              - generic [ref=f2e1727]:
+                - heading [level=3] [ref=f2e1728]:
+                  - 'link "Подробнее: Название неизвестно" [ref=f2e1729] [cursor=pointer]':
+                    - /url: /anime/anilist-11757-sword-art-online
+                    - text: Название неизвестно
+                - 'generic "Рейтинг: 7,0" [ref=f2e1730]': 7,0
+              - generic [ref=f2e1733]:
+                - paragraph [ref=f2e1734]: Боевик · Приключения
+                - generic [ref=f2e1735]: "2012"
+          - article [ref=f2e1736]:
+            - generic [ref=f2e1737]:
+              - 'link "Подробнее: Название неизвестно" [ref=f2e1738] [cursor=pointer]':
+                - /url: /anime/anilist-20954-a-silent-voice
+                - 'img "Постер аниме: Название неизвестно" [ref=f2e1741]'
+              - 'button "Добавить в список: Название неизвестно" [ref=f2e1742] [cursor=pointer]'
+              - generic [ref=f2e1744]: Завершено
+            - generic [ref=f2e1745]:
+              - generic [ref=f2e1746]:
+                - heading [level=3] [ref=f2e1747]:
+                  - 'link "Подробнее: Название неизвестно" [ref=f2e1748] [cursor=pointer]':
+                    - /url: /anime/anilist-20954-a-silent-voice
+                    - text: Название неизвестно
+                - 'generic "Рейтинг: 8,8" [ref=f2e1749]': 8,8
+              - generic [ref=f2e1752]:
+                - paragraph [ref=f2e1753]: Драма · Романтика
+                - generic [ref=f2e1754]: "2016"
+          - article [ref=f2e1755]:
+            - generic [ref=f2e1756]:
+              - 'link "Подробнее: Название неизвестно" [ref=f2e1757] [cursor=pointer]':
+                - /url: /anime/anilist-21519-your-name
+                - 'img "Постер аниме: Название неизвестно" [ref=f2e1760]'
+              - 'button "Добавить в список: Название неизвестно" [ref=f2e1761] [cursor=pointer]'
+              - generic [ref=f2e1763]: Завершено
+            - generic [ref=f2e1764]:
+              - generic [ref=f2e1765]:
+                - heading [level=3] [ref=f2e1766]:
+                  - 'link "Подробнее: Название неизвестно" [ref=f2e1767] [cursor=pointer]':
+                    - /url: /anime/anilist-21519-your-name
+                    - text: Название неизвестно
+                - 'generic "Рейтинг: 8,6" [ref=f2e1768]': 8,6
+              - generic [ref=f2e1771]:
+                - paragraph [ref=f2e1772]: Драма · Романтика
+                - generic [ref=f2e1773]: "2016"
+          - article [ref=f2e1774]:
+            - generic [ref=f2e1775]:
+              - 'link "Подробнее: Название неизвестно" [ref=f2e1776] [cursor=pointer]':
+                - /url: /anime/anilist-99147-attack-on-titan-season-3
+                - 'img "Постер аниме: Название неизвестно" [ref=f2e1779]'
+              - 'button "Добавить в список: Название неизвестно" [ref=f2e1780] [cursor=pointer]'
+              - generic [ref=f2e1782]: Завершено
+            - generic [ref=f2e1783]:
+              - generic [ref=f2e1784]:
+                - heading [level=3] [ref=f2e1785]:
+                  - 'link "Подробнее: Название неизвестно" [ref=f2e1786] [cursor=pointer]':
+                    - /url: /anime/anilist-99147-attack-on-titan-season-3
+                    - text: Название неизвестно
+                - 'generic "Рейтинг: 8,6" [ref=f2e1787]': 8,6
+              - generic [ref=f2e1790]:
+                - paragraph [ref=f2e1791]: Боевик · Драма
+                - generic [ref=f2e1792]: "2018"
+          - article [ref=f2e1793]:
+            - generic [ref=f2e1794]:
+              - 'link "Подробнее: Название неизвестно" [ref=f2e1795] [cursor=pointer]':
+                - /url: /anime/anilist-21856-my-hero-academia-season-2
+                - 'img "Постер аниме: Название неизвестно" [ref=f2e1798]'
+              - 'button "Добавить в список: Название неизвестно" [ref=f2e1799] [cursor=pointer]'
+              - generic [ref=f2e1801]: Завершено
+            - generic [ref=f2e1802]:
+              - generic [ref=f2e1803]:
+                - heading [level=3] [ref=f2e1804]:
+                  - 'link "Подробнее: Название неизвестно" [ref=f2e1805] [cursor=pointer]':
+                    - /url: /anime/anilist-21856-my-hero-academia-season-2
+                    - text: Название неизвестно
+                - 'generic "Рейтинг: 7,9" [ref=f2e1806]': 7,9
+              - generic [ref=f2e1809]:
+                - paragraph [ref=f2e1810]: Боевик · Приключения
+                - generic [ref=f2e1811]: "2017"
+          - article [ref=f2e1812]:
+            - generic [ref=f2e1813]:
+              - 'link "Подробнее: Название неизвестно" [ref=f2e1814] [cursor=pointer]':
+                - /url: /anime/anilist-110277-attack-on-titan-final-season
+                - 'img "Постер аниме: Название неизвестно" [ref=f2e1817]'
+              - 'button "Добавить в список: Название неизвестно" [ref=f2e1818] [cursor=pointer]'
+              - generic [ref=f2e1820]: Завершено
+            - generic [ref=f2e1821]:
+              - generic [ref=f2e1822]:
+                - heading [level=3] [ref=f2e1823]:
+                  - 'link "Подробнее: Название неизвестно" [ref=f2e1824] [cursor=pointer]':
+                    - /url: /anime/anilist-110277-attack-on-titan-final-season
+                    - text: Название неизвестно
+                - 'generic "Рейтинг: 8,7" [ref=f2e1825]': 8,7
+              - generic [ref=f2e1828]:
+                - paragraph [ref=f2e1829]: Боевик · Драма
+                - generic [ref=f2e1830]: "2021"
+          - article [ref=f2e1831]:
+            - generic [ref=f2e1832]:
+              - 'link "Подробнее: Название неизвестно" [ref=f2e1833] [cursor=pointer]':
+                - /url: /anime/anilist-127230-chainsaw-man
+                - 'img "Постер аниме: Название неизвестно" [ref=f2e1836]'
+              - 'button "Добавить в список: Название неизвестно" [ref=f2e1837] [cursor=pointer]'
+              - generic [ref=f2e1839]: Завершено
+            - generic [ref=f2e1840]:
+              - generic [ref=f2e1841]:
+                - heading [level=3] [ref=f2e1842]:
+                  - 'link "Подробнее: Название неизвестно" [ref=f2e1843] [cursor=pointer]':
+                    - /url: /anime/anilist-127230-chainsaw-man
+                    - text: Название неизвестно
+                - 'generic "Рейтинг: 8,3" [ref=f2e1844]': 8,3
+              - generic [ref=f2e1847]:
+                - paragraph [ref=f2e1848]: Боевик · Драма
+                - generic [ref=f2e1849]: "2022"
+          - article [ref=f2e1850]:
+            - generic [ref=f2e1851]:
+              - 'link "Подробнее: Название неизвестно" [ref=f2e1852] [cursor=pointer]':
+                - /url: /anime/anilist-21507-mob-psycho-100
+                - 'img "Постер аниме: Название неизвестно" [ref=f2e1855]'
+              - 'button "Добавить в список: Название неизвестно" [ref=f2e1856] [cursor=pointer]'
+              - generic [ref=f2e1858]: Завершено
+            - generic [ref=f2e1859]:
+              - generic [ref=f2e1860]:
+                - heading [level=3] [ref=f2e1861]:
+                  - 'link "Подробнее: Название неизвестно" [ref=f2e1862] [cursor=pointer]':
+                    - /url: /anime/anilist-21507-mob-psycho-100
+                    - text: Название неизвестно
+                - 'generic "Рейтинг: 8,4" [ref=f2e1863]': 8,4
+              - generic [ref=f2e1866]:
+                - paragraph [ref=f2e1867]: Боевик · Комедия
+                - generic [ref=f2e1868]: "2016"
+          - article [ref=f2e1869]:
+            - generic [ref=f2e1870]:
+              - 'link "Подробнее: Название неизвестно" [ref=f2e1871] [cursor=pointer]':
+                - /url: /anime/anilist-21355-re-zero-starting-life-in-another-world
+                - 'img "Постер аниме: Название неизвестно" [ref=f2e1874]'
+              - 'button "Добавить в список: Название неизвестно" [ref=f2e1875] [cursor=pointer]'
+              - generic [ref=f2e1877]: Завершено
+            - generic [ref=f2e1878]:
+              - generic [ref=f2e1879]:
+                - heading [level=3] [ref=f2e1880]:
+                  - 'link "Подробнее: Название неизвестно" [ref=f2e1881] [cursor=pointer]':
+                    - /url: /anime/anilist-21355-re-zero-starting-life-in-another-world
+                    - text: Название неизвестно
+                - 'generic "Рейтинг: 8,1" [ref=f2e1882]': 8,1
+              - generic [ref=f2e1885]:
+                - paragraph [ref=f2e1886]: Боевик · Приключения
+                - generic [ref=f2e1887]: "2016"
+          - article [ref=f2e1888]:
+            - generic [ref=f2e1889]:
+              - 'link "Подробнее: Название неизвестно" [ref=f2e1890] [cursor=pointer]':
+                - /url: /anime/anilist-1735-naruto-shippuden
+                - 'img "Постер аниме: Название неизвестно" [ref=f2e1893]'
+              - 'button "Добавить в список: Название неизвестно" [ref=f2e1894] [cursor=pointer]'
+              - generic [ref=f2e1896]: Завершено
+            - generic [ref=f2e1897]:
+              - generic [ref=f2e1898]:
+                - heading [level=3] [ref=f2e1899]:
+                  - 'link "Подробнее: Название неизвестно" [ref=f2e1900] [cursor=pointer]':
+                    - /url: /anime/anilist-1735-naruto-shippuden
+                    - text: Название неизвестно
+                - 'generic "Рейтинг: 8,2" [ref=f2e1901]': 8,2
+              - generic [ref=f2e1904]:
+                - paragraph [ref=f2e1905]: Боевик · Приключения
+                - generic [ref=f2e1906]: "2007"
+          - article [ref=f2e1907]:
+            - generic [ref=f2e1908]:
+              - 'link "Подробнее: Название неизвестно" [ref=f2e1909] [cursor=pointer]':
+                - /url: /anime/anilist-104578-attack-on-titan-season-3-part-2
+                - 'img "Постер аниме: Название неизвестно" [ref=f2e1912]'
+              - 'button "Добавить в список: Название неизвестно" [ref=f2e1913] [cursor=pointer]'
+              - generic [ref=f2e1915]: Завершено
+            - generic [ref=f2e1916]:
+              - generic [ref=f2e1917]:
+                - heading [level=3] [ref=f2e1918]:
+                  - 'link "Подробнее: Название неизвестно" [ref=f2e1919] [cursor=pointer]':
+                    - /url: /anime/anilist-104578-attack-on-titan-season-3-part-2
+                    - text: Название неизвестно
+                - 'generic "Рейтинг: 9,0" [ref=f2e1920]': 9,0
+              - generic [ref=f2e1923]:
+                - paragraph [ref=f2e1924]: Боевик · Драма
+                - generic [ref=f2e1925]: "2019"
+          - article [ref=f2e1926]:
+            - generic [ref=f2e1927]:
+              - 'link "Подробнее: Название неизвестно" [ref=f2e1928] [cursor=pointer]':
+                - /url: /anime/anilist-21234-erased
+                - 'img "Постер аниме: Название неизвестно" [ref=f2e1931]'
+              - 'button "Добавить в список: Название неизвестно" [ref=f2e1932] [cursor=pointer]'
+              - generic [ref=f2e1934]: Завершено
+            - generic [ref=f2e1935]:
+              - generic [ref=f2e1936]:
+                - heading [level=3] [ref=f2e1937]:
+                  - 'link "Подробнее: Название неизвестно" [ref=f2e1938] [cursor=pointer]':
+                    - /url: /anime/anilist-21234-erased
+                    - text: Название неизвестно
+                - 'generic "Рейтинг: 8,1" [ref=f2e1939]': 8,1
+              - generic [ref=f2e1942]:
+                - paragraph [ref=f2e1943]: Драма · Мистика
+                - generic [ref=f2e1944]: "2016"
+    - contentinfo [ref=f2e1946]:
+      - generic [ref=f2e1947]:
+        - link "kairo." [ref=f2e1948] [cursor=pointer]:
+          - /url: /
+        - paragraph [ref=f2e1949]: Истории, которые хочется сохранить.Новый дом для аниме.
+        - navigation "Навигация в подвале" [ref=f2e1950]:
+          - link "Каталог" [ref=f2e1951] [cursor=pointer]:
+            - /url: /catalog
+          - link "Новинки" [ref=f2e1952] [cursor=pointer]:
+            - /url: /new
+          - link "Коллекции" [ref=f2e1953] [cursor=pointer]:
+            - /url: /collections
+      - generic [ref=f2e1954]:
+        - paragraph [ref=f2e1955]: Демонстрационный каталог · защищённые материалы не используются
+        - generic [ref=f2e1956]:
+          - link "Условия использования" [ref=f2e1957] [cursor=pointer]:
+            - /url: "#"
+          - link "Конфиденциальность" [ref=f2e1958] [cursor=pointer]:
+            - /url: "#"
+        - generic [ref=f2e1959]: © 2026 Kairo

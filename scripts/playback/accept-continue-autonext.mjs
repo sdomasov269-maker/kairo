@@ -201,10 +201,10 @@ const watchNowResume = Number(
     .locator('[data-testid="kairo-player"]')
     .getAttribute("data-resume-position"),
 );
-const translationAfter = await page.locator("#playback-translation").inputValue();
+const translationAfter = await page.locator("#playback-translation").getAttribute("data-value");
 
 await openEpisode(1);
-const translationBefore = await page.locator("#playback-translation").inputValue();
+const translationBefore = await page.locator("#playback-translation").getAttribute("data-value");
 await dispatchEnded();
 await page.waitForFunction(
   () => new URL(location.href).searchParams.get("episode") === "2",

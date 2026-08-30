@@ -22,6 +22,7 @@ const LocaleContext = createContext<LocaleContextValue | null>(null);
 
 export function LocaleProvider({ children }: { children: ReactNode }) {
   const [locale, updateLocale] = useState<Locale>("ru");
+
   useEffect(() => {
     const stored = window.localStorage.getItem("kairo-locale");
     const nextLocale: Locale =
@@ -32,12 +33,13 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     }, 0);
     return () => window.clearTimeout(timer);
   }, []);
-  const setLocale = (next: Locale) => {
-    updateLocale(next);
-    window.localStorage.setItem("kairo-locale", next);
-    document.documentElement.lang = next;
+
+  const setLocale = (nextLocale: Locale) => {
+    updateLocale(nextLocale);
+    window.localStorage.setItem("kairo-locale", nextLocale);
+    document.documentElement.lang = nextLocale;
   };
-  const value = useMemo(
+  const value = useMemo<LocaleContextValue>(
     () => ({
       locale,
       dictionary: locale === "ru" ? ru : locale === "uk" ? uk : en,
