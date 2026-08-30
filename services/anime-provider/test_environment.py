@@ -4,6 +4,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+import environment
 from environment import load_provider_environment
 
 
@@ -28,6 +29,46 @@ class ProviderEnvironmentTest(unittest.TestCase):
                 self.assertEqual(os.environ["KAIRO_DEFAULT_ONLY"], "default")
                 os.environ.pop("KAIRO_LOCAL_ONLY", None)
                 os.environ.pop("KAIRO_DEFAULT_ONLY", None)
+
+    def test_monorepo_layout_finds_repository_environment(self):
+        with tempfile.TemporaryDirectory() as directory:
+            repository = Path(directory)
+            provider = repository / "services" / "anime-provider"
+            provider.mkdir(parents=True)
+            (repository / ".env").write_text(
+                "KAIRO_MONOREPO_LAYOUT=loaded\n",
+                encoding="utf-8",
+            )
+            with patch.object(environment, "__file__", str(provider / "environment.py")):
+                with patch.dict(os.environ, {}, clear=False):
+                    os.environ.pop("KAIRO_MONOREPO_LAYOUT", None)
+                    load_provider_environment()
+                    self.assertEqual(os.environ["KAIRO_MONOREPO_LAYOUT"], "loaded")
+                    os.environ.pop("KAIRO_MONOREPO_LAYOUT", None)
+
+    def test_standalone_layout_without_env_keeps_process_environment(self):
+        with tempfile.TemporaryDirectory() as directory:
+            provider = Path(directory) / "app"
+            provider.mkdir()
+            with patch.object(environment, "__file__", str(provider / "environment.py")):
+                with patch.dict(
+                    os.environ,
+                    {"KAIRO_PROCESS_ONLY": "railway"},
+                    clear=False,
+                ):
+                    load_provider_environment()
+                    self.assertEqual(os.environ["KAIRO_PROCESS_ONLY"], "railway")
+
+    def test_explicit_missing_root_does_not_fail(self):
+        with tempfile.TemporaryDirectory() as directory:
+            missing = Path(directory) / "no-env-files"
+            with patch.dict(
+                os.environ,
+                {"KAIRO_EXPLICIT_ROOT": "process"},
+                clear=False,
+            ):
+                load_provider_environment(missing)
+                self.assertEqual(os.environ["KAIRO_EXPLICIT_ROOT"], "process")
 
 
 if __name__ == "__main__":
