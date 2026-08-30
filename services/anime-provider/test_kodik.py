@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 
 from models import PlaybackTranslation, TitleInfo
 from providers.kodik import KodikProvider, ProviderError, normalize_skip_segments
@@ -27,6 +28,46 @@ class KodikTranslationsTest(unittest.TestCase):
         with self.assertRaisesRegex(ProviderError, "No translations") as raised:
             provider.get_translations("56735")
         self.assertEqual(raised.exception.code, "NO_TRANSLATIONS")
+
+
+class KodikDiagnosticsTest(unittest.TestCase):
+    def test_content_blocked_log_is_safe_and_specific(self):
+        content_blocked = type("ContentBlocked", (Exception,), {})
+        provider = KodikProvider()
+        secret = "a" * 32
+
+        with patch.dict(
+            "os.environ",
+            {
+                "KODIK_API_TOKEN": secret,
+                "RAILWAY_SERVICE_ID": "service-id",
+            },
+            clear=False,
+        ):
+            with self.assertLogs("kairo.provider.kodik", level="ERROR") as logs:
+                with self.assertRaises(ProviderError) as raised:
+                    provider._run(lambda: (_ for _ in ()).throw(content_blocked()))
+
+        self.assertEqual(raised.exception.code, "MEDIA_BLOCKED")
+        output = "\n".join(logs.output)
+        self.assertIn("exception=ContentBlocked", output)
+        self.assertIn("code=MEDIA_BLOCKED", output)
+        self.assertIn("upstream_status=unknown", output)
+        self.assertIn("upstream_host=kodikplayer.com", output)
+        self.assertIn("runtime=railway", output)
+        self.assertIn("token_present=True", output)
+        self.assertIn("token_length=32", output)
+        self.assertNotIn(secret, output)
+
+    def test_token_error_is_not_mapped_to_content_blocked(self):
+        token_error = type("TokenError", (Exception,), {})
+        provider = KodikProvider()
+
+        with self.assertLogs("kairo.provider.kodik", level="ERROR"):
+            with self.assertRaises(ProviderError) as raised:
+                provider._run(lambda: (_ for _ in ()).throw(token_error()))
+
+        self.assertEqual(raised.exception.code, "TOKEN_INVALID")
 
 
 class KodikSkipSegmentsTest(unittest.TestCase):

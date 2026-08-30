@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import math
 import os
 import threading
@@ -16,6 +17,9 @@ from models import (
     PlaybackTranslation,
     TitleInfo,
 )
+
+
+logger = logging.getLogger("kairo.provider.kodik")
 
 
 class ProviderError(RuntimeError):
@@ -86,8 +90,10 @@ class KodikProvider:
         try:
             return self._executor.submit(operation).result(timeout=self._timeout)
         except FutureTimeout as error:
+            self._log_failure(error, "PROVIDER_TIMEOUT", "unknown")
             raise ProviderError("PROVIDER_TIMEOUT", "Kodik resolution timed out") from error
-        except ProviderError:
+        except ProviderError as error:
+            self._log_failure(error, error.code, "unknown")
             raise
         except Exception as error:
             name = type(error).__name__
@@ -96,7 +102,39 @@ class KodikProvider:
                 "ContentBlocked": "MEDIA_BLOCKED",
                 "TokenError": "TOKEN_INVALID",
             }.get(name, "PROVIDER_ERROR")
+            upstream_host = {
+                "ContentBlocked": "kodikplayer.com",
+                "NoResults": "kodik-api.com",
+                "TokenError": "kodik-api.com",
+            }.get(name, "unknown")
+            self._log_failure(error, code, upstream_host)
             raise ProviderError(code, f"Kodik {name}") from error
+
+    @staticmethod
+    def _log_failure(error: Exception, code: str, upstream_host: str) -> None:
+        token = os.getenv("KODIK_API_TOKEN", "").strip()
+        response = getattr(error, "response", None)
+        upstream_status = getattr(response, "status_code", None) or getattr(
+            error, "status_code", None
+        )
+        runtime = (
+            "railway"
+            if os.getenv("RAILWAY_ENVIRONMENT_ID")
+            or os.getenv("RAILWAY_PROJECT_ID")
+            or os.getenv("RAILWAY_SERVICE_ID")
+            else os.getenv("KAIRO_RUNTIME_ENV", "local")
+        )
+        logger.error(
+            "kodik_failure exception=%s code=%s upstream_status=%s "
+            "upstream_host=%s runtime=%s token_present=%s token_length=%d",
+            type(error).__name__,
+            code,
+            upstream_status if upstream_status is not None else "unknown",
+            upstream_host,
+            runtime,
+            bool(token),
+            len(token),
+        )
 
     def _cached(self, key: str, operation):
         now = time.monotonic()
