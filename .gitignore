@@ -35,3 +35,7 @@ node_modules_backup/
 package-lock.backup.json
 .vercel
 .env*
+.playwright-mcp/
+reports/*.png
+catalog-hero-1440.png
+catalog-roulette-1440.png
